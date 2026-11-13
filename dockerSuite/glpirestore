@@ -1,0 +1,51 @@
+#!/bin/bash
+# Restore a GLPI backup made by glpibackup.
+# Usage: glpirestore [--yes] [--no-safety] BACKUP_DIR [INSTANCE_DIR]     (default instance /opt/glpi/prod)
+set -uo pipefail
+YES=0; SAFETY=1; ARGS=()
+for a in "$@"; do
+  case "$a" in --yes) YES=1;; --no-safety) SAFETY=0;; *) ARGS+=("$a");; esac
+done
+BK="${ARGS[0]:-}"; DIR="${ARGS[1]:-/opt/glpi/prod}"
+log(){ echo "[$(date '+%F %T')] $*"; }
+die(){ log "ERROR: $*"; exit 1; }
+[ -n "$BK" ] && [ -d "$BK" ] || die "usage: glpirestore BACKUP_DIR [INSTANCE_DIR]   (see: ls /var/backups/glpi/$(basename "$DIR"))"
+for f in db.sql.gz glpi_data.tar.gz glpi_plugins.tar.gz SHA256SUMS; do [ -f "$BK/$f" ] || die "missing $BK/$f"; done
+( cd "$BK" && sha256sum -c SHA256SUMS >/dev/null 2>&1 ) || die "checksum mismatch - the backup is damaged"
+cd "$DIR" || die "cannot enter $DIR"
+echo "This REPLACES the database and files of the GLPI instance in $DIR with the backup:"
+echo "  $BK"
+echo "A safety backup of the current state is made first."
+if [ "$YES" != 1 ]; then
+  printf 'Type RESTORE to continue: '; read -r ans
+  [ "$ans" = "RESTORE" ] || die "cancelled"
+fi
+
+SELF="$(dirname "$(readlink -f "$0")")"
+if [ "$SAFETY" = 1 ]; then
+  log "Safety backup of the current state..."
+  "$SELF/glpibackup" "$DIR" || die "safety backup failed - nothing was changed"
+fi
+
+log "Stopping glpi, starting db..."
+docker compose stop glpi >/dev/null 2>&1
+docker compose up -d db || die "cannot start db"
+for i in $(seq 1 30); do docker compose exec -T db sh -c 'mariadb-admin ping --silent' >/dev/null 2>&1 && break; sleep 2; done
+
+log "Importing database..."
+gzip -dc "$BK/db.sql.gz" | docker compose exec -T db sh -c '
+  RP="${MARIADB_ROOT_PASSWORD:-$MYSQL_ROOT_PASSWORD}"
+  if [ -n "$RP" ]; then export MYSQL_PWD="$RP"; U=root
+  else export MYSQL_PWD="${MARIADB_PASSWORD:-$MYSQL_PASSWORD}"; U="${MARIADB_USER:-$MYSQL_USER}"; fi
+  exec mariadb -u"$U"
+' || die "database import failed (files were not touched; the safety backup is in /var/backups/glpi)"
+
+unpack(){   # $1 = path in container, $2 = archive
+  docker compose run --rm --no-deps -T --entrypoint sh glpi -c "cd '$1' && find . -mindepth 1 -delete && tar -xzf -" < "$2"
+}
+log "Restoring /var/glpi ..."; unpack /var/glpi "$BK/glpi_data.tar.gz" || die "restoring files failed"
+log "Restoring plugins ..."; unpack /var/www/glpi/plugins "$BK/glpi_plugins.tar.gz" || die "restoring plugins failed"
+
+log "Starting GLPI..."
+docker compose up -d || die "cannot start the project"
+log "Restore finished. Check the site, then run: docker compose -f $DIR/docker-compose.yml ps"

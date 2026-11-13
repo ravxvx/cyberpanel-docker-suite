@@ -1,0 +1,23 @@
+#!/bin/sh
+P=/usr/local/CyberCP/dockerSuite
+chmod 755 $P/dmtool.sh $P/srvtool.sh $P/glpitool.sh $P/glpibackup $P/glpirestore $P/repair-menu.sh 2>/dev/null
+mkdir -p /var/log/dockermanager /var/backups/docker /var/backups/glpi /var/backups/server /var/restore /etc/dockermanager/vpn
+chmod 700 /var/backups/glpi /var/backups/server /var/restore
+rm -f /etc/cron.d/glpimanager-backup   # the nightly job now lives in Docker Suite (covers GLPI too)
+chmod 700 /var/log/dockermanager /var/backups/docker /etc/dockermanager /etc/dockermanager/vpn
+command -v openssl >/dev/null 2>&1 || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssl >/dev/null 2>&1
+command -v rsync >/dev/null 2>&1 || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq rsync >/dev/null 2>&1
+sh $P/repair-menu.sh
+# create default config and the daily job (02:30) through the tool itself
+bash $P/dmtool.sh setconfig - "$(echo '{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true}' | base64 -w0)" 0123456789ab >/dev/null 2>&1
+cat > /etc/logrotate.d/dockermanager <<'L'
+/var/log/dockermanager/openvpn.log {
+  weekly
+  rotate 4
+  compress
+  missingok
+  notifempty
+}
+L
+( sleep 3; systemctl restart lscpd ) >/dev/null 2>&1 &
+echo "Docker Suite installed. Panel restarts in a few seconds - refresh with Ctrl+F5."

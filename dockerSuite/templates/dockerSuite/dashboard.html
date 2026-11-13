@@ -1,0 +1,729 @@
+{% extends "baseTemplate/index.html" %}
+{% block title %}Docker Suite - CyberPanel{% endblock %}
+{% block content %}
+<style>
+#dmgr{--ink:#08182b;--ink2:#0f2a47;--blue:#2a7de1;--blue-d:#1d63bd;--sky:#e4effc;--text:#13202f;--muted:#5d6d80;--line:#dbe3ec;--soft:#f2f6fa;--bg:#fff;--fg:#13202f;--accent:#2a7de1;--accent2:#1d63bd;
+  --ok:#14603f;--okbg:#dcf3e5;--warn:#8a4b06;--warnbg:#fcefd0;--bad:#9f1d12;--badbg:#fde4e1;--info:#1b4b8a;--infobg:#e1ecf9;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:var(--text);padding-bottom:48px}
+#dmgr *{box-sizing:border-box}
+#dmgr code{background:var(--soft);color:var(--ink2);padding:1px 6px;border-radius:5px;font-size:12.5px}
+/* hero: stacked-container motif, the one bold element */
+#dmgr .d-hero{position:relative;overflow:hidden;border-radius:20px;margin:8px 0 14px;padding:28px 30px 26px;color:#e6f0fc;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 46px,transparent 46px 52px) 0 0/100% 100%,
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 22px,transparent 22px 28px) 0 0/100% 100%,
+    radial-gradient(800px 280px at 90% -20%,rgba(66,153,255,.35),transparent 60%),
+    linear-gradient(135deg,var(--ink) 0%,var(--ink2) 100%);
+  box-shadow:0 14px 40px rgba(4,14,30,.38);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:end}
+#dmgr .d-hero h2{margin:0;font-size:32px;line-height:1.05;font-weight:750;letter-spacing:-1px;color:#fff}
+#dmgr .d-hero p{margin:10px 0 0;max-width:48ch;color:#a6bdd6;font-size:14px;line-height:1.55}
+#dmgr .d-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+#dmgr .d-hero .g-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+#dmgr .d-hero .g-btn:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
+#dmgr .d-hero .g-btn.primary{background:#4da3ff;border-color:#4da3ff;color:#04223f}
+#dmgr .d-hero .g-btn.primary:hover{background:#7dbcff;color:#04223f}
+#dmgr .d-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#dmgr .d-stat{border-radius:14px;padding:14px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+#dmgr .d-stat b{display:block;font-size:32px;line-height:1;font-weight:750;color:#fff;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+#dmgr .d-stat span{display:block;margin-top:7px;color:#a6bdd6;font-size:12px;line-height:1.3}
+#dmgr .d-stat.hot b{color:#ffd37a}
+@media (max-width:900px){#dmgr .d-hero{grid-template-columns:1fr;padding:22px 20px}#dmgr .d-hero h2{font-size:26px}}
+/* tabs */
+#dmgr .d-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;padding:6px;border-radius:14px;background:var(--ink);border:1px solid rgba(255,255,255,.08)}
+#dmgr .d-tab{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:0;border-radius:10px;background:transparent;color:#b3c8de;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+#dmgr .d-tab:hover{background:rgba(255,255,255,.09);color:#fff}
+#dmgr .d-tab.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+#dmgr .d-tab:focus-visible,#dmgr .g-btn:focus-visible,#dmgr input:focus-visible,#dmgr select:focus-visible,#dmgr textarea:focus-visible{outline:3px solid #4da3ff;outline-offset:2px}
+/* cards */
+#dmgr .g-card{background:var(--bg);color:var(--fg);border-radius:16px;margin-bottom:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 1px 2px rgba(8,24,43,.06),0 8px 24px rgba(8,24,43,.07)}
+#dmgr .g-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:15px 22px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;letter-spacing:-.2px;color:var(--ink);background:linear-gradient(180deg,#f6f9fd,#fff)}
+#dmgr .g-body{padding:18px 22px;color:var(--fg);line-height:1.55}
+#dmgr .g-muted{color:var(--muted)}
+#dmgr .g-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;margin:1px 4px 1px 0;white-space:nowrap}
+#dmgr .b-ok{background:var(--okbg);color:var(--ok)} #dmgr .b-warn{background:var(--warnbg);color:var(--warn)}
+#dmgr .b-bad{background:var(--badbg);color:var(--bad)} #dmgr .b-info{background:var(--infobg);color:var(--info)} #dmgr .b-gray{background:var(--soft);color:var(--muted)}
+#dmgr .g-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 18px;margin-bottom:14px}
+#dmgr .g-kv span{display:block;color:var(--muted);font-size:12px} #dmgr .g-kv b{font-weight:650}
+#dmgr .g-actions{display:flex;flex-wrap:wrap;gap:8px}
+#dmgr .g-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--fg);font-size:13px;font-weight:600;cursor:pointer;line-height:1.2;transition:border-color .12s,background .12s}
+#dmgr .g-btn:hover{border-color:var(--accent);color:var(--accent2)}
+#dmgr .g-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} #dmgr .g-btn.primary:hover{background:var(--accent2);color:#fff}
+#dmgr .g-btn.warn{background:var(--warnbg);border-color:#f2cf7a;color:var(--warn)}
+#dmgr .g-btn.danger.solid{background:#d63a2b;border-color:#d63a2b;color:#fff}
+#dmgr .g-btn[disabled]{opacity:.5;cursor:not-allowed}
+#dmgr .g-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:500} #dmgr .g-status:empty{display:none}
+#dmgr .s-ok{background:var(--okbg);color:var(--ok)} #dmgr .s-bad{background:var(--badbg);color:var(--bad)} #dmgr .s-info{background:var(--infobg);color:var(--info)} #dmgr .s-warn{background:var(--warnbg);color:var(--warn)}
+#dmgr .g-spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:dspin .7s linear infinite;flex:none}
+@keyframes dspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#dmgr .g-spin{animation-duration:2s}}
+#dmgr pre.g-log{margin:0;max-height:360px;overflow:auto;background:#08182b;color:#dbe8f7;padding:14px;border-radius:10px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;border:0}
+#dmgr table.g-table{width:100%;border-collapse:collapse;margin:0} #dmgr .g-table th{background:var(--soft);color:var(--muted);font-size:12px;font-weight:650;text-align:left;padding:10px 14px;border:0}
+#dmgr .g-table td{padding:12px 14px;border:0;border-top:1px solid var(--line);color:var(--fg);background:transparent;vertical-align:middle}
+#dmgr .g-table tbody tr:hover td{background:#f8fbfe}
+#dmgr .g-modal{position:fixed;inset:0;background:rgba(8,24,43,.62);display:none;align-items:center;justify-content:center;z-index:10000;padding:16px}
+#dmgr .g-modal-box{background:#fff;color:var(--fg);border-radius:16px;max-width:520px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+#dmgr .g-modal-box h3{margin:0 0 12px;font-size:18px;font-weight:700;color:var(--ink)} #dmgr .g-modal-box ol{padding-left:20px;margin:8px 0}
+#dmgr .g-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+#dmgr .g-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px;margin-bottom:12px}
+#dmgr .g-form label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+#dmgr .g-form input[type=text],#dmgr .g-form input[type=number],#dmgr .g-form input[type=time],#dmgr .g-form select,#dmgr input.g-in{width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--fg);font-size:13px}
+#dmgr .g-check{display:flex;align-items:center;gap:8px;font-weight:500;margin-bottom:8px}
+#dmgr .g-key{font-family:ui-monospace,monospace;font-size:12px;background:var(--soft);padding:8px 10px;border-radius:10px;word-break:break-all;margin:8px 0;color:var(--fg)}
+#dmgr h4{margin:16px 0 8px;font-size:14px;font-weight:700;color:var(--ink)}
+#dmgr textarea.g-in{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--fg);font-size:13px;min-height:64px;font-family:ui-monospace,monospace}
+#dmgr .g-table td.nm{font-weight:650}
+/* overview */
+#dmgr .o-alerts:empty{display:none}
+#dmgr .o-alert{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:12px;margin-bottom:8px;font-weight:550}
+#dmgr .o-alert.warn{background:var(--warnbg);color:var(--warn)} #dmgr .o-alert.bad{background:var(--badbg);color:var(--bad)} #dmgr .o-alert.ok{background:var(--okbg);color:var(--ok)}
+#dmgr .o-gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+#dmgr .o-gauge{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff;box-shadow:0 1px 2px rgba(8,24,43,.06)}
+#dmgr .o-gauge .k{color:var(--muted);font-size:12.5px;font-weight:600}
+#dmgr .o-gauge .v{font-size:28px;font-weight:750;letter-spacing:-1px;margin:4px 0 8px;color:var(--ink);font-variant-numeric:tabular-nums}
+#dmgr .o-gauge .s{color:var(--muted);font-size:12px;margin-top:7px}
+#dmgr .o-bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}
+#dmgr .o-bar i{display:block;height:100%;border-radius:99px;background:var(--blue);transition:width .5s}
+#dmgr .o-bar i.warn{background:#e0a21b} #dmgr .o-bar i.bad{background:#d63a2b}
+#dmgr .o-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+#dmgr .o-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)} #dmgr .o-row:first-child{border-top:0}
+#dmgr .o-row span:first-child{color:var(--muted)}
+</style>
+<div class="container" id="dmgr">
+  {% csrf_token %}
+  <div class="d-hero">
+    <div>
+      <h2>Docker Suite</h2>
+      <p>Containers, GLPI and server backups in one place: day-based retention, update with rollback, and an encrypted copy to your NAS.</p>
+      <div class="d-actions"><button type="button" id="dCheck" class="g-btn"><i class="fas fa-cloud-arrow-down"></i> Check for updates</button><button type="button" id="dRunAll" class="g-btn primary"><i class="fas fa-play"></i> Run full job now</button><button type="button" id="dRefresh" class="g-btn"><i class="fas fa-arrows-rotate"></i> Refresh</button></div>
+    </div>
+    <div class="d-stats">
+      <div class="d-stat"><b id="hCt">-</b><span>containers running</span></div>
+      <div class="d-stat"><b id="hBk">-</b><span>since the last backup</span></div>
+      <div class="d-stat" id="hDiskBox"><b id="hDisk">-</b><span>system disk used</span></div>
+    </div>
+  </div>
+  <div class="d-tabs" role="tablist">
+    <button type="button" id="tabBtnO" class="d-tab on"><i class="fas fa-gauge-high"></i> Overview</button>
+    <button type="button" id="tabBtnD" class="d-tab"><i class="fas fa-cubes"></i> Containers &amp; backups</button>
+    <button type="button" id="tabBtnG" class="d-tab"><i class="fas fa-headset"></i> GLPI</button>
+    <button type="button" id="tabBtnS" class="d-tab"><i class="fas fa-server"></i> Server backup</button>
+  </div>
+  <div id="tabOverview">
+    <div class="o-alerts" id="oAlerts"></div>
+    <div class="o-gauges">
+      <div class="o-gauge"><div class="k">CPU load (1 min)</div><div class="v" id="oLoad">-</div><div class="o-bar"><i id="oLoadBar" style="width:0"></i></div><div class="s" id="oLoadSub"></div></div>
+      <div class="o-gauge"><div class="k">Memory</div><div class="v" id="oMem">-</div><div class="o-bar"><i id="oMemBar" style="width:0"></i></div><div class="s" id="oMemSub"></div></div>
+      <div class="o-gauge"><div class="k">System disk</div><div class="v" id="oDisk">-</div><div class="o-bar"><i id="oDiskBar" style="width:0"></i></div><div class="s" id="oDiskSub"></div></div>
+      <div class="o-gauge"><div class="k">Uptime</div><div class="v" id="oUp">-</div><div class="s" id="oUpSub"></div></div>
+    </div>
+    <div class="o-cols">
+      <div class="g-card"><div class="g-title">Services</div><div class="g-body" id="oServices"><span class="g-muted">Loading...</span></div></div>
+      <div class="g-card"><div class="g-title">Backups</div><div class="g-body" id="oBackups"><span class="g-muted">Loading...</span></div></div>
+      <div class="g-card"><div class="g-title">Docker and daily job</div><div class="g-body" id="oDocker"><span class="g-muted">Loading...</span></div></div>
+    </div>
+  </div>
+<div id="tabDocker" style="display:none">
+  <div class="g-card">
+    <div class="g-title"><span>Containers</span><span id="dDf"></span></div>
+    <div style="overflow-x:auto"><table class="g-table" id="dTable"><thead><tr><th>Name</th><th>Image</th><th>Status</th><th>CPU / RAM</th><th>Backup</th><th>Last backup</th><th>Actions</th></tr></thead><tbody><tr><td colspan="7" class="g-muted">Loading...</td></tr></tbody></table></div>
+    <div class="g-body g-muted">"Backup" ticked = included in the automatic job. "Stop" = stop the container briefly during the volume copy (consistent files; databases are dumped without stopping). Containers of GLPI in <code>/opt/glpi/</code> are excluded by default (GLPI Manager handles them) - tick them to include. Save with <b>Save settings</b> below.</div>
+  </div>
+  <div class="g-card" id="dBackupsCard" style="display:none">
+    <div class="g-title"><span>Backups: <span id="dBackupsName" class="g-muted"></span></span></div>
+    <table class="g-table" id="dBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="g-card">
+    <div class="g-title">Schedule and retention</div>
+    <div class="g-body">
+      <div class="g-check"><input type="checkbox" id="cAuto"><label for="cAuto" style="margin:0;text-transform:none;font-size:14px;color:inherit">Run the automatic job every day</label></div>
+      <div class="g-form">
+        <div><label>Time (server)</label><input type="time" id="cTime"></div>
+        <div><label>Keep backups (days)</label><input type="number" id="cDays" min="1" max="365"></div>
+        <div><label>Always keep newest (per container)</label><input type="number" id="cMin" min="1" max="30"></div>
+      </div>
+      <div class="g-muted">Old backups are removed only after a run, never below the "always keep" number, so a broken backup job cannot delete your last good copies. Local folder: <code>/var/backups/docker/&lt;container&gt;/</code>.</div>
+    </div>
+  </div>
+  <div class="g-card">
+    <div class="g-title">Remote backup (NAS / another server)</div>
+    <div class="g-body">
+      <div class="g-check"><input type="checkbox" id="rEnabled"><label for="rEnabled" style="margin:0;text-transform:none;font-size:14px;color:inherit">Copy backups to the remote machine after each run</label></div>
+      <div class="g-form">
+        <div><label>Host / IP (inside the VPN)</label><input type="text" id="rHost" placeholder="10.8.0.2"></div>
+        <div><label>SSH port</label><input type="number" id="rPort" min="1" max="65535"></div>
+        <div><label>User</label><input type="text" id="rUser" placeholder="admin"></div>
+        <div><label>Folder on the NAS</label><input type="text" id="rPath" placeholder="/volume1/backups/contabo"></div>
+        <div><label>Keep on NAS (days)</label><input type="number" id="rDays" min="1"></div>
+        <div><label>VPN</label><select id="rVpn"><option value="none">None (direct / already routed)</option><option value="wireguard">WireGuard</option><option value="openvpn">OpenVPN</option></select></div>
+        <div><label>Extra routes through VPN (CIDR, comma separated)</label><input type="text" id="rRoutes" placeholder="192.168.1.0/24"></div>
+      </div>
+      <div id="rVpnBox" style="display:none">
+        <h4>VPN configuration</h4>
+        <div class="g-muted" style="margin-bottom:8px">Upload the client file from your VPN server (<code>.conf</code> for WireGuard, <code>.ovpn</code> for OpenVPN). It is stored readable by root only. The VPN connects only for the copy, then disconnects; only traffic to the NAS goes through it, so access to this server is never cut off.</div>
+        <div class="g-actions"><input type="file" id="rFile" class="g-in" style="max-width:340px"><button type="button" class="g-btn" id="rUpload"><i class="fas fa-upload"></i> Upload config</button><span id="rVpnState" class="g-muted"></span></div>
+        <div id="rAuthBox" style="display:none;margin-top:10px"><div class="g-form"><div><label>OpenVPN username (if required)</label><input type="text" id="rOvUser"></div><div><label>OpenVPN password</label><input type="text" id="rOvPass" autocomplete="off"></div></div><button type="button" class="g-btn" id="rAuthSave">Save OpenVPN login</button></div>
+      </div>
+      <h4>SSH key</h4>
+      <div class="g-muted">The panel logs in with a key (no password stored). Click <b>Install key</b> and enter the NAS password once: it is used one time to install the key and is not saved. Or paste the public key below into the NAS user's <code>~/.ssh/authorized_keys</code> yourself. The NAS needs SSH and rsync enabled (Synology: Control Panel > Terminal and SNMP > SSH, and File Services > rsync).</div>
+      <div class="g-key" id="rPub">(key not generated yet - click "Show key")</div>
+      <div class="g-actions"><button type="button" class="g-btn" id="rShowKey"><i class="fas fa-key"></i> Show key</button><button type="button" class="g-btn" id="rInstall"><i class="fas fa-user-lock"></i> Install key (asks NAS password once)</button><button type="button" class="g-btn" id="rTest"><i class="fas fa-plug"></i> Test connection</button><button type="button" class="g-btn" id="rSend"><i class="fas fa-cloud-arrow-up"></i> Send backups now</button></div>
+    </div>
+  </div>
+  <div class="g-actions" style="margin-bottom:18px"><button type="button" class="g-btn primary" id="dSave"><i class="fas fa-floppy-disk"></i> Save settings</button><button type="button" class="g-btn" id="dPrune"><i class="fas fa-broom"></i> Apply retention now</button></div>
+  </div>
+  <div id="tabGlpi" style="display:none">
+    <div class="g-card"><div class="g-body g-muted">GLPI instances in Docker (<code>/opt/glpi/&lt;name&gt;/</code>): backup, restore and updates to any stable version (automatic backup first, automatic rollback; a major upgrade needs typed confirmation). Backups of GLPI are also included in the nightly job, the retention above and the NAS copy. <button type="button" id="gRefresh" class="g-btn" style="margin-left:8px"><i class="fas fa-arrows-rotate"></i> Refresh</button></div></div>
+    <div id="gInstances"><div class="g-card"><div class="g-body g-muted">Open this tab to load.</div></div></div>
+    <div class="g-card" id="gHealthCard" style="display:none">
+      <div class="g-title"><span>Health check: <span id="gHealthName" class="g-muted"></span></span><span id="gHealthSum"></span></div>
+      <table class="g-table" id="gHealthTable"><thead><tr><th>Check</th><th>Result</th><th>Details</th></tr></thead><tbody></tbody></table>
+      <div class="g-body g-muted">Runs automatically before and after every GLPI update: if a critical check fails after the update, GLPI is rolled back from the backup. Warnings never roll back. Tip: record the public domain with <code>echo your.domain.ie &gt; /opt/glpi/&lt;name&gt;/.domain</code> to also test HTTPS and the SSL certificate.</div>
+    </div>
+    <div class="g-card" id="gNewCard">
+      <div class="g-title"><span>Add a new GLPI instance (e.g. another school)</span></div>
+      <div class="g-body">
+        <div class="g-form">
+          <div><label>Name (a-z, 0-9, - _)</label><input type="text" id="nName" placeholder="school2"></div>
+          <div><label>Domain (optional)</label><input type="text" id="nDomain" placeholder="school2.yourdomain.ie"></div>
+          <div><label>GLPI version</label><select id="nVer"><option value="">Loading...</option></select></div>
+        </div>
+        <div class="g-check"><input type="checkbox" id="nPub"><label for="nPub" style="margin:0;text-transform:none;font-size:14px;color:inherit">Also create the website + SSL certificate in CyberPanel and proxy it to the new GLPI (the domain's DNS must already point to this server)</label></div>
+        <div class="g-muted" style="margin-bottom:10px">Creates <code>/opt/glpi/&lt;name&gt;/</code> with its own GLPI + MariaDB containers, volumes, random passwords and a free local port, installs an empty GLPI database and shows it in this panel. It joins the nightly backup, retention and NAS copy automatically.</div>
+        <button type="button" class="g-btn primary" id="nCreate"><i class="fas fa-plus"></i> Create instance</button>
+      </div>
+    </div>
+    <div class="g-card" id="gBackupsCard" style="display:none">
+      <div class="g-title"><span>GLPI backups: <span id="gBackupsName" class="g-muted"></span></span></div>
+      <table class="g-table" id="gBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
+      <div class="g-body g-muted">Stored in <code>/var/backups/glpi/&lt;name&gt;/</code>: database, <code>/var/glpi</code> (incl. <code>glpicrypt.key</code>), plugins and compose files.</div>
+    </div>
+  </div>
+  <div id="tabSrv" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span>Server backup (websites, system, CyberPanel settings, databases)</span><span id="sBadges"></span></div>
+      <div class="g-body">
+        <div class="g-muted" style="margin-bottom:10px">Backs up the websites (<code>/home</code>), system files (<code>/etc</code>, cron, OpenLiteSpeed config), CyberPanel settings and every MariaDB database (one dump per database, so one website can be restored alone). It runs in the daily job after the Docker backups and is copied to the NAS with the same remote/VPN settings (folder <code>_server</code>). Docker containers and GLPI are backed up by the other tabs.</div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="sBackupNow"><i class="fas fa-play"></i> Back up now</button><button type="button" class="g-btn" id="sRefresh"><i class="fas fa-arrows-rotate"></i> Refresh</button><button type="button" class="g-btn" id="sPrune"><i class="fas fa-broom"></i> Apply retention</button></div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title">What to back up</div>
+      <div class="g-body">
+        <div class="g-check"><input type="checkbox" id="sEnabled"><label for="sEnabled" style="margin:0;text-transform:none;font-size:14px;color:inherit">Include the server backup in the daily job</label></div>
+        <div class="g-check"><input type="checkbox" id="sSites"><label for="sSites" style="margin:0;text-transform:none;font-size:14px;color:inherit">Websites and mail (<code>/home</code>)</label></div>
+        <div class="g-check"><input type="checkbox" id="sSystem"><label for="sSystem" style="margin:0;text-transform:none;font-size:14px;color:inherit">System files (<code>/etc</code> incl. SSL certificates, cron, OpenLiteSpeed config)</label></div>
+        <div class="g-check"><input type="checkbox" id="sPanel"><label for="sPanel" style="margin:0;text-transform:none;font-size:14px;color:inherit">CyberPanel settings (<code>settings.py</code>, lscpd config)</label></div>
+        <div class="g-check"><input type="checkbox" id="sDatabases"><label for="sDatabases" style="margin:0;text-transform:none;font-size:14px;color:inherit">MariaDB databases (WordPress and the panel database; not the Docker/GLPI databases)</label></div>
+        <div class="g-form">
+          <div><label>Keep backups (days)</label><input type="number" id="sDays" min="1" max="365"></div>
+          <div><label>Always keep newest</label><input type="number" id="sMin" min="1" max="30"></div>
+        </div>
+        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px">Extra folders (one per line, absolute paths)</label>
+        <textarea class="g-in" id="sExtra" placeholder="/opt/myapp"></textarea>
+        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:10px 0 4px">Exclude (one pattern per line)</label>
+        <textarea class="g-in" id="sExclude"></textarea>
+        <h4>Encryption</h4>
+        <div class="g-check"><input type="checkbox" id="sEncrypt"><label for="sEncrypt" style="margin:0;text-transform:none;font-size:14px;color:inherit">Encrypt backups (AES-256) before they are stored and sent to the NAS</label></div>
+        <div class="g-status s-warn" style="display:block;margin-bottom:10px">Keep a copy of the passphrase OUTSIDE this server (password manager). Without it encrypted backups cannot be opened, also if the server is lost.</div>
+        <div class="g-actions"><input type="password" id="sPass" class="g-in" autocomplete="off" placeholder="passphrase (min. 12 characters)" style="max-width:340px"><button type="button" class="g-btn" id="sPassSave"><i class="fas fa-key"></i> Save passphrase</button><button type="button" class="g-btn" id="sPassShow"><i class="fas fa-eye"></i> Show passphrase</button><span id="sPassState" class="g-muted"></span></div>
+        <div style="margin-top:14px"><button type="button" class="g-btn primary" id="sSave"><i class="fas fa-floppy-disk"></i> Save settings</button></div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title">Server backups</div>
+      <div style="overflow-x:auto"><table class="g-table" id="sTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th>Encrypted</th><th></th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Open this tab to load.</td></tr></tbody></table></div>
+      <div class="g-body g-muted">Stored in <code>/var/backups/server/&lt;date&gt;/</code>. <b>Verify</b> reads every file (and decrypts it) to prove the backup is usable. <b>Extract</b> unpacks it into <code>/var/restore/&lt;date&gt;/</code> without touching the live server. <b>Restore website</b> replaces the files of one website (the old folder is kept next to it). <b>Restore database</b> imports one database after a safety dump of the current one.</div>
+    </div>
+  </div>
+  <div class="g-card"><div class="g-title">Operation log</div><div class="g-body"><div id="dResult" class="g-status"></div><pre id="dLog" class="g-log">No operation running.</pre></div></div>
+  <div class="g-modal" id="dModal"><div class="g-modal-box"><h3 id="dModalTitle"></h3><div id="dModalBody"></div><div class="g-modal-actions"><button type="button" class="g-btn" id="dModalCancel">Cancel</button><button type="button" class="g-btn primary" id="dModalOk">OK</button></div></div></div>
+</div>
+<script>
+(function () {
+  var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}", overview: "{% url 'dockerSuiteOverview' %}"};
+  var csrf = document.querySelector('#dmgr [name=csrfmiddlewaretoken]').value;
+  var $ = function (id) { return document.getElementById(id); };
+  var busy = false, cfg = null, vpnFiles = {}, upd = {}, lastList = '';
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (text != null) { e.textContent = text; } return e; }
+  function b64(s) { return btoa(unescape(encodeURIComponent(s))); }
+  function post(url, data) {
+    var fd = new FormData(); fd.append('csrfmiddlewaretoken', csrf);
+    Object.keys(data || {}).forEach(function (k) { fd.append(k, data[k]); });
+    return fetch(url, {method: 'POST', body: fd, credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (r) {
+      return r.text().then(function (t) {
+        try { return JSON.parse(t); } catch (e) {
+          throw new Error('The panel returned an unexpected answer (HTTP ' + r.status + '). ' + (r.status === 500 ? 'Server error - see /var/log/dockermanager/plugin-errors.log and /usr/local/lscp/logs/error.log.' : 'Reload the page (Ctrl+F5) and sign in again if needed.'));
+        }
+      });
+    });
+  }
+  function setBusy(b) { busy = b; document.querySelectorAll('#dmgr button').forEach(function (x) { x.disabled = b; }); }
+  function msg(type, text) { var r = $('dResult'); r.className = 'g-status s-' + type; r.innerHTML = ''; if (type === 'info') { r.appendChild(el('span', 'g-spin')); } r.appendChild(el('span', '', text)); }
+  function show(t) { var l = $('dLog'); l.textContent = t; l.scrollTop = l.scrollHeight; }
+  function btn(label, icon, cls, fn) { var b = el('button', 'g-btn ' + cls); b.type = 'button'; b.appendChild(el('i', 'fas ' + icon)); b.appendChild(document.createTextNode(' ' + label)); b.addEventListener('click', fn); return b; }
+  function badge(cls, t) { return el('span', 'g-badge b-' + cls, t); }
+  function runJob(action, name, extra, quiet) {
+    return post(URLS.job, {action: action, name: name || '', extra: extra || ''}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Error'); }
+      return new Promise(function (resolve, reject) {
+        var tries = 0;
+        (function poll() {
+          post(URLS.status, {action: action, name: name || '', nonce: d.nonce}).then(function (s) {
+            if (!s.ok) { reject(new Error(s.error || 'Status error')); return; }
+            if (s.started && !quiet) { show(s.log); }
+            if (s.done) { resolve({success: s.success, log: s.log}); return; }
+            if (++tries > 2400) { reject(new Error('Timed out. Check /var/log/dockermanager/ on the server.')); return; }
+            setTimeout(poll, 1500);
+          }).catch(reject);
+        })();
+      });
+    });
+  }
+  function openModal(title, body, label, danger, onOk) {
+    var m = $('dModal'); $('dModalTitle').textContent = title; var b = $('dModalBody'); b.innerHTML = ''; b.appendChild(body);
+    var ok = $('dModalOk'); ok.textContent = label; ok.className = 'g-btn ' + (danger ? 'danger solid' : 'primary');
+    ok.onclick = function () { if (onOk() !== false) { m.style.display = 'none'; } };
+    $('dModalCancel').onclick = function () { m.style.display = 'none'; };
+    m.style.display = 'flex';
+  }
+  function simple(action, name, label, extra, after) {
+    if (busy) { return; }
+    setBusy(true); show('Start...'); msg('info', label + '...');
+    runJob(action, name, extra).then(function (r) { msg(r.success ? 'ok' : 'bad', r.success ? label + ': finished.' : label + ': failed - see the log below.'); })
+      .catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); if (after) { after(); } else if (action !== 'logs') { loadAll(); } });
+  }
+
+  function readForm() {
+    var c = cfg || {containers: {}, remote: {}};
+    c.auto = $('cAuto').checked; c.schedule = $('cTime').value || '02:30';
+    c.retention_days = parseInt($('cDays').value, 10) || 5; c.min_keep = parseInt($('cMin').value, 10) || 2;
+    c.remote = {enabled: $('rEnabled').checked, host: $('rHost').value.trim(), port: parseInt($('rPort').value, 10) || 22, user: $('rUser').value.trim(),
+      path: $('rPath').value.trim(), retention_days: parseInt($('rDays').value, 10) || 30, vpn: $('rVpn').value, vpn_routes: $('rRoutes').value.trim()};
+    document.querySelectorAll('#dTable tbody tr[data-ct]').forEach(function (tr) {
+      c.containers[tr.dataset.ct] = {backup: tr.querySelector('.ck-b').checked, stop: tr.querySelector('.ck-s').checked};
+    });
+    return c;
+  }
+  function fillForm() {
+    var c = cfg, r = c.remote || {};
+    $('cAuto').checked = !!c.auto; $('cTime').value = c.schedule || '02:30'; $('cDays').value = c.retention_days; $('cMin').value = c.min_keep;
+    $('rEnabled').checked = !!r.enabled; $('rHost').value = r.host || ''; $('rPort').value = r.port || 22; $('rUser').value = r.user || '';
+    $('rPath').value = r.path || ''; $('rDays').value = r.retention_days || 30; $('rVpn').value = r.vpn || 'none'; $('rRoutes').value = r.vpn_routes || '';
+    vpnUi();
+  }
+  function vpnUi() {
+    var v = $('rVpn').value; $('rVpnBox').style.display = v === 'none' ? 'none' : 'block';
+    $('rAuthBox').style.display = v === 'openvpn' ? 'block' : 'none';
+    $('rVpnState').textContent = v === 'none' ? '' : (vpnFiles[v] === 'yes' ? 'Config uploaded' : 'No config uploaded yet');
+  }
+  function saveSettings(thenFn) {
+    if (busy) { return; }
+    cfg = readForm();
+    setBusy(true); msg('info', 'Saving settings...');
+    runJob('setconfig', '', b64(JSON.stringify(cfg)), true).then(function (r) { show(r.log); msg(r.success ? 'ok' : 'bad', r.success ? 'Settings saved.' : 'Saving failed.'); return r.success; })
+      .catch(function (e) { msg('bad', e.message); return false; }).then(function (okk) { setBusy(false); if (okk && thenFn) { thenFn(); } });
+  }
+  function loadAll() {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Loading...');
+    runJob('getconfig', '', '', true).then(function (r) {
+      r.log.split('\n').forEach(function (l) {
+        if (l.indexOf('CONFIG|') === 0) { cfg = JSON.parse(l.slice(7)); }
+        if (l.indexOf('VPNFILES|') === 0) { l.slice(9).split(',').forEach(function (kv) { var p = kv.split('='); vpnFiles[p[0]] = p[1]; }); }
+        if (l.indexOf('PUBKEY|') === 0) { $('rPub').textContent = l.slice(7); }
+      });
+      if (cfg) { fillForm(); }
+      return runJob('list', '', '', true);
+    }).then(function (r) { renderList(r.log); msg('ok', 'Loaded.'); })
+      .catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function renderList(log) {
+    lastList = log;
+    var tb = document.querySelector('#dTable tbody'); tb.innerHTML = ''; var n = 0, df = $('dDf'); df.innerHTML = '';
+    log.split('\n').forEach(function (line) {
+      var p = line.split('|');
+      if (p[0] === 'FREE') { df.appendChild(badge('gray', 'Free for backups: ' + p[1] + ' GB')); }
+      if (p[0] === 'DF') { df.appendChild(badge('gray', p[1] + ': ' + p[2] + ' (reclaimable ' + p[3] + ')')); }
+      if (p[0] !== 'CT') { return; }
+      n++; var name = p[1], tr = document.createElement('tr'); tr.dataset.ct = name;
+      var running = p[3] === 'running', en = p[9], saved = cfg && cfg.containers && cfg.containers[name];
+      var td = el('td', 'nm', name); if (p[5] !== '-') { td.appendChild(el('div', 'g-muted', 'compose: ' + p[5])); } tr.appendChild(td);
+      tr.appendChild(el('td', '', p[2]));
+      var st = el('td'); st.appendChild(badge(running ? 'ok' : 'bad', p[3]));
+      var u = upd[name]; if (u) { var ub = badge(u.s === 'yes' ? 'warn' : (u.s === 'no' ? 'ok' : 'gray'), u.s === 'yes' ? 'Update available' : (u.s === 'no' ? 'Up to date' : 'No auto-update')); ub.title = u.m; st.appendChild(ub); }
+      st.appendChild(el('div', 'g-muted', p[4])); tr.appendChild(st);
+      tr.appendChild(el('td', '', p[7] + ' / ' + p[8]));
+      var bk = el('td'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'ck-b'; cb.checked = saved && 'backup' in saved ? saved.backup : en === 'yes';
+      var cs = document.createElement('input'); cs.type = 'checkbox'; cs.className = 'ck-s'; cs.checked = !!(saved && saved.stop);
+      bk.appendChild(cb); bk.appendChild(document.createTextNode(' backup ')); bk.appendChild(cs); bk.appendChild(document.createTextNode(' stop'));
+      if (en === 'auto-excluded' && !(saved && 'backup' in saved)) { bk.appendChild(el('div', 'g-muted', 'GLPI Manager handles this')); }
+      tr.appendChild(bk);
+      tr.appendChild(el('td', '', p[10] === '-' ? 'none' : p[10] + ' (' + p[11] + ')'));
+      var act = el('td'); act.style.whiteSpace = 'nowrap';
+      if (upd[name] && upd[name].s === 'yes') { act.appendChild(btn('Update', 'fa-arrow-up', 'warn', function () { updateDialog(name, p[2]); })); }
+      act.appendChild(btn('Backup', 'fa-floppy-disk', 'primary', function () { simple('backup', name, 'Backup ' + name); }));
+      act.appendChild(btn('Backups', 'fa-clock-rotate-left', '', function () { showBackups(name); }));
+      act.appendChild(btn(running ? 'Restart' : 'Start', 'fa-rotate', '', function () { ctl(name, running ? 'restart' : 'start'); }));
+      if (running) { act.appendChild(btn('Stop', 'fa-stop', 'warn', function () { ctl(name, 'stop'); })); }
+      act.appendChild(btn('Logs', 'fa-terminal', '', function () { simple('logs', name, 'Logs of ' + name); }));
+      tr.appendChild(act); tb.appendChild(tr);
+    });
+    if (!n) { tb.innerHTML = '<tr><td colspan="7" class="g-muted">No containers found.</td></tr>'; }
+  }
+  function updateDialog(name, img) {
+    var box = el('div'); box.appendChild(el('p', '', 'Update "' + name + '" to the newest build of ' + img + '. Steps (automatic):'));
+    var ol = el('ol'); ['Backup of the container (volumes / database dump)', 'Pull the new image', 'Recreate the container with docker compose', 'Wait until it is running and healthy; if not, the previous image is put back'].forEach(function (x) { ol.appendChild(el('li', '', x)); });
+    box.appendChild(ol); box.appendChild(el('p', 'g-muted', 'Only the same tag is refreshed (e.g. nginx:1 stays nginx:1). The service is briefly unavailable.'));
+    openModal('Update ' + name, box, 'Update', false, function () { simple('update', name, 'Update ' + name, '', function () { delete upd[name]; loadAll(); }); });
+  }
+  function checkUpdates() {
+    if (busy) { return; }
+    setBusy(true); show('Start...'); msg('info', 'Checking images (this downloads newer images but changes no container)...');
+    runJob('checkupd', '', '', false).then(function (r) {
+      upd = {}; var n = 0;
+      r.log.split('\n').forEach(function (l) { if (l.indexOf('UPD|') === 0) { var p = l.split('|'); upd[p[1]] = {s: p[3], m: p[4]}; if (p[3] === 'yes') { n++; } } });
+      renderList(lastList);
+      msg(r.success ? 'ok' : 'bad', r.success ? (n ? n + ' update(s) available - use the Update button in the table.' : 'Everything is up to date.') : 'Check failed - see the log.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function ctl(name, cmd) {
+    var box = el('div'); box.appendChild(el('p', '', cmd.charAt(0).toUpperCase() + cmd.slice(1) + ' container "' + name + '"? Services running in it will be briefly unavailable.'));
+    openModal(cmd.charAt(0).toUpperCase() + cmd.slice(1) + ' ' + name, box, 'Yes, ' + cmd, cmd === 'stop', function () { simple('ctl', name, cmd + ' ' + name, cmd); });
+  }
+  function showBackups(name) {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Loading backups of ' + name + '...');
+    runJob('backups', name, '', true).then(function (r) {
+      var tb = document.querySelector('#dBackupsTable tbody'); tb.innerHTML = ''; $('dBackupsName').textContent = name; var n = 0;
+      r.log.split('\n').forEach(function (line) {
+        if (line.indexOf('BACKUP|') !== 0) { return; }
+        var p = line.split('|'); n++; var tr = document.createElement('tr');
+        [p[1], (parseInt(p[2], 10) / 1024).toFixed(1) + ' MB', p[3], p[4] + ' volume(s)' + (p[5] === 'db' ? ' + database dump' : '')].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+        var td = document.createElement('td');
+        td.appendChild(btn('Restore', 'fa-rotate-left', 'warn', function () {
+          var box = el('div'); box.appendChild(el('p', '', 'Restore "' + name + '" from ' + p[1] + '? The container is stopped, its volumes are replaced with the backup (databases are re-imported from the dump) and it is started again. A safety backup of the current state is made first.'));
+          openModal('Restore ' + name, box, 'Restore', true, function () { simple('restore', name, 'Restore ' + name, p[1]); });
+        }));
+        tr.appendChild(td); tb.appendChild(tr);
+      });
+      if (!n) { tb.innerHTML = '<tr><td colspan="5" class="g-muted">No backups yet.</td></tr>'; }
+      $('dBackupsCard').style.display = 'block'; msg('ok', 'Backups loaded.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  $('dCheck').addEventListener('click', checkUpdates);
+  $('dSave').addEventListener('click', function () { saveSettings(); });
+  $('dPrune').addEventListener('click', function () { simple('prune', '', 'Retention'); });
+  $('dRunAll').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Backs up every ticked container, applies retention and copies to the NAS (if enabled). Takes a few minutes.'));
+    openModal('Run full job', box, 'Start', false, function () { simple('run', '', 'Full job'); });
+  });
+  $('rVpn').addEventListener('change', vpnUi);
+  $('rUpload').addEventListener('click', function () {
+    var f = $('rFile').files[0], v = $('rVpn').value;
+    if (!f || v === 'none') { msg('bad', 'Choose a VPN type and a file first.'); return; }
+    if (f.size > 60000) { msg('bad', 'File too large (max 60 KB).'); return; }
+    var rd = new FileReader();
+    rd.onload = function () { simple('vpnsave', v, 'Upload ' + v + ' config', b64(rd.result), function () { vpnFiles[v] = 'yes'; vpnUi(); }); };
+    rd.readAsText(f);
+  });
+  $('rAuthSave').addEventListener('click', function () {
+    var u = $('rOvUser').value, p = $('rOvPass').value; if (!u || !p) { msg('bad', 'Enter username and password.'); return; }
+    simple('vpnsave', 'openvpn-auth', 'Save OpenVPN login', b64(u + '\n' + p + '\n'), function () { $('rOvPass').value = ''; });
+  });
+  $('rShowKey').addEventListener('click', function () {
+    if (busy) { return; } setBusy(true); msg('info', 'Preparing key...');
+    runJob('keyshow', '', '', true).then(function (r) { r.log.split('\n').forEach(function (l) { if (l.indexOf('PUBKEY|') === 0) { $('rPub').textContent = l.slice(7); } }); msg('ok', 'Key ready.'); })
+      .catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  });
+  $('rInstall').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Enter the NAS password for the user from the form above. It is used once to install the SSH key and is not stored. Settings are saved first.'));
+    var pw = document.createElement('input'); pw.type = 'password'; pw.className = 'g-in'; pw.autocomplete = 'off'; box.appendChild(pw);
+    openModal('Install SSH key on the NAS', box, 'Install', false, function () {
+      if (!pw.value) { return false; } var v = b64(pw.value); pw.value = '';
+      saveSettings(function () { simple('keyinstall', '', 'Install key', v, function () {}); });
+    });
+  });
+  $('rTest').addEventListener('click', function () { saveSettings(function () { simple('remotetest', '', 'Test connection', '', function () {}); }); });
+  $('rSend').addEventListener('click', function () { saveSettings(function () { simple('remotesend', '', 'Send to NAS'); }); });
+
+  // ---------------- GLPI tab ----------------
+  function tagOf(img) { var m = /:([0-9][0-9A-Za-z._-]*)$/.exec(img || ''); return m ? m[1] : ''; }
+  function vcmp(a, b) { var x = a.split('.').map(Number), y = b.split('.').map(Number); for (var i = 0; i < 3; i++) { if (x[i] !== y[i]) { return x[i] - y[i]; } } return 0; }
+  function renderGlpi(log) {
+    var box = $('gInstances'); box.innerHTML = ''; var n = 0;
+    log.split('\n').forEach(function (line) {
+      if (line.indexOf('INST|') !== 0) { return; }
+      var p = line.split('|'); n++;
+      var name = p[1], img = p[2], st = p[3], dbimg = p[5], dbst = p[6], port = p[7], last = p[8], cnt = p[9], free = p[10], cur = tagOf(img);
+      if (!glpiMajor && cur) { glpiMajor = cur.split('.')[0]; }
+      var card = el('div', 'g-card'), t = el('div', 'g-title'); t.appendChild(el('span', '', name));
+      var bw = el('span'); bw.appendChild(badge('info', 'GLPI ' + (cur || '?'))); bw.appendChild(badge(st === 'running' ? 'ok' : 'bad', 'glpi: ' + st)); bw.appendChild(badge(dbst === 'running' ? 'ok' : 'bad', 'db: ' + dbst));
+      t.appendChild(bw); card.appendChild(t);
+      var b = el('div', 'g-body'), g = el('div', 'g-grid');
+      [['Image', img], ['Database', dbimg], ['Local port', port === '-' ? '-' : '127.0.0.1:' + port], ['Started', (p[4] || '-').replace('T', ' ').slice(0, 16)],
+       ['Last backup', last && last !== '-' ? last : 'none yet'], ['Backups kept', cnt], ['Free for backups', free + ' GB']].forEach(function (kv) {
+        var d = el('div', 'g-kv'); d.appendChild(el('span', '', kv[0])); d.appendChild(el('b', '', kv[1])); g.appendChild(d); });
+      b.appendChild(g);
+      var upd = el('div'); upd.style.margin = '0 0 12px'; var act = el('div', 'g-actions');
+      act.appendChild(btn('Backup now', 'fa-floppy-disk', 'primary', function () { simple('gbackup', name, 'GLPI backup', '', gLoad); }));
+      act.appendChild(btn('Backups / restore', 'fa-clock-rotate-left', '', function () { gBackups(name); }));
+      act.appendChild(btn('Health check', 'fa-heart-pulse', '', function () { gHealth(name); }));
+      act.appendChild(btn('Update GLPI...', 'fa-cloud-arrow-down', '', function () { gCheck(name, cur, upd); }));
+      act.appendChild(btn('Logs', 'fa-terminal', '', function () { simple('glogs', name, 'GLPI logs', '', function () {}); }));
+      b.appendChild(upd); b.appendChild(act); card.appendChild(b); box.appendChild(card);
+    });
+    pickVer();
+    if (!n) { var c = el('div', 'g-card'); c.appendChild(el('div', 'g-body g-muted', 'No GLPI instance found. Expected a docker-compose project in /opt/glpi/<name>/.')); box.appendChild(c); }
+  }
+  function gLoad() {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Scanning /opt/glpi ...');
+    runJob('glist', '', '', true).then(function (r) { renderGlpi(r.log); msg('ok', 'GLPI list refreshed.'); })
+      .catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function gCheck(name, cur, holder) {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Checking GLPI releases on GitHub...');
+    post(URLS.glatest, {}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); }
+      holder.innerHTML = ''; var major = (cur || '').split('.')[0];
+      var newer = d.tags.filter(function (t) { return cur && vcmp(t, cur) > 0; }).sort(vcmp).reverse();
+      holder.appendChild(badge('info', 'Installed: ' + cur));
+      if (!newer.length) { holder.appendChild(badge('ok', 'You are on the latest stable version')); msg('ok', 'Release check finished.'); return; }
+      var latest = newer[0], sameMajor = newer.filter(function (t) { return t.split('.')[0] === major; });
+      holder.appendChild(badge('warn', 'Newest stable: ' + latest + (latest.split('.')[0] !== major ? ' (major upgrade)' : '')));
+      holder.appendChild(el('br'));
+      var sel = document.createElement('select'); sel.className = 'g-in'; sel.style.cssText = 'width:auto;margin:8px 8px 0 0;display:inline-block';
+      newer.forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t + (t.split('.')[0] !== major ? '  (major upgrade)' : ''); sel.appendChild(o); });
+      if (sameMajor.length) { sel.value = sameMajor[0]; }
+      holder.appendChild(sel);
+      holder.appendChild(btn('Install selected version', 'fa-arrow-up', 'warn', function () { gUpdateDialog(name, cur, sel.value); }));
+      holder.appendChild(btn('Install latest (' + latest + ')', 'fa-bolt', 'warn', function () { gUpdateDialog(name, cur, latest); }));
+      msg('ok', 'Release check finished - choose a version below.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function gUpdateDialog(name, cur, target) {
+    var isMajor = target.split('.')[0] !== cur.split('.')[0], conf = null;
+    var box = el('div'); box.appendChild(el('p', '', 'Update ' + name + ' from ' + cur + ' to ' + target + '. Steps (automatic):'));
+    var ol = el('ol'); ['Pull the new image', 'Full backup (database, files, plugins, compose files)', 'Switch the image tag and restart GLPI', 'Run bin/console database:update', 'Check that GLPI answers; if anything fails the previous state is restored from the backup'].forEach(function (x) { ol.appendChild(el('li', '', x)); });
+    box.appendChild(ol); box.appendChild(el('p', 'g-muted', 'GLPI is unavailable for a short time. Afterwards check your plugins in GLPI > Setup > Plugins.'));
+    if (isMajor) {
+      var w = el('div', 'g-status s-warn'); w.style.display = 'block'; w.textContent = 'MAJOR upgrade (' + cur.split('.')[0] + ' \u2192 ' + target.split('.')[0] + '). The database schema changes and your own plugins (e.g. Device Timeline) may stop working. Best tested on a copy first. Type UPGRADE to confirm.';
+      box.appendChild(w); conf = document.createElement('input'); conf.type = 'text'; conf.className = 'g-in'; conf.placeholder = 'UPGRADE'; conf.style.marginTop = '8px'; box.appendChild(conf);
+    }
+    openModal('Update ' + name, box, 'Update to ' + target, isMajor, function () {
+      if (isMajor && (!conf || conf.value.trim() !== 'UPGRADE')) { conf.focus(); return false; }
+      simple('gupdate', name, 'GLPI update', target + (isMajor ? ':major' : ''), gLoad);
+    });
+  }
+  function gBackups(name) {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Loading backups of ' + name + '...');
+    runJob('gbackups', name, '', true).then(function (r) {
+      var tb = document.querySelector('#gBackupsTable tbody'); tb.innerHTML = ''; $('gBackupsName').textContent = name; var n = 0;
+      r.log.split('\n').forEach(function (line) {
+        if (line.indexOf('BACKUP|') !== 0) { return; }
+        var p = line.split('|'); n++; var tr = document.createElement('tr');
+        [p[1], (parseInt(p[2], 10) / 1024).toFixed(1) + ' MB', p[3]].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+        var td = document.createElement('td');
+        td.appendChild(btn('Restore', 'fa-rotate-left', 'warn', function () {
+          var box = el('div'); box.appendChild(el('p', '', 'Restore ' + name + ' from backup ' + p[1] + '? The current database and files are replaced (a safety backup of the current state is made first). GLPI is briefly unavailable.'));
+          openModal('Restore ' + name, box, 'Restore', true, function () { simple('grestore', name, 'GLPI restore', p[1], gLoad); });
+        }));
+        tr.appendChild(td); tb.appendChild(tr);
+      });
+      if (!n) { tb.innerHTML = '<tr><td colspan="4" class="g-muted">No backups yet - click "Backup now".</td></tr>'; }
+      $('gBackupsCard').style.display = 'block'; msg('ok', 'Backups loaded.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+
+  var glpiMajor = '';
+  function pickVer() {
+    var sel = $('nVer'); if (!glpiMajor) { return; }
+    var vs = Array.prototype.map.call(sel.options, function (o) { return o.value; }).filter(function (v) { return v && v.split('.')[0] === glpiMajor; }).sort(vcmp).reverse();
+    if (vs.length) { sel.value = vs[0]; }
+  }
+  function gHealth(name) {
+    if (busy) { return; }
+    setBusy(true); show('Start...'); msg('info', 'Running health check of ' + name + '...');
+    runJob('gcheck', name, '').then(function (r) {
+      var tb = document.querySelector('#gHealthTable tbody'); tb.innerHTML = ''; $('gHealthName').textContent = name; var sum = $('gHealthSum'); sum.innerHTML = '';
+      r.log.split('\n').forEach(function (line) {
+        var p = line.split('|');
+        if (p[0] === 'CHECK') { var tr = document.createElement('tr'); var a = document.createElement('td'); a.textContent = p[1]; tr.appendChild(a);
+          var b = document.createElement('td'); b.appendChild(badge(p[2] === 'OK' ? 'ok' : (p[2] === 'WARN' ? 'warn' : 'bad'), p[2])); tr.appendChild(b);
+          var c = document.createElement('td'); c.textContent = p.slice(3).join('|'); tr.appendChild(c); tb.appendChild(tr); }
+        if (p[0] === 'RESULT') { sum.appendChild(badge('ok', p[2] + ' OK')); if (+p[3]) { sum.appendChild(badge('warn', p[3] + ' warning(s)')); } if (+p[4]) { sum.appendChild(badge('bad', p[4] + ' failed')); } }
+      });
+      $('gHealthCard').style.display = 'block';
+      msg(r.success ? 'ok' : 'bad', r.success ? 'Health check finished - no critical problems.' : 'Health check found critical problems - see the table.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function gLoadVersions() {
+    post(URLS.glatest, {}).then(function (d) {
+      var sel = $('nVer'); sel.innerHTML = '';
+      if (!d.ok || !d.tags.length) { var o = document.createElement('option'); o.value = ''; o.textContent = 'Cannot load versions (type later)'; sel.appendChild(o); return; }
+      d.tags.slice().sort(vcmp).reverse().forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
+      pickVer();
+    }).catch(function () {});
+  }
+  $('nCreate').addEventListener('click', function () {
+    var name = $('nName').value.trim().toLowerCase(), dom = $('nDomain').value.trim().toLowerCase(), ver = $('nVer').value, pub = $('nPub').checked && dom ? '1' : '0';
+    if (!/^[a-z0-9][a-z0-9_-]{0,40}$/.test(name)) { msg('bad', 'Name: use only a-z, 0-9, - and _ (max 41 characters).'); return; }
+    if (dom && !/^[a-z0-9][a-z0-9.-]{1,200}\.[a-z]{2,}$/.test(dom)) { msg('bad', 'The domain looks invalid.'); return; }
+    if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(ver)) { msg('bad', 'Choose a GLPI version.'); return; }
+    var box = el('div'); box.appendChild(el('p', '', 'Create a new GLPI ' + ver + ' instance "' + name + '"' + (dom ? ' for ' + dom : '') + '?'));
+    var ul = el('ul'); ['Own GLPI + MariaDB containers and volumes in /opt/glpi/' + name, 'Random database passwords (stored root-only in .env)', 'Empty GLPI database with the default logins (glpi/glpi, tech/tech, ...) - change them right after'].concat(pub === '1' ? ['Website + SSL + proxy for ' + dom] : []).forEach(function (x) { ul.appendChild(el('li', '', x)); });
+    box.appendChild(ul);
+    openModal('Create GLPI instance', box, 'Create', false, function () {
+      simple('gnew', name, 'Create instance ' + name, (dom || 'none') + '|' + ver + '|' + pub, function () { $('nName').value = ''; $('nDomain').value = ''; gLoad(); });
+    });
+  });
+  // ---------------- Server backup tab ----------------
+  var sCfg = null, sSites = [], sBdb = {};
+  function sLines(log, pre) { return log.split('\n').filter(function (l) { return l.indexOf(pre) === 0; }).map(function (l) { return l.slice(pre.length); }); }
+  function sLoad() {
+    if (busy) { return; }
+    setBusy(true); msg('info', 'Loading server backup...');
+    runJob('sgetconfig', '', '', true).then(function (r) {
+      sLines(r.log, 'CONFIG|').forEach(function (j) { sCfg = JSON.parse(j); });
+      var key = sLines(r.log, 'KEY|')[0] || 'no|none', free = sLines(r.log, 'FREE|')[0] || '?';
+      sSites = sLines(r.log, 'SITE|');
+      var c = sCfg, bd = $('sBadges'); bd.innerHTML = '';
+      bd.appendChild(badge(c.encrypt ? 'ok' : 'warn', c.encrypt ? 'encrypted' : 'not encrypted'));
+      bd.appendChild(badge(key.split('|')[0] === 'yes' ? 'ok' : (c.encrypt ? 'bad' : 'gray'), key.split('|')[0] === 'yes' ? 'passphrase set (' + key.split('|')[1] + ')' : 'no passphrase'));
+      bd.appendChild(badge('gray', free + ' GB free'));
+      $('sEnabled').checked = c.enabled; $('sSites').checked = c.sites; $('sSystem').checked = c.system; $('sPanel').checked = c.panel; $('sDatabases').checked = c.databases;
+      $('sDays').value = c.retention_days; $('sMin').value = c.min_keep; $('sEncrypt').checked = c.encrypt;
+      $('sExtra').value = (c.extra_paths || []).join('\n'); $('sExclude').value = (c.exclude || []).join('\n');
+      $('sPassState').textContent = key.split('|')[0] === 'yes' ? 'Passphrase fingerprint: ' + key.split('|')[1] : '';
+      return runJob('sbackups', '', '', true);
+    }).then(function (r) { sRender(r.log); msg('ok', 'Loaded.'); }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function sRender(log) {
+    sBdb = {}; sLines(log, 'BDB|').forEach(function (l) { var p = l.split('|'); sBdb[p[0]] = p[1] ? p[1].split(',') : []; });
+    var tb = document.querySelector('#sTable tbody'); tb.innerHTML = ''; var n = 0;
+    sLines(log, 'BACKUP|').forEach(function (l) {
+      var p = l.split('|'), id = p[0]; n++;
+      var tr = document.createElement('tr');
+      [id, (parseInt(p[1], 10) / 1024).toFixed(1) + ' MB', p[2], (p[5] === '-' ? '' : p[5].replace(/,/g, ', ') + ' + ') + p[6] + ' database(s)', p[3] === 'yes' ? 'yes (' + p[4] + ')' : 'no'].forEach(function (v) { tr.appendChild(el('td', '', v)); });
+      var a = el('td'); a.style.whiteSpace = 'nowrap';
+      a.appendChild(btn('Verify', 'fa-shield-halved', '', function () { simple('sverify', '', 'Verify ' + id, id, function () {}); }));
+      a.appendChild(btn('Extract', 'fa-box-open', '', function () {
+        var box = el('div'); box.appendChild(el('p', '', 'Unpack ' + id + ' into /var/restore/' + id + '/ (needs about 3x the backup size in free space). The live server is not changed.'));
+        openModal('Extract backup', box, 'Extract', false, function () { simple('sextract', '', 'Extract ' + id, id, function () {}); });
+      }));
+      if (p[5].split(',').indexOf('sites') >= 0) {
+        a.appendChild(btn('Restore website', 'fa-clock-rotate-left', 'warn', function () {
+          var box = el('div'); box.appendChild(el('p', '', 'Replace the files of ONE website with the copy from ' + id + '. The current folder is kept as <name>.before-restore-<time>. The database is not touched.'));
+          var sel = document.createElement('select'); sel.className = 'g-in'; sSites.forEach(function (s) { var o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }); box.appendChild(sel);
+          var tip = el('p', 'g-muted', 'Websites that no longer exist on the server are not listed: use Extract and copy them by hand.'); tip.style.marginTop = '8px'; box.appendChild(tip);
+          openModal('Restore website files', box, 'Restore', true, function () { if (!sel.value) { return false; } simple('srestoresite', sel.value, 'Restore ' + sel.value, id, function () {}); });
+        }));
+      }
+      var dbs = sBdb[id] || [];
+      if (dbs.length) {
+        a.appendChild(btn('Restore database', 'fa-database', 'warn', function () {
+          var box = el('div'); box.appendChild(el('p', '', 'Import ONE database from ' + id + '. A safety dump of the current one is made first (/var/backups/server/_safety/). Tables newer than the backup are kept, older data is overwritten.'));
+          var sel = document.createElement('select'); sel.className = 'g-in'; dbs.forEach(function (s) { var o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }); box.appendChild(sel);
+          var t = el('p', '', 'Type RESTORE to confirm:'); t.style.marginTop = '10px'; box.appendChild(t);
+          var cf = document.createElement('input'); cf.type = 'text'; cf.className = 'g-in'; box.appendChild(cf);
+          openModal('Restore database', box, 'Restore', true, function () { if (cf.value !== 'RESTORE' || !sel.value) { return false; } simple('srestoredb', sel.value, 'Restore database ' + sel.value, id, function () {}); });
+        }));
+      }
+      tr.appendChild(a); tb.appendChild(tr);
+    });
+    if (!n) { tb.innerHTML = '<tr><td colspan="6" class="g-muted">No server backups yet. Click "Back up now".</td></tr>'; }
+  }
+  function sRead() {
+    var lines = function (id) { return $(id).value.split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x; }); };
+    return {enabled: $('sEnabled').checked, sites: $('sSites').checked, system: $('sSystem').checked, panel: $('sPanel').checked, databases: $('sDatabases').checked,
+      extra_paths: lines('sExtra'), exclude: lines('sExclude'), retention_days: parseInt($('sDays').value, 10) || 5, min_keep: parseInt($('sMin').value, 10) || 2, encrypt: $('sEncrypt').checked};
+  }
+  function sSave(after) { simple('ssetconfig', '', 'Save server backup settings', b64(JSON.stringify(sRead())), after || function () { sLoad(); }); }
+  $('sSave').addEventListener('click', function () { sSave(); });
+  $('sRefresh').addEventListener('click', sLoad);
+  $('sPrune').addEventListener('click', function () { sSave(function () { simple('sprune', '', 'Retention', '', sLoad); }); });
+  $('sBackupNow').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Archive the selected folders and dump all databases now. This can take several minutes for big sites; the website keeps running.'));
+    openModal('Back up the server now', box, 'Start', false, function () { sSave(function () { simple('sbackup', '', 'Server backup', '', sLoad); }); });
+  });
+  $('sPassSave').addEventListener('click', function () {
+    var v = $('sPass').value; if (v.length < 12) { msg('bad', 'The passphrase needs at least 12 characters.'); return; }
+    $('sPass').value = ''; simple('skeyset', '', 'Save passphrase', b64(v), sLoad);
+  });
+  $('sPassShow').addEventListener('click', function () {
+    if (busy) { return; } setBusy(true);
+    runJob('skeyshow', '', '', true).then(function (r) {
+      var pw = sLines(r.log, 'PASS|')[0] || '', box = el('div');
+      box.appendChild(el('p', '', 'Copy it into your password manager now.')); var k = el('div', 'g-key', pw); box.appendChild(k);
+      openModal('Backup passphrase', box, 'Close', false, function () { k.textContent = ''; });
+      msg('ok', 'Passphrase shown.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  });
+  var curTab = 'o';
+  function ago(ts) {
+    if (!ts) { return 'never'; }
+    var m = Math.floor((Date.now() / 1000 - ts) / 60);
+    if (m < 2) { return 'just now'; } if (m < 90) { return m + ' min ago'; }
+    var h = Math.floor(m / 60); if (h < 48) { return h + ' h ago'; } return Math.floor(h / 24) + ' days ago';
+  }
+  function gb(n) { return (n / 1073741824).toFixed(n >= 10737418240 ? 0 : 1) + ' GB'; }
+  function mb(n) { return n >= 1073741824 ? gb(n) : Math.max(1, Math.round(n / 1048576)) + ' MB'; }
+  function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+  function bar(id, p) { var e = $(id); e.style.width = Math.min(p, 100) + '%'; e.className = p >= 90 ? 'bad' : (p >= 75 ? 'warn' : ''); }
+  function row(k, v) { var r = el('div', 'o-row'); r.appendChild(el('span', '', k)); var s2 = el('span'); if (typeof v === 'string') { s2.textContent = v; } else { s2.appendChild(v); } r.appendChild(s2); return r; }
+  function loadOverview() {
+    post(URLS.overview, {}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Overview failed'); }
+      var al = $('oAlerts'); al.innerHTML = '';
+      function alert(cls, icon, t) { var a = el('div', 'o-alert ' + cls); a.appendChild(el('i', 'fas ' + icon)); a.appendChild(el('span', '', t)); al.appendChild(a); }
+      var load = d.load ? d.load[0] : 0, lp = pct(load, d.cpus || 1);
+      $('oLoad').textContent = load.toFixed(2); bar('oLoadBar', lp); $('oLoadSub').textContent = (d.cpus || 1) + ' CPU cores - 5 min: ' + (d.load ? d.load[1] : '-');
+      if (d.mem) { var mp = pct(d.mem.used, d.mem.total); $('oMem').textContent = mp + '%'; bar('oMemBar', mp); $('oMemSub').textContent = gb(d.mem.used) + ' of ' + gb(d.mem.total); }
+      var dp = d.disk ? pct(d.disk.used, d.disk.total) : 0;
+      if (d.disk) { $('oDisk').textContent = dp + '%'; bar('oDiskBar', dp); $('oDiskSub').textContent = gb(d.disk.used) + ' of ' + gb(d.disk.total); $('hDisk').textContent = dp + '%'; $('hDiskBox').className = 'd-stat' + (dp >= 85 ? ' hot' : ''); }
+      var days = Math.floor((d.uptime || 0) / 86400), hrs = Math.floor(((d.uptime || 0) % 86400) / 3600);
+      $('oUp').textContent = days + 'd ' + hrs + 'h'; $('oUpSub').textContent = d.reboot_required ? 'Restart required after updates' : 'No restart pending';
+      var sv = $('oServices'); sv.innerHTML = '';
+      var names = {docker: 'Docker', lsws: 'OpenLiteSpeed', lscpd: 'CyberPanel', mariadb: 'MariaDB'};
+      Object.keys(names).forEach(function (k) { var st = (d.services || {})[k] || 'unknown'; sv.appendChild(row(names[k], badge(st === 'active' ? 'ok' : 'bad', st))); if (st !== 'active' && k !== 'docker') { alert('bad', 'fa-circle-exclamation', names[k] + ' is not running (' + st + ').'); } });
+      var bk = d.backups || {}, bx = $('oBackups'); bx.innerHTML = '';
+      var newest = 0;
+      [['docker', 'Containers'], ['glpi', 'GLPI'], ['server', 'Server (sites, system, databases)']].forEach(function (p) {
+        var b = bk[p[0]] || {count: 0, newest: 0, size: 0}; if (b.newest > newest) { newest = b.newest; }
+        bx.appendChild(row(p[1], b.count ? b.count + ' files - ' + mb(b.size) + ' - ' + ago(b.newest) : 'none yet'));
+      });
+      $('hBk').textContent = newest ? ago(newest).replace(' ago', '') : 'none';
+      var dk = $('oDocker'); dk.innerHTML = '';
+      if (d.docker) { dk.appendChild(row('Containers', d.docker.running + ' running of ' + d.docker.total)); dk.appendChild(row('Images', String(d.docker.images))); $('hCt').textContent = d.docker.running + '/' + d.docker.total; }
+      else { dk.appendChild(row('Docker', badge('bad', 'not available'))); $('hCt').textContent = '-'; alert('warn', 'fa-triangle-exclamation', 'Docker is not running or not installed on this server.'); }
+      dk.appendChild(row('Daily job', d.cron && d.cron.present ? badge('ok', 'on - ' + (d.cron.time || '')) : badge('gray', 'off')));
+      if (d.reboot_required) { alert('warn', 'fa-rotate', 'A server restart is required to finish system updates.'); }
+      if (dp >= 85) { alert('bad', 'fa-hard-drive', 'The system disk is ' + dp + '% full. Old backups or Docker images may need cleaning.'); }
+      if (newest && (Date.now() / 1000 - newest) > 172800) { alert('warn', 'fa-clock', 'The newest backup is older than 2 days.'); }
+      if (!newest) { alert('warn', 'fa-box-archive', 'No backups yet. Open Containers & backups and run the full job once.'); }
+      if (d.plugin_errors) { alert('warn', 'fa-bug', d.plugin_errors + ' plugin error(s) logged in /var/log/dockermanager/plugin-errors.log.'); }
+      if (!al.children.length) { alert('ok', 'fa-circle-check', 'Everything looks fine.'); }
+    }).catch(function (e) { var al = $('oAlerts'); al.innerHTML = ''; var a = el('div', 'o-alert bad'); a.appendChild(el('i', 'fas fa-circle-exclamation')); a.appendChild(el('span', '', e.message)); al.appendChild(a); });
+  }
+  function tab(which) {
+    curTab = which;
+    var map = {o: ['tabOverview', 'tabBtnO'], d: ['tabDocker', 'tabBtnD'], g: ['tabGlpi', 'tabBtnG'], s: ['tabSrv', 'tabBtnS']};
+    Object.keys(map).forEach(function (k) { $(map[k][0]).style.display = k === which ? 'block' : 'none'; $(map[k][1]).className = 'd-tab' + (k === which ? ' on' : ''); });
+    $('dCheck').style.display = $('dRunAll').style.display = which === 'd' ? '' : 'none';
+    if (which === 'o') { loadOverview(); }
+    if (which === 'd' && !$('tabDocker').dataset.loaded) { $('tabDocker').dataset.loaded = '1'; loadAll(); }
+    if (which === 'g' && !$('gInstances').dataset.loaded) { $('gInstances').dataset.loaded = '1'; gLoad(); gLoadVersions(); }
+    if (which === 's' && !$('sTable').dataset.loaded) { $('sTable').dataset.loaded = '1'; sLoad(); }
+  }
+  $('tabBtnO').addEventListener('click', function () { tab('o'); });
+  $('tabBtnD').addEventListener('click', function () { tab('d'); });
+  $('tabBtnG').addEventListener('click', function () { tab('g'); });
+  $('tabBtnS').addEventListener('click', function () { tab('s'); });
+  $('dRefresh').addEventListener('click', function () { if (curTab === 'o') { loadOverview(); } else if (curTab === 'g') { gLoad(); } else if (curTab === 's') { sLoad(); } else { loadAll(); } });
+  $('gRefresh').addEventListener('click', gLoad);
+  tab('o');
+})();
+</script>
+{% endblock %}

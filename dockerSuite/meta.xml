@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cyberpanelPluginConfig>
+    <name>dockerSuite</name>
+    <type>plugin</type>
+    <description>Docker Suite - containers overview, GLPI backup/update (Docker), image updates with rollback, backups with day-based retention, server backup (websites, system, databases; optional encryption) and optional remote backup (NAS) over SSH with OpenVPN/WireGuard</description>
+    <version>0.7.0</version>
+</cyberpanelPluginConfig>

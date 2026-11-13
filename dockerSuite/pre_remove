@@ -1,0 +1,5 @@
+#!/bin/sh
+IDX=/usr/local/CyberCP/baseTemplate/templates/baseTemplate/index.html
+[ -f "$IDX" ] && sed -i '/DM-BEGIN/d' "$IDX"
+rm -f /etc/cron.d/dockermanager-backup
+echo "Docker Suite removed (containers, backups in /var/backups/docker and settings in /etc/dockermanager are NOT touched)."

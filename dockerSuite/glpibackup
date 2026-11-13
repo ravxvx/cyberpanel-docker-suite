@@ -1,0 +1,80 @@
+#!/bin/bash
+# GLPI backup for a docker-compose instance.
+# Usage: glpibackup [INSTANCE_DIR]        (default /opt/glpi/prod)
+#        glpibackup --all                 (every /opt/glpi/*/ that has a compose file)
+# Env:   GLPI_BACKUP_ROOT (default /var/backups/glpi)   GLPI_BACKUP_KEEP (default 7)
+set -uo pipefail
+if [ "${1:-}" = "--all" ]; then
+  rc=0
+  for d in /opt/glpi/*/; do
+    d="${d%/}"
+    ls "$d" 2>/dev/null | grep -qE '^(docker-compose|compose).*\.ya?ml$' || continue
+    "$0" "$d" || rc=1
+  done
+  exit $rc
+fi
+DIR="${1:-/opt/glpi/prod}"
+NAME="$(basename "$DIR")"
+ROOT="${GLPI_BACKUP_ROOT:-/var/backups/glpi}"
+KEEP="${GLPI_BACKUP_KEEP:-7}"
+DEST="$ROOT/$NAME"
+TS="$(date +%Y%m%d-%H%M%S)"
+OUT="$DEST/$TS"
+PART="$OUT.partial"
+log(){ echo "[$(date '+%F %T')] $*"; }
+die(){ log "ERROR: $*"; rm -rf "$PART"; exit 1; }
+umask 077
+
+[ -d "$DIR" ] || die "instance directory $DIR not found"
+cd "$DIR" || die "cannot enter $DIR"
+docker compose config -q 2>/dev/null || die "docker compose cannot read the project in $DIR"
+mkdir -p "$DEST" || die "cannot create $DEST"
+chmod 700 "$ROOT" "$DEST"
+exec 9>"/var/lock/glpibackup-$NAME.lock"
+flock -n 9 || die "another backup of $NAME is already running"
+AVAIL_KB="$(df -Pk "$DEST" | awk 'NR==2{print $4}')"
+[ "${AVAIL_KB:-0}" -gt 1048576 ] || die "less than 1 GB free in $DEST"
+mkdir -p "$PART" || die "cannot create $PART"
+log "Backup of $NAME -> $OUT"
+
+# 1) database (credentials are read INSIDE the db container from its own environment)
+log "Dumping database..."
+docker compose exec -T db sh -c '
+  DB="${MARIADB_DATABASE:-$MYSQL_DATABASE}"
+  RP="${MARIADB_ROOT_PASSWORD:-$MYSQL_ROOT_PASSWORD}"
+  if [ -n "$RP" ]; then export MYSQL_PWD="$RP"; U=root
+  else export MYSQL_PWD="${MARIADB_PASSWORD:-$MYSQL_PASSWORD}"; U="${MARIADB_USER:-$MYSQL_USER}"; fi
+  [ -n "$DB" ] || { echo "no database name in the db container environment" >&2; exit 3; }
+  exec mariadb-dump -u"$U" --single-transaction --routines --events --default-character-set=utf8mb4 --databases "$DB"
+' | gzip -c > "$PART/db.sql.gz"
+PS=("${PIPESTATUS[@]}")   # must be read immediately after the pipeline
+[ "${PS[0]:-1}" -eq 0 ] && [ "${PS[1]:-1}" -eq 0 ] || die "database dump failed"
+gzip -t "$PART/db.sql.gz" || die "database dump is corrupted"
+gzip -dc "$PART/db.sql.gz" | tail -n 3 | grep -q "Dump completed" || die "database dump looks incomplete"
+
+# 2) GLPI files (config incl. glpicrypt.key, documents, logs) and plugins
+pack(){   # $1 = path inside the glpi container, $2 = output file
+  docker compose exec -T glpi tar -czf - -C "$1" . > "$2"
+  local rc=$?
+  [ "$rc" -le 1 ] || return 1          # 1 = "file changed while reading", acceptable on a live system
+  tar -tzf "$2" >/dev/null 2>&1
+}
+log "Archiving /var/glpi ..."
+pack /var/glpi "$PART/glpi_data.tar.gz" || die "archiving /var/glpi failed (is the glpi container running?)"
+log "Archiving plugins ..."
+pack /var/www/glpi/plugins "$PART/glpi_plugins.tar.gz" || die "archiving plugins failed"
+tar -tzf "$PART/glpi_data.tar.gz" 2>/dev/null | grep -q "glpicrypt.key" || log "WARNING: glpicrypt.key not found in the files archive - check where GLPI stores its config"
+
+# 3) compose project files (contain secrets, root-only)
+FILES="$(ls -A "$DIR" | grep -E '^(docker-compose.*\.ya?ml|compose.*\.ya?ml|\.env)$' | tr '\n' ' ')"
+[ -n "$FILES" ] && tar -czf "$PART/compose.tar.gz" -C "$DIR" $FILES
+docker compose images > "$PART/manifest.txt" 2>&1
+date -u '+created %F %T UTC' >> "$PART/manifest.txt"
+
+# 4) checksums, finalize, rotate
+( cd "$PART" && sha256sum ./* > SHA256SUMS )
+mv "$PART" "$OUT" || die "cannot finalize backup"
+chmod -R go-rwx "$OUT"
+log "OK: $(du -sh "$OUT" | cut -f1) in $OUT"
+ls -1dt "$DEST"/20* 2>/dev/null | tail -n +"$((KEEP+1))" | while read -r old; do log "Removing old backup $old"; rm -rf "$old"; done
+exit 0
