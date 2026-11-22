@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+- Assistant: choose the AI provider in Settings - Anthropic Claude, Groq (free tier), Google Gemini (free tier),
+  OpenRouter, or any OpenAI-compatible API (e.g. Ollama). One key per provider, stored root-only.
+- "Load models" lists the models your key can use; clear message when a free-tier limit is hit (HTTP 429).
+
 ## 0.8.0
 - Cleaner layout: Overview, Containers, GLPI, Backups (server backup, schedule, NAS/VPN as sub-tabs),
   Assistant, Settings. Activity log is a small bar at the bottom of the page; links like
