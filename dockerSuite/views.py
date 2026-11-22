@@ -24,18 +24,20 @@ NONCE_RE = re.compile(r"^[0-9a-f]{12}$")
 BACKUP_RE = re.compile(r"^20[0-9]{6}-[0-9]{6}$")
 B64_RE = re.compile(r"^[A-Za-z0-9+/=]{1,90000}$")
 ACTIONS = ("list", "checkupd", "update", "ctl", "logs", "backup", "backups", "restore", "prune", "getconfig", "setconfig",
-           "vpnsave", "remotetest", "keyshow", "keyinstall", "remotesend", "run")
-GLPI_ACTIONS = {"glist": "list", "gbackup": "backup", "gbackups": "backups", "gupdate": "update", "grestore": "restore", "glogs": "logs", "gnew": "new", "gcheck": "check"}
+           "vpnsave", "remotetest", "keyshow", "keyinstall", "remotesend", "run", "delete",
+           "inspect", "stats", "diskinfo", "cleanup", "testrestore", "gtestrestore", "alertcheck", "alerttest", "smtpsave", "selfupdate")
+GLPI_ACTIONS = {"glist": "list", "gbackup": "backup", "gbackups": "backups", "gupdate": "update", "grestore": "restore", "glogs": "logs", "gnew": "new", "gcheck": "check", "gdelete": "delete"}
 SRV_ACTIONS = {"sgetconfig": "getconfig", "ssetconfig": "setconfig", "skeyset": "keyset", "skeyshow": "keyshow", "sbackup": "backup",
                "sbackups": "backups", "sverify": "verify", "sextract": "extract", "srestoresite": "restoresite", "srestoredb": "restoredb",
-               "sprune": "prune"}
+               "sprune": "prune", "sdelete": "delete"}
 SNAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$")
 SDB_RE = re.compile(r"^[A-Za-z0-9_]{1,64}$")
 GNAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,40}$")
 VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 NEW_RE = re.compile(r"^(none|[a-z0-9][a-z0-9.-]{1,200}\.[a-z]{2,})\|[0-9]+\.[0-9]+\.[0-9]+\|[01]$")
 _cache = {"t": 0, "tags": []}
-NEEDS_NAME = ("update", "ctl", "logs", "backup", "backups", "restore", "vpnsave")
+NEEDS_NAME = ("update", "ctl", "logs", "backup", "backups", "restore", "vpnsave", "delete", "inspect", "stats", "testrestore", "gtestrestore")
+CLEANUPS = ("dangling", "images", "buildcache", "volumes", "logs", "restore")
 
 
 def _run(command):
@@ -113,7 +115,7 @@ def _validate(action, name, extra):
                 return None, None, "Invalid database name."
         else:
             name = ""
-        if action in ("sverify", "sextract", "srestoresite", "srestoredb"):
+        if action in ("sverify", "sextract", "srestoresite", "srestoredb", "sdelete"):
             if not BACKUP_RE.match(extra):
                 return None, None, "Invalid backup id."
         elif action in ("ssetconfig", "skeyset"):
@@ -129,11 +131,11 @@ def _validate(action, name, extra):
             name = ""
         if action == "gupdate" and not re.match(r"^[0-9]+\.[0-9]+\.[0-9]+(:major)?$", extra):
             return None, None, "Invalid version."
-        if action == "grestore" and not BACKUP_RE.match(extra):
+        if action in ("grestore", "gdelete") and not BACKUP_RE.match(extra):
             return None, None, "Invalid backup id."
         if action == "gnew" and not NEW_RE.match(extra):
             return None, None, "Invalid domain, version or option."
-        if action not in ("gupdate", "grestore", "gnew"):
+        if action not in ("gupdate", "grestore", "gnew", "gdelete"):
             extra = ""
         return name, extra, None
     if action not in ACTIONS:
@@ -146,13 +148,21 @@ def _validate(action, name, extra):
             return None, None, "Invalid name."
     else:
         name = ""
+    if action == "gtestrestore" and not GNAME_RE.match(name):
+        return None, None, "Invalid instance name."
     if action == "ctl":
         if extra not in ("start", "stop", "restart"):
             return None, None, "Invalid command."
-    elif action == "restore":
+    elif action == "cleanup":
+        if extra not in CLEANUPS:
+            return None, None, "Invalid cleanup."
+    elif action == "selfupdate":
+        if extra not in ("check", "apply"):
+            return None, None, "Invalid mode."
+    elif action in ("restore", "delete", "testrestore", "gtestrestore"):
         if not BACKUP_RE.match(extra):
             return None, None, "Invalid backup id."
-    elif action in ("setconfig", "vpnsave", "keyinstall"):
+    elif action in ("setconfig", "vpnsave", "keyinstall", "smtpsave"):
         if not B64_RE.match(extra):
             return None, None, "Invalid data."
     else:
@@ -277,12 +287,17 @@ def overview(request):
     except (OSError, ValueError):
         data["system_error"] = True
     out = _sh(
-        "echo '#svc'; for s in docker lsws lscpd mariadb; do echo \"$s $(systemctl is-active $s 2>/dev/null)\"; done; "
+        "echo '#svc'; for s in lsws lscpd mariadb docker fail2ban ufw; do echo \"$s $(systemctl is-active $s 2>/dev/null)\"; done; "
         "echo '#reboot'; test -f /var/run/reboot-required && echo yes; "
         "echo '#docker'; command -v docker >/dev/null 2>&1 && docker info --format '{{.ContainersRunning}} {{.Containers}} {{.Images}}' 2>/dev/null; "
         "echo '#bk-docker'; find /var/backups/docker -mindepth 2 -maxdepth 3 -type f -printf '%%T@ %%s\\n' 2>/dev/null; "
         "echo '#bk-glpi'; find /var/backups/glpi -mindepth 1 -maxdepth 3 -type f -printf '%%T@ %%s\\n' 2>/dev/null; "
         "echo '#bk-server'; find /var/backups/server -mindepth 1 -maxdepth 3 -type f -printf '%%T@ %%s\\n' 2>/dev/null; "
+        "echo '#bk-wp'; find /home/wptoolkit-backups -maxdepth 3 -type f -name '*.tar.gz' -printf '%%T@ %%s\\n' 2>/dev/null; "
+        "echo '#sites'; ls -1d /home/*/public_html 2>/dev/null | wc -l; "
+        "echo '#bkdirs'; du -sb /var/backups/docker /var/backups/glpi /var/backups/server /home/wptoolkit-backups /var/restore 2>/dev/null; "
+        "echo '#ai'; test -s /etc/dockermanager/assistant/api.key && echo yes; "
+        "echo '#alerts'; test -f /etc/cron.d/dockermanager-alerts && echo yes; "
         "echo '#cron'; test -f /etc/cron.d/dockermanager-backup && grep -v '^#' /etc/cron.d/dockermanager-backup | head -1; "
         "echo '#errors'; test -f %s && grep -c '^\\[' %s 2>/dev/null" % (shlex.quote(ERRLOG), shlex.quote(ERRLOG)))
     section, lines = "", {}
@@ -298,7 +313,7 @@ def overview(request):
             services[parts[0]] = parts[1]
     data["services"] = services
     data["reboot_required"] = "yes" in lines.get("reboot", [])
-    for key in ("docker", "glpi", "server"):
+    for key in ("docker", "glpi", "server", "wp"):
         count, newest, size = 0, 0.0, 0
         for row in lines.get("bk-" + key, []):
             parts = row.split()
@@ -313,6 +328,15 @@ def overview(request):
     cron = (lines.get("cron") or [""])[0]
     m = re.match(r"^\s*(\d+)\s+(\d+)\s", cron)
     data["cron"] = {"present": bool(cron), "time": "%02d:%02d" % (int(m.group(2)), int(m.group(1))) if m else ""}
+    sites = (lines.get("sites") or ["0"])[0]
+    data["sites"] = int(sites) if sites.isdigit() else 0
+    data["dirs"] = {}
+    for row in lines.get("bkdirs", []):
+        parts = row.split(None, 1)
+        if len(parts) == 2 and parts[0].isdigit():
+            data["dirs"][parts[1]] = int(parts[0])
+    data["assistant_key"] = "yes" in lines.get("ai", [])
+    data["alerts_on"] = "yes" in lines.get("alerts", [])
     err = (lines.get("errors") or ["0"])[0]
     data["plugin_errors"] = int(err) if err.isdigit() else 0
     return JsonResponse(data)

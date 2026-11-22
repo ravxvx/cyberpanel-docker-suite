@@ -1,7 +1,7 @@
 #!/bin/bash
 # Docker Suite - server backup (websites, system files, CyberPanel settings, MariaDB databases). Runs as root.
 # Usage: srvtool.sh ACTION NAME|- EXTRA|- NONCE
-# ACTION: getconfig setconfig keyset keyshow backup backups verify extract restoresite restoredb prune
+# ACTION: getconfig setconfig keyset keyshow backup backups verify extract restoresite restoredb prune delete
 set -uo pipefail
 ACTION="${1:-}"; NAME="${2:--}"; EXTRA="${3:--}"; NONCE="${4:-}"
 [ "$NAME" = "-" ] && NAME=""; [ "$EXTRA" = "-" ] && EXTRA=""
@@ -10,7 +10,7 @@ SBR="${DM_SERVER_BACKUP_ROOT:-/var/backups/server}"; RESTORE_ROOT="${DM_RESTORE_
 LOGDIR="${DM_LOG_DIR:-/var/log/dockermanager}"; RUNDIR="${DM_RUN_DIR:-/run/dockermanager}"
 HOME_ROOT="${DM_HOME_ROOT:-/home}"
 umask 077
-[[ "$ACTION" =~ ^(getconfig|setconfig|keyset|keyshow|backup|backups|verify|extract|restoresite|restoredb|prune)$ ]] || exit 1
+[[ "$ACTION" =~ ^(getconfig|setconfig|keyset|keyshow|backup|backups|verify|extract|restoresite|restoredb|prune|delete)$ ]] || exit 1
 [[ "$NONCE" =~ ^[0-9a-f]{12}$ ]] || exit 1
 [[ "$NAME" =~ ^[A-Za-z0-9._-]*$ ]] && [[ "$NAME" != *..* ]] || exit 1
 mkdir -p "$LOGDIR" "$CONF_DIR" "$SBR" "$RUNDIR"; chmod 700 "$LOGDIR" "$CONF_DIR" "$SBR" "$RUNDIR"
@@ -264,6 +264,12 @@ restoredb)
   say "Importing..."
   dec "$f" < "$f" | gunzip -c | mysqlc "$NAME" || fail "import failed (the safety dump is in $SBR/_safety/)"
   say "Database $NAME restored from $EXTRA. Tables that exist now but not in the dump were left in place."; ok;;
+delete)
+  lock_ops
+  [[ "$EXTRA" =~ $TS_RE ]] || fail "invalid backup id"
+  [ -d "$SBR/$EXTRA" ] || fail "backup not found"
+  rm -rf "${SBR:?}/$EXTRA" || fail "could not delete $EXTRA"
+  say "Deleted server backup $EXTRA"; ok;;
 prune)
   lock_ops
   days="$(cget retention_days 5)"; keep="$(cget min_keep 2)"

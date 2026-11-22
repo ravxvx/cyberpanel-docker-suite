@@ -8,8 +8,20 @@ chmod 700 /var/log/dockermanager /var/backups/docker /etc/dockermanager /etc/doc
 command -v openssl >/dev/null 2>&1 || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssl >/dev/null 2>&1
 command -v rsync >/dev/null 2>&1 || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq rsync >/dev/null 2>&1
 sh $P/repair-menu.sh
-# create default config and the daily job (02:30) through the tool itself
-bash $P/dmtool.sh setconfig - "$(echo '{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true}' | base64 -w0)" 0123456789ab >/dev/null 2>&1
+# AI assistant: take over the API key, model and audit log of the former Server Command Center plugin (copied once).
+install -d -m 700 /etc/dockermanager/assistant
+for f in api.key model; do
+  [ -s /etc/servercommandcenter/$f ] && [ ! -s /etc/dockermanager/assistant/$f ] && install -m 600 -o root -g root /etc/servercommandcenter/$f /etc/dockermanager/assistant/$f
+done
+[ -s /var/log/servercommandcenter/audit.log ] && [ ! -s /var/log/dockermanager/assistant-audit.log ] && install -m 600 /var/log/servercommandcenter/audit.log /var/log/dockermanager/assistant-audit.log
+# Re-save the CURRENT settings through the tool: this writes the cron jobs for this plugin path and adds new
+# defaults, and never resets an existing configuration (NAS, containers, alerts) on update or reinstall.
+C=/etc/dockermanager/config.json
+if [ -s "$C" ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))' "$C" 2>/dev/null; then
+  bash $P/dmtool.sh setconfig - "$(base64 -w0 < "$C")" 0123456789ab >/dev/null 2>&1
+else
+  bash $P/dmtool.sh setconfig - "$(echo '{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true}' | base64 -w0)" 0123456789ab >/dev/null 2>&1
+fi
 cat > /etc/logrotate.d/dockermanager <<'L'
 /var/log/dockermanager/openvpn.log {
   weekly

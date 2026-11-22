@@ -7,7 +7,7 @@ ACTION="${1:-}"; NAME="${2:--}"; EXTRA="${3:--}"; NONCE="${4:-}"
 BASE="${GLPI_BASE:-/opt/glpi}"; BACKUPROOT="${GLPI_BACKUP_ROOT:-/var/backups/glpi}"; LOGDIR="${DM_LOG_DIR:-/var/log/dockermanager}"
 SELF="$(dirname "$(readlink -f "$0")")"
 umask 077
-[[ "$ACTION" =~ ^(list|backup|backups|update|restore|logs|new|check)$ ]] || exit 1
+[[ "$ACTION" =~ ^(list|backup|backups|update|restore|logs|new|check|delete)$ ]] || exit 1
 [[ "$NONCE" =~ ^[0-9a-f]{12}$ ]] || exit 1
 mkdir -p "$LOGDIR"; chmod 700 "$LOGDIR"; GLPI_LOCKDIR="${DM_RUN_DIR:-/var/run}"; mkdir -p "$GLPI_LOCKDIR"
 ID="glpi-$ACTION-${NAME:-all}"
@@ -78,9 +78,9 @@ run_checks(){
   else chk "plugins" OK "$(echo "$pl_now" | grep -c .) active plugin(s): $(echo "$pl_now" | tr '\n' ' ')"; fi
   # GLPI's own diagnostics (skipped if this version does not have them)
   local out
-  out="$(timeout 90 docker compose exec -T -u www-data glpi php /var/www/glpi/bin/console glpi:system:check_requirements --no-interaction </dev/null 2>&1)"; rc=$?
+  out="$(timeout 90 docker compose exec -T -u www-data glpi php /var/www/glpi/bin/console system:check_requirements --no-interaction </dev/null 2>&1)"; rc=$?
   if echo "$out" | grep -qi 'not defined\|command .* not'; then chk "GLPI requirements" OK "skipped (not available in this version)"
-  elif [ $rc -eq 0 ]; then chk "GLPI requirements" OK "all requirements met"; else chk "GLPI requirements" WARN "$(echo "$out" | grep -i 'error\|fail\|✘\|missing' | head -2 | tr '\n' ' ')- run 'bin/console glpi:system:check_requirements' for details"; fi
+  elif [ $rc -eq 0 ]; then chk "GLPI requirements" OK "all requirements met"; else chk "GLPI requirements" WARN "$(echo "$out" | grep -i 'error\|fail\|✘\|missing' | head -2 | tr '\n' ' ')- run 'bin/console system:check_requirements' for details"; fi
   out="$(timeout 120 docker compose exec -T -u www-data glpi php /var/www/glpi/bin/console database:check_schema_integrity --no-interaction </dev/null 2>&1)"; rc=$?
   if echo "$out" | grep -qi 'not defined\|command .* not'; then chk "schema integrity" OK "skipped (not available in this version)"
   elif [ $rc -eq 0 ]; then chk "schema integrity" OK "database structure matches this GLPI version"; else chk "schema integrity" WARN "differences found: run 'bin/console database:check_schema_integrity' for details"; fi
@@ -136,6 +136,16 @@ backups)
     [[ "$(basename "$b")" =~ \.partial$ ]] && continue
     echo "BACKUP|$(basename "$b")|$(du -sk "$b" | cut -f1)|$(stat -c %y "$b" | cut -c1-16)"
   done
+  ok ;;
+
+delete)
+  [[ "$NAME" =~ ^[a-z0-9][a-z0-9_-]{0,40}$ ]] || fail "invalid instance name"
+  [[ "$EXTRA" =~ ^20[0-9]{6}-[0-9]{6}$ ]] || fail "invalid backup id"
+  [ -d "$BACKUPROOT/$NAME/$EXTRA" ] || fail "backup not found"
+  exec 8>"/var/run/glpimanager-$NAME.lock"
+  flock -n 8 || fail "another operation is already running for $NAME"
+  rm -rf "${BACKUPROOT:?}/$NAME/$EXTRA" || fail "could not delete $EXTRA"
+  echo "Deleted GLPI backup $EXTRA of $NAME"
   ok ;;
 
 logs)

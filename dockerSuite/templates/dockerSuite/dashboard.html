@@ -2,264 +2,517 @@
 {% block title %}Docker Suite - CyberPanel{% endblock %}
 {% block content %}
 <style>
-#dmgr{--ink:#08182b;--ink2:#0f2a47;--blue:#2a7de1;--blue-d:#1d63bd;--sky:#e4effc;--text:#13202f;--muted:#5d6d80;--line:#dbe3ec;--soft:#f2f6fa;--bg:#fff;--fg:#13202f;--accent:#2a7de1;--accent2:#1d63bd;
+/* Docker Suite 0.7 - same visual family as WordPress Toolkit Pro: dark pine hero with stats, pill tabs, white cards */
+#dmgr{--ink:#0d231b;--ink2:#143428;--glow:#3ddc97;--pine:#1d7a5b;--pine-d:#15614a;--mint:#e3f3ea;--mint2:#c7e8d6;
+  --bg:#fff;--fg:#14231d;--head:#0d231b;--muted:#5b6d65;--line:#dbe5df;--soft:#f3f7f4;--accent:#1d7a5b;--accent2:#15614a;
   --ok:#14603f;--okbg:#dcf3e5;--warn:#8a4b06;--warnbg:#fcefd0;--bad:#9f1d12;--badbg:#fde4e1;--info:#1b4b8a;--infobg:#e1ecf9;
-  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:var(--text);padding-bottom:48px}
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:var(--fg);padding-bottom:48px}
 #dmgr *{box-sizing:border-box}
 #dmgr code{background:var(--soft);color:var(--ink2);padding:1px 6px;border-radius:5px;font-size:12.5px}
-/* hero: stacked-container motif, the one bold element */
-#dmgr .d-hero{position:relative;overflow:hidden;border-radius:20px;margin:8px 0 14px;padding:28px 30px 26px;color:#e6f0fc;
-  background:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 46px,transparent 46px 52px) 0 0/100% 100%,
-    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 22px,transparent 22px 28px) 0 0/100% 100%,
-    radial-gradient(800px 280px at 90% -20%,rgba(66,153,255,.35),transparent 60%),
-    linear-gradient(135deg,var(--ink) 0%,var(--ink2) 100%);
-  box-shadow:0 14px 40px rgba(4,14,30,.38);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:end}
-#dmgr .d-hero h2{margin:0;font-size:32px;line-height:1.05;font-weight:750;letter-spacing:-1px;color:#fff}
-#dmgr .d-hero p{margin:10px 0 0;max-width:48ch;color:#a6bdd6;font-size:14px;line-height:1.55}
-#dmgr .d-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
-#dmgr .d-hero .g-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
-#dmgr .d-hero .g-btn:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
-#dmgr .d-hero .g-btn.primary{background:#4da3ff;border-color:#4da3ff;color:#04223f}
-#dmgr .d-hero .g-btn.primary:hover{background:#7dbcff;color:#04223f}
-#dmgr .d-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-#dmgr .d-stat{border-radius:14px;padding:14px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
-#dmgr .d-stat b{display:block;font-size:32px;line-height:1;font-weight:750;color:#fff;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
-#dmgr .d-stat span{display:block;margin-top:7px;color:#a6bdd6;font-size:12px;line-height:1.3}
-#dmgr .d-stat.hot b{color:#ffd37a}
-@media (max-width:900px){#dmgr .d-hero{grid-template-columns:1fr;padding:22px 20px}#dmgr .d-hero h2{font-size:26px}}
+
+/* hero */
+#dmgr .ds-hero{position:relative;overflow:hidden;border-radius:20px;margin:8px 0 14px;padding:26px 28px;color:#e9f6ef;
+  background:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px) 0 0/34px 34px,
+    radial-gradient(900px 300px at 85% -20%,rgba(61,220,151,.28),transparent 60%),linear-gradient(135deg,var(--ink) 0%,var(--ink2) 100%);
+  box-shadow:0 14px 40px rgba(5,20,15,.35);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr);gap:22px;align-items:end}
+#dmgr .ds-live{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;color:#8fe3bd;font-size:12.5px;font-weight:600}
+#dmgr .ds-live i{width:8px;height:8px;border-radius:50%;background:var(--glow);box-shadow:0 0 0 5px rgba(61,220,151,.16)}
+#dmgr .ds-live.bad{color:#ffb4aa} #dmgr .ds-live.bad i{background:#ff6b5b;box-shadow:0 0 0 5px rgba(255,107,91,.18)}
+#dmgr .ds-hero h2{margin:0;font-size:32px;line-height:1.05;font-weight:800;letter-spacing:-1px;color:#fff}
+#dmgr .ds-ver{display:inline-block;vertical-align:middle;margin-left:8px;padding:4px 8px;border-radius:7px;background:var(--glow);color:#06281b;font-size:11px;font-weight:800;letter-spacing:.04em}
+#dmgr .ds-hero p{margin:10px 0 0;max-width:50ch;color:#a9c7b9;font-size:14px;line-height:1.55}
+#dmgr .ds-hero-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+#dmgr .ds-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#dmgr .ds-stat{border-radius:14px;padding:14px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+#dmgr .ds-stat b{display:block;font-size:30px;line-height:1;font-weight:750;color:#fff;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+#dmgr .ds-stat b small{font-size:15px;font-weight:600;letter-spacing:0;color:#cfe6da;margin-left:2px}
+#dmgr .ds-stat span{display:block;margin-top:7px;color:#a9c7b9;font-size:12px;line-height:1.3}
+#dmgr .ds-stat.hot b{color:#ffd37a}
+
+/* attention */
+#dmgr .ds-attn{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:14px}
+#dmgr .ds-attn:empty{display:none}
+#dmgr .ds-alert{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+#dmgr .ds-alert .dot{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:13px}
+#dmgr .ds-alert.warn .dot{background:var(--warnbg);color:var(--warn)} #dmgr .ds-alert.info .dot{background:var(--infobg);color:var(--info)}
+#dmgr .ds-alert.ok .dot{background:var(--okbg);color:var(--ok)} #dmgr .ds-alert.bad .dot{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-alert b{display:block;color:var(--head);font-size:13.5px}
+#dmgr .ds-alert span{color:var(--muted);font-size:12.5px;line-height:1.4}
+#dmgr .ds-alert .g-btn{margin-top:7px}
+
 /* tabs */
-#dmgr .d-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;padding:6px;border-radius:14px;background:var(--ink);border:1px solid rgba(255,255,255,.08)}
-#dmgr .d-tab{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:0;border-radius:10px;background:transparent;color:#b3c8de;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
-#dmgr .d-tab:hover{background:rgba(255,255,255,.09);color:#fff}
-#dmgr .d-tab.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.2)}
-#dmgr .d-tab:focus-visible,#dmgr .g-btn:focus-visible,#dmgr input:focus-visible,#dmgr select:focus-visible,#dmgr textarea:focus-visible{outline:3px solid #4da3ff;outline-offset:2px}
+#dmgr .ds-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+#dmgr .ds-tab{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer}
+#dmgr .ds-tab:hover{background:var(--soft);color:var(--fg)}
+#dmgr .ds-tab.on{background:var(--ink);color:#fff}
+#dmgr .ds-tab .n{padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--muted);font-size:11.5px}
+#dmgr .ds-tab.on .n{background:rgba(255,255,255,.15);color:#fff}
+#dmgr .ds-tab:focus-visible,#dmgr .g-btn:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+
 /* cards */
-#dmgr .g-card{background:var(--bg);color:var(--fg);border-radius:16px;margin-bottom:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 1px 2px rgba(8,24,43,.06),0 8px 24px rgba(8,24,43,.07)}
-#dmgr .g-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:15px 22px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;letter-spacing:-.2px;color:var(--ink);background:linear-gradient(180deg,#f6f9fd,#fff)}
-#dmgr .g-body{padding:18px 22px;color:var(--fg);line-height:1.55}
+#dmgr .g-card{background:var(--bg);color:var(--fg);border-radius:16px;margin-bottom:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 1px 2px rgba(10,30,22,.06),0 8px 24px rgba(10,30,22,.07)}
+#dmgr .g-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;letter-spacing:-.2px;color:var(--head);background:linear-gradient(180deg,#f7fbf8,#fff)}
+#dmgr .g-title>span:first-child{display:inline-flex;align-items:center;gap:10px}
+#dmgr .ds-ico{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--mint);color:var(--pine-d);font-size:13px}
+#dmgr .g-body{padding:18px 20px;color:var(--fg)}
 #dmgr .g-muted{color:var(--muted)}
-#dmgr .g-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;margin:1px 4px 1px 0;white-space:nowrap}
+#dmgr .ds-note{font-size:13px;line-height:1.55;color:var(--muted)}
+#dmgr .g-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;margin:1px 4px 1px 0;white-space:nowrap}
 #dmgr .b-ok{background:var(--okbg);color:var(--ok)} #dmgr .b-warn{background:var(--warnbg);color:var(--warn)}
 #dmgr .b-bad{background:var(--badbg);color:var(--bad)} #dmgr .b-info{background:var(--infobg);color:var(--info)} #dmgr .b-gray{background:var(--soft);color:var(--muted)}
-#dmgr .g-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 18px;margin-bottom:14px}
-#dmgr .g-kv span{display:block;color:var(--muted);font-size:12px} #dmgr .g-kv b{font-weight:650}
-#dmgr .g-actions{display:flex;flex-wrap:wrap;gap:8px}
-#dmgr .g-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--fg);font-size:13px;font-weight:600;cursor:pointer;line-height:1.2;transition:border-color .12s,background .12s}
-#dmgr .g-btn:hover{border-color:var(--accent);color:var(--accent2)}
-#dmgr .g-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} #dmgr .g-btn.primary:hover{background:var(--accent2);color:#fff}
-#dmgr .g-btn.warn{background:var(--warnbg);border-color:#f2cf7a;color:var(--warn)}
-#dmgr .g-btn.danger.solid{background:#d63a2b;border-color:#d63a2b;color:#fff}
+#dmgr .g-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+#dmgr .g-kv{padding:11px 13px;border-radius:12px;background:var(--soft)}
+#dmgr .g-kv span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+#dmgr .g-kv b{font-weight:700;color:var(--head);word-break:break-word}
+#dmgr .g-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* buttons */
+#dmgr .g-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--fg);font-size:13px;font-weight:600;cursor:pointer;line-height:1.2;white-space:nowrap;transition:background .15s,border-color .15s}
+#dmgr .g-btn:hover{border-color:var(--pine);color:var(--pine-d)}
+#dmgr .g-btn.primary{background:var(--pine);border-color:var(--pine);color:#fff} #dmgr .g-btn.primary:hover{background:var(--pine-d);color:#fff}
+#dmgr .g-btn.warn{background:var(--warnbg);border-color:transparent;color:var(--warn)}
+#dmgr .g-btn.danger{color:var(--bad)} #dmgr .g-btn.danger.solid{background:#c0271a;border-color:#c0271a;color:#fff}
+#dmgr .g-btn.glow{background:var(--glow);border-color:var(--glow);color:#06281b}
+#dmgr .g-btn.glass{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e9f6ef}
+#dmgr .g-btn.glass:hover{background:rgba(255,255,255,.15);color:#fff}
+#dmgr .g-btn.sm{padding:6px 10px;font-size:12.5px;border-radius:9px}
 #dmgr .g-btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* status + log */
 #dmgr .g-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:500} #dmgr .g-status:empty{display:none}
 #dmgr .s-ok{background:var(--okbg);color:var(--ok)} #dmgr .s-bad{background:var(--badbg);color:var(--bad)} #dmgr .s-info{background:var(--infobg);color:var(--info)} #dmgr .s-warn{background:var(--warnbg);color:var(--warn)}
 #dmgr .g-spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:dspin .7s linear infinite;flex:none}
 @keyframes dspin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#dmgr .g-spin{animation-duration:2s}}
-#dmgr pre.g-log{margin:0;max-height:360px;overflow:auto;background:#08182b;color:#dbe8f7;padding:14px;border-radius:10px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;border:0}
-#dmgr table.g-table{width:100%;border-collapse:collapse;margin:0} #dmgr .g-table th{background:var(--soft);color:var(--muted);font-size:12px;font-weight:650;text-align:left;padding:10px 14px;border:0}
-#dmgr .g-table td{padding:12px 14px;border:0;border-top:1px solid var(--line);color:var(--fg);background:transparent;vertical-align:middle}
-#dmgr .g-table tbody tr:hover td{background:#f8fbfe}
-#dmgr .g-modal{position:fixed;inset:0;background:rgba(8,24,43,.62);display:none;align-items:center;justify-content:center;z-index:10000;padding:16px}
-#dmgr .g-modal-box{background:#fff;color:var(--fg);border-radius:16px;max-width:520px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
-#dmgr .g-modal-box h3{margin:0 0 12px;font-size:18px;font-weight:700;color:var(--ink)} #dmgr .g-modal-box ol{padding-left:20px;margin:8px 0}
+#dmgr pre.g-log{margin:0;max-height:360px;overflow:auto;background:#0b1712;color:#bfe0cf;padding:14px 16px;border-radius:12px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;border:0}
+
+/* tables */
+#dmgr .ds-scroll{overflow-x:auto}
+#dmgr table.g-table{width:100%;border-collapse:collapse;margin:0;background:transparent}
+#dmgr .g-table th{background:var(--soft)!important;color:var(--muted)!important;font-size:12px;font-weight:600;text-align:left;padding:10px 16px;border:0;white-space:nowrap}
+#dmgr .g-table td{padding:14px 16px;border:0;border-top:1px solid var(--line);color:var(--fg)!important;background:transparent!important;vertical-align:middle}
+#dmgr .g-table tbody tr:hover td{background:#f8fcf9!important}
+#dmgr .g-table td.nm{font-weight:600}
+#dmgr .ds-ct{display:flex;gap:12px;align-items:flex-start;min-width:200px}
+#dmgr .ds-logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;background:var(--mint);color:var(--pine-d);font-weight:800;font-size:12.5px;text-transform:uppercase}
+#dmgr .ds-logo.off{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-ct b{display:block;font-size:14.5px;color:var(--head);word-break:break-word}
+#dmgr .ds-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--muted);word-break:break-all}
+#dmgr .ds-meter{display:grid;grid-template-columns:34px 70px auto;gap:8px;align-items:center;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#dmgr .ds-meter+.ds-meter{margin-top:6px}
+#dmgr .ds-bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden}
+#dmgr .ds-bar i{display:block;height:100%;border-radius:99px;background:var(--pine)}
+#dmgr .ds-acts{display:flex;flex-wrap:wrap;gap:6px}
+
+/* switches (checkbox look) */
+#dmgr .g-check{display:flex;align-items:center;gap:10px;font-weight:500;margin-bottom:10px;color:var(--fg)}
+#dmgr .g-check label{margin:0;font-size:14px;color:var(--fg);font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer}
+#dmgr input[type=checkbox]{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:99px;background:var(--line)!important;position:relative;cursor:pointer;flex:none;margin:0;border:0;transition:background .15s;vertical-align:middle}
+#dmgr input[type=checkbox]:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+#dmgr input[type=checkbox]:checked{background:var(--pine)!important}
+#dmgr input[type=checkbox]:checked:after{left:19px}
+#dmgr input[type=checkbox]:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+#dmgr .ds-sw{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--fg);margin-right:12px;white-space:nowrap}
+
+/* forms: explicit colours so the panel's dark theme cannot make them unreadable */
+#dmgr .g-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 16px;margin-bottom:14px}
+#dmgr .g-form label,#dmgr .ds-lbl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:none;letter-spacing:0}
+#dmgr input[type=text],#dmgr input[type=number],#dmgr input[type=time],#dmgr input[type=password],#dmgr input[type=file],#dmgr select,#dmgr textarea,#dmgr input.g-in,#dmgr select.g-in,#dmgr textarea.g-in{
+  width:100%;padding:9px 11px;border:1px solid var(--line)!important;border-radius:10px;background:#fff!important;color:var(--fg)!important;-webkit-text-fill-color:var(--fg);font-size:14px;height:auto;box-shadow:none}
+#dmgr textarea{min-height:68px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+#dmgr input::placeholder,#dmgr textarea::placeholder{color:#9aaba3!important;-webkit-text-fill-color:#9aaba3}
+#dmgr input:focus,#dmgr select:focus,#dmgr textarea:focus{border-color:var(--pine)!important;outline:3px solid rgba(61,220,151,.35);outline-offset:0}
+#dmgr .g-key{font-family:ui-monospace,monospace;font-size:12px;background:var(--soft);padding:9px 11px;border-radius:10px;word-break:break-all;margin:8px 0;color:var(--fg)}
+#dmgr h4{margin:18px 0 8px;font-size:14px;font-weight:700;color:var(--head)}
+
+/* timeline (schedule tab) */
+#dmgr .ds-tl{list-style:none;margin:0;padding:0}
+#dmgr .ds-tl li{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:start;padding:9px 0;position:relative}
+#dmgr .ds-tl li:not(:last-child):before{content:"";position:absolute;left:13px;top:36px;bottom:-4px;width:2px;background:var(--line)}
+#dmgr .ds-tl .k{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--pine-d);font-weight:700;font-size:12px}
+#dmgr .ds-tl li.off .k{background:var(--soft);color:var(--muted)}
+#dmgr .ds-tl b{color:var(--head);font-size:13.5px}
+#dmgr .ds-tl p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+#dmgr .ds-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+
+/* modal */
+#dmgr .g-modal{position:fixed;inset:0;background:rgba(5,20,15,.6);display:none;align-items:center;justify-content:center;z-index:10000;padding:16px}
+#dmgr .g-modal-box{background:#fff;color:var(--fg);border-radius:16px;max-width:540px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.4);max-height:90vh;overflow:auto}
+#dmgr .g-modal-box h3{margin:0 0 12px;font-size:18px;font-weight:700;color:var(--head)} #dmgr .g-modal-box ol,#dmgr .g-modal-box ul{padding-left:20px;margin:8px 0}
 #dmgr .g-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-#dmgr .g-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px;margin-bottom:12px}
-#dmgr .g-form label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
-#dmgr .g-form input[type=text],#dmgr .g-form input[type=number],#dmgr .g-form input[type=time],#dmgr .g-form select,#dmgr input.g-in{width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--fg);font-size:13px}
-#dmgr .g-check{display:flex;align-items:center;gap:8px;font-weight:500;margin-bottom:8px}
-#dmgr .g-key{font-family:ui-monospace,monospace;font-size:12px;background:var(--soft);padding:8px 10px;border-radius:10px;word-break:break-all;margin:8px 0;color:var(--fg)}
-#dmgr h4{margin:16px 0 8px;font-size:14px;font-weight:700;color:var(--ink)}
-#dmgr textarea.g-in{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--fg);font-size:13px;min-height:64px;font-family:ui-monospace,monospace}
-#dmgr .g-table td.nm{font-weight:650}
-/* overview */
-#dmgr .o-alerts:empty{display:none}
-#dmgr .o-alert{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:12px;margin-bottom:8px;font-weight:550}
-#dmgr .o-alert.warn{background:var(--warnbg);color:var(--warn)} #dmgr .o-alert.bad{background:var(--badbg);color:var(--bad)} #dmgr .o-alert.ok{background:var(--okbg);color:var(--ok)}
-#dmgr .o-gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
-#dmgr .o-gauge{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff;box-shadow:0 1px 2px rgba(8,24,43,.06)}
-#dmgr .o-gauge .k{color:var(--muted);font-size:12.5px;font-weight:600}
-#dmgr .o-gauge .v{font-size:28px;font-weight:750;letter-spacing:-1px;margin:4px 0 8px;color:var(--ink);font-variant-numeric:tabular-nums}
-#dmgr .o-gauge .s{color:var(--muted);font-size:12px;margin-top:7px}
-#dmgr .o-bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}
-#dmgr .o-bar i{display:block;height:100%;border-radius:99px;background:var(--blue);transition:width .5s}
-#dmgr .o-bar i.warn{background:#e0a21b} #dmgr .o-bar i.bad{background:#d63a2b}
-#dmgr .o-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
-#dmgr .o-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)} #dmgr .o-row:first-child{border-top:0}
-#dmgr .o-row span:first-child{color:var(--muted)}
+
+
+/* 0.8: overview, sub-tabs, container detail, activity bar, chat */
+#dmgr{padding-bottom:90px}
+#dmgr .ds-tab .n.dot{background:#ffd37a;color:#5a3a00}
+#dmgr .ds-sys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+#dmgr .ds-sysc{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(10,30,22,.06),0 8px 24px rgba(10,30,22,.07)}
+#dmgr .ds-sysc span{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+#dmgr .ds-sysc b{display:block;font-size:28px;line-height:1.15;margin:6px 0 2px;color:var(--head);font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+#dmgr .ds-sysc small{display:block;color:var(--muted);font-size:12.5px;margin-bottom:10px;min-height:16px}
+#dmgr .ds-bar i.mid{background:#d89614} #dmgr .ds-bar i.hi{background:#c0271a}
+#dmgr .ds-pills{display:flex;flex-wrap:wrap;gap:8px}
+#dmgr .ds-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;background:var(--soft);font-size:13px;font-weight:600;color:var(--fg)}
+#dmgr .ds-pill i{width:8px;height:8px;border-radius:50%;background:#2fbf71} #dmgr .ds-pill.down i{background:#d63a2b} #dmgr .ds-pill.down{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-split2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+#dmgr .ds-split2>.g-card{margin-bottom:16px}
+#dmgr .ds-rows{display:flex;flex-direction:column;gap:2px}
+#dmgr .ds-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+#dmgr .ds-row:last-child{border-bottom:0} #dmgr .ds-row b{color:var(--head);font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+#dmgr .ds-row span{color:var(--muted)}
+#dmgr .ds-sub{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+#dmgr .ds-sub button{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}
+#dmgr .ds-sub button.on{background:var(--mint);border-color:var(--mint2);color:var(--pine-d)}
+#dmgr #dTable tbody tr[data-ct]{cursor:pointer}
+#dmgr #dTable tbody tr.sel td{background:var(--mint)!important}
+#dmgr .ds-detail{border:2px solid var(--mint2)}
+#dmgr .ds-detail .ds-logo{margin-right:2px}
+#dmgr .ds-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+#dmgr .ds-tile{padding:12px 14px;border-radius:12px;background:var(--soft)}
+#dmgr .ds-tile span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+#dmgr .ds-tile b{display:block;font-size:19px;color:var(--head);margin-top:3px;font-variant-numeric:tabular-nums}
+#dmgr .ds-tile small{color:var(--muted);font-size:12px}
+#dmgr .ds-clean{display:flex;flex-direction:column;gap:10px}
+#dmgr .ds-citem{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+#dmgr .ds-citem b{display:block;color:var(--head)} #dmgr .ds-citem p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+#dmgr .ds-citem .sz{font-weight:700;font-variant-numeric:tabular-nums;color:var(--head);white-space:nowrap}
+#dmgr .ds-cl{margin:6px 0 0;padding-left:18px;color:var(--fg);font-size:13px}
+#dmgr .ds-opbar{position:fixed;left:auto;right:18px;bottom:14px;width:min(760px,calc(100% - 36px));z-index:900;background:#0d231b;border-radius:16px;box-shadow:0 14px 40px rgba(5,20,15,.4);padding:8px 10px}
+#dmgr .ds-ophead{display:flex;align-items:center;gap:10px}
+#dmgr .ds-opbar .g-status{flex:1;margin:0;padding:8px 12px;min-height:36px}
+#dmgr .ds-opbar .g-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e9f6ef;flex:none}
+#dmgr .ds-opbar pre.g-log{display:none;margin-top:8px;max-height:42vh}
+#dmgr .ds-opbar.open pre.g-log{display:block}
+#dmgr .ds-chat{display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow:auto;margin-bottom:12px}
+#dmgr .ds-chat:empty{display:none}
+#dmgr .ds-msg{max-width:85%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.5}
+#dmgr .ds-msg.user{align-self:flex-end;background:var(--pine);color:#fff;border-bottom-right-radius:4px}
+#dmgr .ds-msg.bot{align-self:flex-start;background:var(--soft);color:var(--fg);border-bottom-left-radius:4px}
+#dmgr .ds-msg.err{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-cmd{align-self:stretch;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
+#dmgr .ds-cmd.wait{border-color:#e2b04a;background:#fffaf0} #dmgr .ds-cmd.bad{border-color:#e7a29a}
+#dmgr .ds-cmd .hd{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px}
+#dmgr .ds-cmd pre{margin:8px 0 0;background:#0b1712;color:#bfe0cf;padding:9px 11px;border-radius:9px;font:12.5px/1.5 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;border:0;max-height:300px;overflow:auto}
+#dmgr .ds-cmd pre.out{background:var(--soft);color:var(--fg)}
+#dmgr .ds-typing{align-self:flex-start;color:var(--muted);font-size:13px;display:flex;gap:8px;align-items:center}
+#dmgr code{word-break:break-all}
+@media (max-width:991px){ #dmgr .ds-sys{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){ #dmgr .ds-sys{grid-template-columns:1fr} #dmgr .ds-citem{grid-template-columns:1fr} #dmgr .ds-opbar{right:8px;width:calc(100% - 16px)}}
+@media (max-width:991px){ #dmgr .ds-hero{grid-template-columns:1fr} #dmgr .ds-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){ #dmgr .ds-hero{padding:22px 18px} #dmgr .ds-hero h2{font-size:27px} #dmgr .g-title,#dmgr .g-body{padding-left:16px;padding-right:16px}}
+@media (prefers-reduced-motion:reduce){ #dmgr *{transition:none!important;animation:none!important}}
 </style>
 <div class="container" id="dmgr">
   {% csrf_token %}
-  <div class="d-hero">
+  <div class="ds-hero">
     <div>
-      <h2>Docker Suite</h2>
-      <p>Containers, GLPI and server backups in one place: day-based retention, update with rollback, and an encrypted copy to your NAS.</p>
-      <div class="d-actions"><button type="button" id="dCheck" class="g-btn"><i class="fas fa-cloud-arrow-down"></i> Check for updates</button><button type="button" id="dRunAll" class="g-btn primary"><i class="fas fa-play"></i> Run full job now</button><button type="button" id="dRefresh" class="g-btn"><i class="fas fa-arrows-rotate"></i> Refresh</button></div>
+      <div class="ds-live" id="hLive"><i></i> <span id="hLiveText">Loading...</span></div>
+      <h2>Docker Suite <span class="ds-ver">0.8.0</span></h2>
+      <p>Server, containers, GLPI and backups in one place. Every update makes a backup first and rolls back on its own if the new version does not start.</p>
+      <div class="ds-hero-actions">
+        <button type="button" id="dRunAll" class="g-btn glow"><i class="fas fa-play"></i> Run full job now</button>
+        <button type="button" id="dAsk" class="g-btn glass"><i class="fas fa-wand-magic-sparkles"></i> Ask the assistant</button>
+        <button type="button" id="dRefresh" class="g-btn glass"><i class="fas fa-arrows-rotate"></i> Refresh</button>
+      </div>
     </div>
-    <div class="d-stats">
-      <div class="d-stat"><b id="hCt">-</b><span>containers running</span></div>
-      <div class="d-stat"><b id="hBk">-</b><span>since the last backup</span></div>
-      <div class="d-stat" id="hDiskBox"><b id="hDisk">-</b><span>system disk used</span></div>
+    <div class="ds-stats">
+      <div class="ds-stat" id="hRunBox"><b id="hRun">-</b><span>containers running</span></div>
+      <div class="ds-stat"><b id="hGlpi">-</b><span id="hGlpiSub">GLPI instances</span></div>
+      <div class="ds-stat" id="hBkBox"><b id="hBk">-</b><span id="hBkSub">backups kept</span></div>
+      <div class="ds-stat"><b id="hFree">-</b><span>free for backups</span></div>
     </div>
   </div>
-  <div class="d-tabs" role="tablist">
-    <button type="button" id="tabBtnO" class="d-tab on"><i class="fas fa-gauge-high"></i> Overview</button>
-    <button type="button" id="tabBtnD" class="d-tab"><i class="fas fa-cubes"></i> Containers &amp; backups</button>
-    <button type="button" id="tabBtnG" class="d-tab"><i class="fas fa-headset"></i> GLPI</button>
-    <button type="button" id="tabBtnS" class="d-tab"><i class="fas fa-server"></i> Server backup</button>
+
+  <div class="ds-tabs" role="tablist">
+    <button type="button" class="ds-tab on" id="tabBtnO"><i class="fas fa-gauge-high"></i> Overview</button>
+    <button type="button" class="ds-tab" id="tabBtnD"><i class="fas fa-cubes"></i> Containers <span class="n" id="tabND">-</span></button>
+    <button type="button" class="ds-tab" id="tabBtnG"><i class="fas fa-headset"></i> GLPI <span class="n" id="tabNG">-</span></button>
+    <button type="button" class="ds-tab" id="tabBtnB"><i class="fas fa-box-archive"></i> Backups</button>
+    <button type="button" class="ds-tab" id="tabBtnA"><i class="fas fa-wand-magic-sparkles"></i> Assistant</button>
+    <button type="button" class="ds-tab" id="tabBtnS"><i class="fas fa-gear"></i> Settings <span class="n dot" id="tabNS" style="display:none">!</span></button>
   </div>
+
   <div id="tabOverview">
-    <div class="o-alerts" id="oAlerts"></div>
-    <div class="o-gauges">
-      <div class="o-gauge"><div class="k">CPU load (1 min)</div><div class="v" id="oLoad">-</div><div class="o-bar"><i id="oLoadBar" style="width:0"></i></div><div class="s" id="oLoadSub"></div></div>
-      <div class="o-gauge"><div class="k">Memory</div><div class="v" id="oMem">-</div><div class="o-bar"><i id="oMemBar" style="width:0"></i></div><div class="s" id="oMemSub"></div></div>
-      <div class="o-gauge"><div class="k">System disk</div><div class="v" id="oDisk">-</div><div class="o-bar"><i id="oDiskBar" style="width:0"></i></div><div class="s" id="oDiskSub"></div></div>
-      <div class="o-gauge"><div class="k">Uptime</div><div class="v" id="oUp">-</div><div class="s" id="oUpSub"></div></div>
+    <div class="ds-attn" id="dAttn"></div>
+    <div class="ds-sys" id="oSys">
+      <div class="ds-sysc"><span>CPU load (now)</span><b id="oCpu">-</b><small id="oCpuSub"></small><div class="ds-bar"><i id="oCpuBar"></i></div></div>
+      <div class="ds-sysc"><span>Memory</span><b id="oMem">-</b><small id="oMemSub"></small><div class="ds-bar"><i id="oMemBar"></i></div></div>
+      <div class="ds-sysc"><span>Disk (/)</span><b id="oDisk">-</b><small id="oDiskSub"></small><div class="ds-bar"><i id="oDiskBar"></i></div></div>
+      <div class="ds-sysc"><span>Newest backup</span><b id="oBk">-</b><small id="oBkSub"></small><div class="ds-bar"><i id="oBkBar"></i></div></div>
     </div>
-    <div class="o-cols">
-      <div class="g-card"><div class="g-title">Services</div><div class="g-body" id="oServices"><span class="g-muted">Loading...</span></div></div>
-      <div class="g-card"><div class="g-title">Backups</div><div class="g-body" id="oBackups"><span class="g-muted">Loading...</span></div></div>
-      <div class="g-card"><div class="g-title">Docker and daily job</div><div class="g-body" id="oDocker"><span class="g-muted">Loading...</span></div></div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-server"></i></span> Services</span><span class="g-muted" id="oUp"></span></div>
+      <div class="g-body"><div class="ds-pills" id="oSvc"><span class="g-muted">Loading...</span></div></div>
     </div>
-  </div>
-<div id="tabDocker" style="display:none">
-  <div class="g-card">
-    <div class="g-title"><span>Containers</span><span id="dDf"></span></div>
-    <div style="overflow-x:auto"><table class="g-table" id="dTable"><thead><tr><th>Name</th><th>Image</th><th>Status</th><th>CPU / RAM</th><th>Backup</th><th>Last backup</th><th>Actions</th></tr></thead><tbody><tr><td colspan="7" class="g-muted">Loading...</td></tr></tbody></table></div>
-    <div class="g-body g-muted">"Backup" ticked = included in the automatic job. "Stop" = stop the container briefly during the volume copy (consistent files; databases are dumped without stopping). Containers of GLPI in <code>/opt/glpi/</code> are excluded by default (GLPI Manager handles them) - tick them to include. Save with <b>Save settings</b> below.</div>
-  </div>
-  <div class="g-card" id="dBackupsCard" style="display:none">
-    <div class="g-title"><span>Backups: <span id="dBackupsName" class="g-muted"></span></span></div>
-    <table class="g-table" id="dBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th></th></tr></thead><tbody></tbody></table>
-  </div>
-  <div class="g-card">
-    <div class="g-title">Schedule and retention</div>
-    <div class="g-body">
-      <div class="g-check"><input type="checkbox" id="cAuto"><label for="cAuto" style="margin:0;text-transform:none;font-size:14px;color:inherit">Run the automatic job every day</label></div>
-      <div class="g-form">
-        <div><label>Time (server)</label><input type="time" id="cTime"></div>
-        <div><label>Keep backups (days)</label><input type="number" id="cDays" min="1" max="365"></div>
-        <div><label>Always keep newest (per container)</label><input type="number" id="cMin" min="1" max="30"></div>
+    <div class="ds-split2">
+      <div class="g-card">
+        <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock"></i></span> Nightly job</span><button type="button" class="g-btn sm" id="oSchedEdit"><i class="fas fa-pen"></i> Change</button></div>
+        <div class="g-body"><ol class="ds-tl" id="schedTl"></ol></div>
       </div>
-      <div class="g-muted">Old backups are removed only after a run, never below the "always keep" number, so a broken backup job cannot delete your last good copies. Local folder: <code>/var/backups/docker/&lt;container&gt;/</code>.</div>
+      <div class="g-card">
+        <div class="g-title"><span><span class="ds-ico"><i class="fas fa-hard-drive"></i></span> Space used</span><button type="button" class="g-btn sm" id="oClean"><i class="fas fa-broom"></i> Clean up</button></div>
+        <div class="g-body"><div id="oBkSizes" class="ds-rows"><span class="g-muted">Loading...</span></div></div>
+      </div>
     </div>
   </div>
-  <div class="g-card">
-    <div class="g-title">Remote backup (NAS / another server)</div>
-    <div class="g-body">
-      <div class="g-check"><input type="checkbox" id="rEnabled"><label for="rEnabled" style="margin:0;text-transform:none;font-size:14px;color:inherit">Copy backups to the remote machine after each run</label></div>
-      <div class="g-form">
-        <div><label>Host / IP (inside the VPN)</label><input type="text" id="rHost" placeholder="10.8.0.2"></div>
-        <div><label>SSH port</label><input type="number" id="rPort" min="1" max="65535"></div>
-        <div><label>User</label><input type="text" id="rUser" placeholder="admin"></div>
-        <div><label>Folder on the NAS</label><input type="text" id="rPath" placeholder="/volume1/backups/contabo"></div>
-        <div><label>Keep on NAS (days)</label><input type="number" id="rDays" min="1"></div>
-        <div><label>VPN</label><select id="rVpn"><option value="none">None (direct / already routed)</option><option value="wireguard">WireGuard</option><option value="openvpn">OpenVPN</option></select></div>
-        <div><label>Extra routes through VPN (CIDR, comma separated)</label><input type="text" id="rRoutes" placeholder="192.168.1.0/24"></div>
+
+  <div id="tabDocker" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cubes"></i></span> Containers</span>
+        <span class="g-actions"><span id="dDf"></span><button type="button" id="dCheck" class="g-btn sm"><i class="fas fa-cloud-arrow-down"></i> Check image updates</button></span></div>
+      <div class="ds-scroll"><table class="g-table" id="dTable"><thead><tr><th>Container</th><th>Status</th><th>Usage</th><th>Nightly backup</th><th>Last backup</th><th></th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Loading...</td></tr></tbody></table></div>
+      <div class="g-body ds-note"><b>Volumes</b> = the container is copied in the nightly job. <b>Stop</b> = it is stopped for a moment during the copy, so files are consistent (databases are dumped without stopping). Containers in <code>/opt/glpi/</code> are backed up by the GLPI tab. Click a container to see details, live usage, logs and its backups.
+        <div class="g-actions" style="margin-top:12px"><button type="button" class="g-btn primary" id="dSaveSel"><i class="fas fa-floppy-disk"></i> Save backup selection</button></div></div>
+    </div>
+    <div class="g-card ds-detail" id="ctDetail" style="display:none">
+      <div class="g-title"><span><span class="ds-logo" id="ctLogo"></span><span><span id="ctName"></span><br><small class="ds-mono" id="ctImg"></small></span></span>
+        <span class="g-actions"><span id="ctBadges"></span><label class="ds-sw" title="Refresh usage every 10 seconds"><input type="checkbox" id="ctLive" checked> Live</label><button type="button" class="g-btn sm" id="ctClose"><i class="fas fa-xmark"></i> Close</button></span></div>
+      <div class="g-body">
+        <div class="ds-tiles" id="ctStats"></div>
+        <div class="g-actions" id="ctActs" style="margin:4px 0 16px"></div>
+        <div class="ds-split2">
+          <div><span class="ds-lbl">Details</span><div class="g-grid" id="ctInfo"></div></div>
+          <div><span class="ds-lbl">Network and storage</span><div id="ctNet" class="ds-rows"></div></div>
+        </div>
+        <span class="ds-lbl" style="margin-top:6px">Backups</span>
+        <div class="ds-scroll"><table class="g-table" id="dBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th></th></tr></thead><tbody></tbody></table></div>
+        <span class="ds-lbl" style="margin-top:16px">Recent log (last 60 lines)</span>
+        <pre class="g-log" id="ctLog"></pre>
       </div>
-      <div id="rVpnBox" style="display:none">
-        <h4>VPN configuration</h4>
-        <div class="g-muted" style="margin-bottom:8px">Upload the client file from your VPN server (<code>.conf</code> for WireGuard, <code>.ovpn</code> for OpenVPN). It is stored readable by root only. The VPN connects only for the copy, then disconnects; only traffic to the NAS goes through it, so access to this server is never cut off.</div>
-        <div class="g-actions"><input type="file" id="rFile" class="g-in" style="max-width:340px"><button type="button" class="g-btn" id="rUpload"><i class="fas fa-upload"></i> Upload config</button><span id="rVpnState" class="g-muted"></span></div>
-        <div id="rAuthBox" style="display:none;margin-top:10px"><div class="g-form"><div><label>OpenVPN username (if required)</label><input type="text" id="rOvUser"></div><div><label>OpenVPN password</label><input type="text" id="rOvPass" autocomplete="off"></div></div><button type="button" class="g-btn" id="rAuthSave">Save OpenVPN login</button></div>
-      </div>
-      <h4>SSH key</h4>
-      <div class="g-muted">The panel logs in with a key (no password stored). Click <b>Install key</b> and enter the NAS password once: it is used one time to install the key and is not saved. Or paste the public key below into the NAS user's <code>~/.ssh/authorized_keys</code> yourself. The NAS needs SSH and rsync enabled (Synology: Control Panel > Terminal and SNMP > SSH, and File Services > rsync).</div>
-      <div class="g-key" id="rPub">(key not generated yet - click "Show key")</div>
-      <div class="g-actions"><button type="button" class="g-btn" id="rShowKey"><i class="fas fa-key"></i> Show key</button><button type="button" class="g-btn" id="rInstall"><i class="fas fa-user-lock"></i> Install key (asks NAS password once)</button><button type="button" class="g-btn" id="rTest"><i class="fas fa-plug"></i> Test connection</button><button type="button" class="g-btn" id="rSend"><i class="fas fa-cloud-arrow-up"></i> Send backups now</button></div>
     </div>
   </div>
-  <div class="g-actions" style="margin-bottom:18px"><button type="button" class="g-btn primary" id="dSave"><i class="fas fa-floppy-disk"></i> Save settings</button><button type="button" class="g-btn" id="dPrune"><i class="fas fa-broom"></i> Apply retention now</button></div>
-  </div>
+
   <div id="tabGlpi" style="display:none">
-    <div class="g-card"><div class="g-body g-muted">GLPI instances in Docker (<code>/opt/glpi/&lt;name&gt;/</code>): backup, restore and updates to any stable version (automatic backup first, automatic rollback; a major upgrade needs typed confirmation). Backups of GLPI are also included in the nightly job, the retention above and the NAS copy. <button type="button" id="gRefresh" class="g-btn" style="margin-left:8px"><i class="fas fa-arrows-rotate"></i> Refresh</button></div></div>
-    <div id="gInstances"><div class="g-card"><div class="g-body g-muted">Open this tab to load.</div></div></div>
+    <div class="g-card"><div class="g-body ds-note" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>GLPI instances in Docker (<code>/opt/glpi/&lt;name&gt;/</code>): backup, restore and updates to any stable version. A backup is made first and a failed update is rolled back. GLPI backups are part of the nightly job, the retention and the NAS copy.</span> <button type="button" id="gRefresh" class="g-btn"><i class="fas fa-arrows-rotate"></i> Refresh</button></div></div>
+    <div id="gInstances"><div class="g-card"><div class="g-body g-muted">Loading...</div></div></div>
     <div class="g-card" id="gHealthCard" style="display:none">
-      <div class="g-title"><span>Health check: <span id="gHealthName" class="g-muted"></span></span><span id="gHealthSum"></span></div>
-      <table class="g-table" id="gHealthTable"><thead><tr><th>Check</th><th>Result</th><th>Details</th></tr></thead><tbody></tbody></table>
-      <div class="g-body g-muted">Runs automatically before and after every GLPI update: if a critical check fails after the update, GLPI is rolled back from the backup. Warnings never roll back. Tip: record the public domain with <code>echo your.domain.ie &gt; /opt/glpi/&lt;name&gt;/.domain</code> to also test HTTPS and the SSL certificate.</div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-heart-pulse"></i></span> Health check: <span id="gHealthName" class="g-muted"></span></span><span id="gHealthSum"></span></div>
+      <div class="ds-scroll"><table class="g-table" id="gHealthTable"><thead><tr><th>Check</th><th>Result</th><th>Details</th></tr></thead><tbody></tbody></table></div>
+      <div class="g-body ds-note">Runs before and after every GLPI update: if a critical check fails after the update, GLPI is rolled back from the backup. Warnings never roll back. Tip: save the public domain with <code>echo your.domain.ie &gt; /opt/glpi/&lt;name&gt;/.domain</code> to also test HTTPS and the SSL certificate.</div>
+    </div>
+    <div class="g-card" id="gBackupsCard" style="display:none">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock-rotate-left"></i></span> GLPI backups: <span id="gBackupsName" class="g-muted"></span></span></div>
+      <div class="ds-scroll"><table class="g-table" id="gBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="g-body ds-note">Stored in <code>/var/backups/glpi/&lt;name&gt;/</code>: database, <code>/var/glpi</code> (incl. <code>glpicrypt.key</code>), plugins and compose files.</div>
     </div>
     <div class="g-card" id="gNewCard">
-      <div class="g-title"><span>Add a new GLPI instance (e.g. another school)</span></div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-plus"></i></span> Add a GLPI instance</span></div>
       <div class="g-body">
         <div class="g-form">
-          <div><label>Name (a-z, 0-9, - _)</label><input type="text" id="nName" placeholder="school2"></div>
-          <div><label>Domain (optional)</label><input type="text" id="nDomain" placeholder="school2.yourdomain.ie"></div>
-          <div><label>GLPI version</label><select id="nVer"><option value="">Loading...</option></select></div>
+          <div><label for="nName">Name (a-z, 0-9, - _)</label><input type="text" id="nName" placeholder="school2"></div>
+          <div><label for="nDomain">Domain (optional)</label><input type="text" id="nDomain" placeholder="school2.yourdomain.ie"></div>
+          <div><label for="nVer">GLPI version</label><select id="nVer"><option value="">Loading...</option></select></div>
         </div>
-        <div class="g-check"><input type="checkbox" id="nPub"><label for="nPub" style="margin:0;text-transform:none;font-size:14px;color:inherit">Also create the website + SSL certificate in CyberPanel and proxy it to the new GLPI (the domain's DNS must already point to this server)</label></div>
-        <div class="g-muted" style="margin-bottom:10px">Creates <code>/opt/glpi/&lt;name&gt;/</code> with its own GLPI + MariaDB containers, volumes, random passwords and a free local port, installs an empty GLPI database and shows it in this panel. It joins the nightly backup, retention and NAS copy automatically.</div>
+        <div class="g-check"><input type="checkbox" id="nPub"><label for="nPub">Also create the website, SSL certificate and proxy in CyberPanel (the domain must already point to this server)</label></div>
+        <div class="ds-note" style="margin-bottom:12px">Creates <code>/opt/glpi/&lt;name&gt;/</code> with its own GLPI and MariaDB containers, random passwords and a free local port, then installs an empty GLPI database. It joins the nightly backup, retention and NAS copy.</div>
         <button type="button" class="g-btn primary" id="nCreate"><i class="fas fa-plus"></i> Create instance</button>
       </div>
     </div>
-    <div class="g-card" id="gBackupsCard" style="display:none">
-      <div class="g-title"><span>GLPI backups: <span id="gBackupsName" class="g-muted"></span></span></div>
-      <table class="g-table" id="gBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
-      <div class="g-body g-muted">Stored in <code>/var/backups/glpi/&lt;name&gt;/</code>: database, <code>/var/glpi</code> (incl. <code>glpicrypt.key</code>), plugins and compose files.</div>
-    </div>
   </div>
-  <div id="tabSrv" style="display:none">
+
+  <div id="tabBackups" style="display:none">
+    <div class="ds-sub" role="tablist">
+      <button type="button" class="on" id="subBtnSrv"><i class="fas fa-server"></i> Server backup</button>
+      <button type="button" id="subBtnSched"><i class="fas fa-clock"></i> Schedule &amp; retention</button>
+      <button type="button" id="subBtnNas"><i class="fas fa-cloud-arrow-up"></i> NAS / VPN copy</button>
+    </div>
+  <div id="subSrv">
     <div class="g-card">
-      <div class="g-title"><span>Server backup (websites, system, CyberPanel settings, databases)</span><span id="sBadges"></span></div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-server"></i></span> Server backup</span><span id="sBadges"></span></div>
       <div class="g-body">
-        <div class="g-muted" style="margin-bottom:10px">Backs up the websites (<code>/home</code>), system files (<code>/etc</code>, cron, OpenLiteSpeed config), CyberPanel settings and every MariaDB database (one dump per database, so one website can be restored alone). It runs in the daily job after the Docker backups and is copied to the NAS with the same remote/VPN settings (folder <code>_server</code>). Docker containers and GLPI are backed up by the other tabs.</div>
+        <div class="ds-note" style="margin-bottom:12px">Websites (<code>/home</code>), system files (<code>/etc</code>, cron, OpenLiteSpeed config), CyberPanel settings and every MariaDB database, one dump per database so one website can be restored alone. Runs in the nightly job after the Docker backups and is copied to the NAS (folder <code>_server</code>).</div>
         <div class="g-actions"><button type="button" class="g-btn primary" id="sBackupNow"><i class="fas fa-play"></i> Back up now</button><button type="button" class="g-btn" id="sRefresh"><i class="fas fa-arrows-rotate"></i> Refresh</button><button type="button" class="g-btn" id="sPrune"><i class="fas fa-broom"></i> Apply retention</button></div>
       </div>
     </div>
     <div class="g-card">
-      <div class="g-title">What to back up</div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-list-check"></i></span> What to back up</span></div>
       <div class="g-body">
-        <div class="g-check"><input type="checkbox" id="sEnabled"><label for="sEnabled" style="margin:0;text-transform:none;font-size:14px;color:inherit">Include the server backup in the daily job</label></div>
-        <div class="g-check"><input type="checkbox" id="sSites"><label for="sSites" style="margin:0;text-transform:none;font-size:14px;color:inherit">Websites and mail (<code>/home</code>)</label></div>
-        <div class="g-check"><input type="checkbox" id="sSystem"><label for="sSystem" style="margin:0;text-transform:none;font-size:14px;color:inherit">System files (<code>/etc</code> incl. SSL certificates, cron, OpenLiteSpeed config)</label></div>
-        <div class="g-check"><input type="checkbox" id="sPanel"><label for="sPanel" style="margin:0;text-transform:none;font-size:14px;color:inherit">CyberPanel settings (<code>settings.py</code>, lscpd config)</label></div>
-        <div class="g-check"><input type="checkbox" id="sDatabases"><label for="sDatabases" style="margin:0;text-transform:none;font-size:14px;color:inherit">MariaDB databases (WordPress and the panel database; not the Docker/GLPI databases)</label></div>
-        <div class="g-form">
-          <div><label>Keep backups (days)</label><input type="number" id="sDays" min="1" max="365"></div>
-          <div><label>Always keep newest</label><input type="number" id="sMin" min="1" max="30"></div>
+        <div class="g-check"><input type="checkbox" id="sEnabled"><label for="sEnabled">Include the server backup in the nightly job</label></div>
+        <div class="g-check"><input type="checkbox" id="sSites"><label for="sSites">Websites and mail (<code>/home</code>)</label></div>
+        <div class="g-check"><input type="checkbox" id="sSystem"><label for="sSystem">System files (<code>/etc</code> incl. SSL certificates, cron, OpenLiteSpeed config)</label></div>
+        <div class="g-check"><input type="checkbox" id="sPanel"><label for="sPanel">CyberPanel settings (<code>settings.py</code>, lscpd config)</label></div>
+        <div class="g-check"><input type="checkbox" id="sDatabases"><label for="sDatabases">MariaDB databases (WordPress and the panel database, not the GLPI databases)</label></div>
+        <div class="g-form" style="margin-top:14px">
+          <div><label for="sDays">Keep backups (days)</label><input type="number" id="sDays" min="1" max="365"></div>
+          <div><label for="sMin">Always keep newest</label><input type="number" id="sMin" min="1" max="30"></div>
         </div>
-        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px">Extra folders (one per line, absolute paths)</label>
-        <textarea class="g-in" id="sExtra" placeholder="/opt/myapp"></textarea>
-        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:10px 0 4px">Exclude (one pattern per line)</label>
-        <textarea class="g-in" id="sExclude"></textarea>
+        <div class="g-form">
+          <div><label for="sExtra">Extra folders (one per line, absolute paths)</label><textarea class="g-in" id="sExtra" placeholder="/opt/myapp"></textarea></div>
+          <div><label for="sExclude">Skip (one pattern per line)</label><textarea class="g-in" id="sExclude"></textarea></div>
+        </div>
         <h4>Encryption</h4>
-        <div class="g-check"><input type="checkbox" id="sEncrypt"><label for="sEncrypt" style="margin:0;text-transform:none;font-size:14px;color:inherit">Encrypt backups (AES-256) before they are stored and sent to the NAS</label></div>
-        <div class="g-status s-warn" style="display:block;margin-bottom:10px">Keep a copy of the passphrase OUTSIDE this server (password manager). Without it encrypted backups cannot be opened, also if the server is lost.</div>
+        <div class="g-check"><input type="checkbox" id="sEncrypt"><label for="sEncrypt">Encrypt backups (AES-256) before they are stored and sent to the NAS</label></div>
+        <div class="g-status s-warn" style="display:block;margin-bottom:12px">Keep a copy of the passphrase outside this server, in a password manager. Without it encrypted backups cannot be opened, also if the server is lost.</div>
         <div class="g-actions"><input type="password" id="sPass" class="g-in" autocomplete="off" placeholder="passphrase (min. 12 characters)" style="max-width:340px"><button type="button" class="g-btn" id="sPassSave"><i class="fas fa-key"></i> Save passphrase</button><button type="button" class="g-btn" id="sPassShow"><i class="fas fa-eye"></i> Show passphrase</button><span id="sPassState" class="g-muted"></span></div>
-        <div style="margin-top:14px"><button type="button" class="g-btn primary" id="sSave"><i class="fas fa-floppy-disk"></i> Save settings</button></div>
+        <div style="margin-top:16px"><button type="button" class="g-btn primary" id="sSave"><i class="fas fa-floppy-disk"></i> Save settings</button></div>
       </div>
     </div>
     <div class="g-card">
-      <div class="g-title">Server backups</div>
-      <div style="overflow-x:auto"><table class="g-table" id="sTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th>Encrypted</th><th></th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Open this tab to load.</td></tr></tbody></table></div>
-      <div class="g-body g-muted">Stored in <code>/var/backups/server/&lt;date&gt;/</code>. <b>Verify</b> reads every file (and decrypts it) to prove the backup is usable. <b>Extract</b> unpacks it into <code>/var/restore/&lt;date&gt;/</code> without touching the live server. <b>Restore website</b> replaces the files of one website (the old folder is kept next to it). <b>Restore database</b> imports one database after a safety dump of the current one.</div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-box-archive"></i></span> Server backups</span></div>
+      <div class="ds-scroll"><table class="g-table" id="sTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th>Encrypted</th><th></th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Loading...</td></tr></tbody></table></div>
+      <div class="g-body ds-note">Stored in <code>/var/backups/server/&lt;date&gt;/</code>. <b>Verify</b> reads (and decrypts) every file to prove the backup is usable. <b>Extract</b> unpacks it into <code>/var/restore/&lt;date&gt;/</code> without touching the live server. <b>Restore website</b> replaces the files of one website (the old folder is kept next to it). <b>Restore database</b> imports one database after a safety dump of the current one.</div>
     </div>
   </div>
-  <div class="g-card"><div class="g-title">Operation log</div><div class="g-body"><div id="dResult" class="g-status"></div><pre id="dLog" class="g-log">No operation running.</pre></div></div>
+
+  <div id="subSched" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock"></i></span> Nightly job</span><span class="g-check" style="margin:0"><input type="checkbox" id="cAuto"><label for="cAuto">Run every day</label></span></div>
+      <div class="g-body ds-split">
+        <div>
+          <div class="g-form">
+            <div><label for="cTime">Start time (server)</label><input type="time" id="cTime"></div>
+            <div><label for="cDays">Keep backups (days)</label><input type="number" id="cDays" min="1" max="365"></div>
+            <div><label for="cMin">Always keep newest (per container)</label><input type="number" id="cMin" min="1" max="30"></div>
+          </div>
+          <div class="ds-note" style="margin-bottom:14px">Old backups are removed only after a run and never below the “always keep” number, so a broken job cannot delete your last good copies. Local folder: <code>/var/backups/docker/&lt;container&gt;/</code>.</div>
+          <div class="g-actions"><button type="button" class="g-btn primary" id="dSave"><i class="fas fa-floppy-disk"></i> Save settings</button><button type="button" class="g-btn" id="dPrune"><i class="fas fa-broom"></i> Apply retention now</button></div>
+        </div>
+        <div><span class="ds-lbl">What the nightly job does</span><ol class="ds-tl" id="schedTl2"></ol></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="subNas" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cloud-arrow-up"></i></span> Copy to a NAS or another server</span><span class="g-check" style="margin:0"><input type="checkbox" id="rEnabled"><label for="rEnabled">Send after each nightly job</label></span></div>
+      <div class="g-body">
+        <div class="g-form">
+          <div><label for="rHost">Host / IP (inside the VPN)</label><input type="text" id="rHost" placeholder="10.8.0.2"></div>
+          <div><label for="rPort">SSH port</label><input type="number" id="rPort" min="1" max="65535"></div>
+          <div><label for="rUser">User</label><input type="text" id="rUser" placeholder="admin"></div>
+          <div><label for="rPath">Folder on the NAS</label><input type="text" id="rPath" placeholder="/volume1/backups/contabo"></div>
+          <div><label for="rDays">Keep on NAS (days)</label><input type="number" id="rDays" min="1"></div>
+          <div><label for="rVpn">VPN</label><select id="rVpn"><option value="none">None (direct / already routed)</option><option value="wireguard">WireGuard</option><option value="openvpn">OpenVPN</option></select></div>
+          <div><label for="rRoutes">Extra routes through VPN (CIDR, comma separated)</label><input type="text" id="rRoutes" placeholder="192.168.1.0/24"></div>
+        </div>
+        <div id="rVpnBox" style="display:none">
+          <h4>VPN configuration</h4>
+          <div class="ds-note" style="margin-bottom:10px">Upload the client file from your VPN server (<code>.conf</code> for WireGuard, <code>.ovpn</code> for OpenVPN). It is stored readable by root only. The VPN connects only for the copy and only traffic to the NAS goes through it, so access to this server is never cut off.</div>
+          <div class="g-actions"><input type="file" id="rFile" class="g-in" style="max-width:340px"><button type="button" class="g-btn" id="rUpload"><i class="fas fa-upload"></i> Upload config</button><span id="rVpnState" class="g-muted"></span></div>
+          <div id="rAuthBox" style="display:none;margin-top:12px"><div class="g-form"><div><label for="rOvUser">OpenVPN username (if required)</label><input type="text" id="rOvUser"></div><div><label for="rOvPass">OpenVPN password</label><input type="text" id="rOvPass" autocomplete="off"></div></div><button type="button" class="g-btn" id="rAuthSave">Save OpenVPN login</button></div>
+        </div>
+        <h4>SSH key</h4>
+        <div class="ds-note">The panel logs in with a key, no password is stored. <b>Install key</b> asks for the NAS password once, uses it to install the key and forgets it. Or paste the public key into the NAS user's <code>~/.ssh/authorized_keys</code> yourself. The NAS needs SSH and rsync (Synology: Control Panel &gt; Terminal and SNMP &gt; SSH, and File Services &gt; rsync).</div>
+        <div class="g-key" id="rPub">(no key yet - click "Show key")</div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="rSave"><i class="fas fa-floppy-disk"></i> Save settings</button><button type="button" class="g-btn" id="rShowKey"><i class="fas fa-key"></i> Show key</button><button type="button" class="g-btn" id="rInstall"><i class="fas fa-user-lock"></i> Install key</button><button type="button" class="g-btn" id="rTest"><i class="fas fa-plug"></i> Test connection</button><button type="button" class="g-btn" id="rSend"><i class="fas fa-cloud-arrow-up"></i> Send backups now</button></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="tabAssistant" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-wand-magic-sparkles"></i></span> Assistant</span>
+        <span class="g-actions"><span class="g-badge b-info" title="Read-only commands run at once, everything else waits for you">Changes need your approval</span><button type="button" class="g-btn sm" id="aiNew"><i class="fas fa-rotate-left"></i> New chat</button></span></div>
+      <div class="g-body">
+        <div id="aiNoKey" class="g-status s-warn" style="display:none">Add your Anthropic API key in <a href="#" id="aiGoSet">Settings</a> to start.</div>
+        <div class="ds-chat" id="aiChat" aria-live="polite"></div>
+        <div class="g-actions" id="aiSugg">
+          <button type="button" class="g-btn sm" data-ask="Sprawdź ogólny stan serwera: obciążenie, pamięć, dysk i usługi.">Check server health</button>
+          <button type="button" class="g-btn sm" data-ask="Co zajmuje najwięcej miejsca na dysku?">What fills the disk?</button>
+          <button type="button" class="g-btn sm" data-ask="Pokaż ostatnie błędy w logach OpenLiteSpeed.">Recent web server errors</button>
+          <button type="button" class="g-btn sm" data-ask="Sprawdź kontenery Docker i ich stan.">Docker containers</button>
+        </div>
+        <div style="margin-top:14px">
+          <textarea class="g-in" id="aiInput" rows="3" placeholder="Napisz, co mam zrobić na serwerze... (Ctrl+Enter wysyła)"></textarea>
+          <div class="g-actions" style="margin-top:10px;justify-content:space-between">
+            <span class="g-muted" style="font-size:12.5px">Command output is sent to the Anthropic API. Secrets are masked and secret files are blocked.</span>
+            <button type="button" class="g-btn primary" id="aiSend"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clipboard-list"></i></span> Audit log</span><button type="button" class="g-btn sm" id="auditRefresh"><i class="fas fa-arrows-rotate"></i> Refresh</button></div>
+      <div class="ds-scroll"><table class="g-table"><thead><tr><th>When (UTC)</th><th>Result</th><th>Command</th></tr></thead><tbody id="auditBody"><tr><td colspan="3" class="g-muted">Loading...</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tabSettings" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-key"></i></span> Assistant (Anthropic API)</span><span id="setState" class="g-badge b-gray">...</span></div>
+      <div class="g-body">
+        <div class="g-form">
+          <div><label for="setKey">API key</label><input id="setKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
+          <div><label for="setModel">Model</label><input id="setModel" type="text" placeholder="claude-sonnet-5-5"></div>
+        </div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
+        <div class="ds-note" style="margin-top:12px">The key is stored on the server in a file only root can read and is never shown again. API usage is billed by Anthropic. Turn on two-factor login for CyberPanel: the assistant can run commands as root after your approval.</div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-bell"></i></span> E-mail alerts</span><span class="g-check" style="margin:0"><input type="checkbox" id="aEnabled"><label for="aEnabled">Send alerts</label></span></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Checked every 10 minutes. You get one mail when a problem starts, a reminder after 24 hours if it is still there, and a mail when it is fixed.</div>
+        <div class="g-form">
+          <div><label for="aEmail">Send to</label><input type="text" id="aEmail" placeholder="you@example.com"></div>
+          <div><label for="aDisk">Disk full alert at (%)</label><input type="number" id="aDisk" min="50" max="99"></div>
+          <div><label for="aStale">No new backup for (hours)</label><input type="number" id="aStale" min="12" max="720"></div>
+        </div>
+        <div class="g-check"><input type="checkbox" id="aDown"><label for="aDown">A container stops (one that was running or should always run)</label></div>
+        <div class="g-check"><input type="checkbox" id="aUnh"><label for="aUnh">A container reports “unhealthy”</label></div>
+        <div class="g-check"><input type="checkbox" id="aJob"><label for="aJob">The nightly job finishes with errors</label></div>
+        <h4>How to send</h4>
+        <div class="g-form">
+          <div><label for="aMethod">Method</label><select id="aMethod"><option value="local">This server (sendmail / Postfix)</option><option value="smtp">SMTP server (Gmail, Microsoft 365, ...)</option></select></div>
+          <div><label for="aFrom">From address (optional)</label><input type="text" id="aFrom" placeholder="alerts@yourdomain.ie"></div>
+        </div>
+        <div id="aSmtpBox" style="display:none">
+          <div class="g-form">
+            <div><label for="aHost">SMTP host</label><input type="text" id="aHost" placeholder="smtp.office365.com"></div>
+            <div><label for="aPort">Port</label><input type="number" id="aPort" min="1" max="65535"></div>
+            <div><label for="aTls">Security</label><select id="aTls"><option value="starttls">STARTTLS (587)</option><option value="ssl">SSL/TLS (465)</option><option value="none">None</option></select></div>
+            <div><label for="aUser">Username</label><input type="text" id="aUser" autocomplete="off"></div>
+          </div>
+          <div class="g-actions"><input type="password" id="aPass" class="g-in" autocomplete="new-password" placeholder="SMTP password (stored root-only)" style="max-width:340px"><button type="button" class="g-btn" id="aPassSave"><i class="fas fa-key"></i> Save password</button></div>
+        </div>
+        <div class="g-actions" style="margin-top:16px"><button type="button" class="g-btn primary" id="aSave"><i class="fas fa-floppy-disk"></i> Save alerts</button><button type="button" class="g-btn" id="aTest"><i class="fas fa-paper-plane"></i> Send test mail</button><button type="button" class="g-btn" id="aCheck"><i class="fas fa-magnifying-glass"></i> Check now</button></div>
+      </div>
+    </div>
+    <div class="g-card" id="cleanCard">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-broom"></i></span> Disk cleanup</span><button type="button" class="g-btn sm" id="cRefresh"><i class="fas fa-arrows-rotate"></i> Measure</button></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Shows what Docker keeps on disk and frees it safely. Running containers, their images and their volumes are never removed. Backups are not touched here.</div>
+        <div class="ds-clean" id="cList"><span class="g-muted">Press Measure.</span></div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cloud-arrow-down"></i></span> Docker Suite updates</span><span id="uBadge"></span></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Updates this plugin straight from GitHub (<code>ravxvx/cyberpanel-docker-suite</code>). Files are checked first, the current version is saved to <code>/root/dockersuite-&lt;version&gt;-&lt;date&gt;.tar.gz</code>, and your settings, backups and containers are not touched. The panel restarts for a few seconds.</div>
+        <div id="uInfo"></div>
+        <div class="g-actions"><button type="button" class="g-btn" id="uCheck"><i class="fas fa-magnifying-glass"></i> Check for updates</button><button type="button" class="g-btn primary" id="uApply" style="display:none"><i class="fas fa-download"></i> Install update</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ds-opbar" id="opbar">
+    <div class="ds-ophead"><div id="dResult" class="g-status"><span>Ready.</span></div><button type="button" class="g-btn sm" id="opToggle"><i class="fas fa-terminal"></i> <span>Show log</span></button></div>
+    <pre id="dLog" class="g-log">No operation running.</pre>
+  </div>
   <div class="g-modal" id="dModal"><div class="g-modal-box"><h3 id="dModalTitle"></h3><div id="dModalBody"></div><div class="g-modal-actions"><button type="button" class="g-btn" id="dModalCancel">Cancel</button><button type="button" class="g-btn primary" id="dModalOk">OK</button></div></div></div>
 </div>
 <script>
 (function () {
-  var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}", overview: "{% url 'dockerSuiteOverview' %}"};
+  var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}", overview: "{% url 'dockerSuiteOverview' %}",
+    aichat: "{% url 'dockerSuiteAiChat' %}", aiexec: "{% url 'dockerSuiteAiExec' %}", aiset: "{% url 'dockerSuiteAiSettings' %}", aiaudit: "{% url 'dockerSuiteAiAudit' %}"};
   var csrf = document.querySelector('#dmgr [name=csrfmiddlewaretoken]').value;
   var $ = function (id) { return document.getElementById(id); };
   var busy = false, cfg = null, vpnFiles = {}, upd = {}, lastList = '';
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (text != null) { e.textContent = text; } return e; }
   function b64(s) { return btoa(unescape(encodeURIComponent(s))); }
+  function b64u(s) { return b64(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function post(url, data) {
     var fd = new FormData(); fd.append('csrfmiddlewaretoken', csrf);
     Object.keys(data || {}).forEach(function (k) { fd.append(k, data[k]); });
     return fetch(url, {method: 'POST', body: fd, credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (r) {
-      return r.text().then(function (t) {
-        try { return JSON.parse(t); } catch (e) {
-          throw new Error('The panel returned an unexpected answer (HTTP ' + r.status + '). ' + (r.status === 500 ? 'Server error - see /var/log/dockermanager/plugin-errors.log and /usr/local/lscp/logs/error.log.' : 'Reload the page (Ctrl+F5) and sign in again if needed.'));
-        }
-      });
+      if ((r.headers.get('content-type') || '').indexOf('json') === -1) { throw new Error('The panel answered HTTP ' + r.status + ' (not JSON). If Docker Suite was just updated, wait 15 s and reload. Details: /var/log/dockermanager/plugin-errors.log'); }
+      return r.json();
     });
   }
-  function setBusy(b) { busy = b; document.querySelectorAll('#dmgr button').forEach(function (x) { x.disabled = b; }); }
+  function setBusy(b) { busy = b; document.querySelectorAll('#dmgr button:not(.ds-tab):not(.nb)').forEach(function (x) { if (!x.closest('.ds-sub') && !x.closest('#tabAssistant')) { x.disabled = b; } }); }
   function msg(type, text) { var r = $('dResult'); r.className = 'g-status s-' + type; r.innerHTML = ''; if (type === 'info') { r.appendChild(el('span', 'g-spin')); } r.appendChild(el('span', '', text)); }
-  function show(t) { var l = $('dLog'); l.textContent = t; l.scrollTop = l.scrollHeight; }
+  function show(t) { var l = $('dLog'); l.textContent = t; l.scrollTop = l.scrollHeight; if (t && t !== 'Start...') { $('opbar').classList.add('open'); $('opToggle').querySelector('span').textContent = 'Hide log'; } }
   function btn(label, icon, cls, fn) { var b = el('button', 'g-btn ' + cls); b.type = 'button'; b.appendChild(el('i', 'fas ' + icon)); b.appendChild(document.createTextNode(' ' + label)); b.addEventListener('click', fn); return b; }
   function badge(cls, t) { return el('span', 'g-badge b-' + cls, t); }
   function runJob(action, name, extra, quiet) {
@@ -272,6 +525,8 @@
             if (!s.ok) { reject(new Error(s.error || 'Status error')); return; }
             if (s.started && !quiet) { show(s.log); }
             if (s.done) { resolve({success: s.success, log: s.log}); return; }
+            // The tools exit quietly when the same task is already running (lock). Do not wait an hour for a job that never started.
+            if (!s.started && tries >= 30) { reject(new Error('This task is already running (maybe in another browser tab). Wait a moment and press Refresh.')); return; }
             if (++tries > 2400) { reject(new Error('Timed out. Check /var/log/dockermanager/ on the server.')); return; }
             setTimeout(poll, 1500);
           }).catch(reject);
@@ -299,6 +554,10 @@
     c.retention_days = parseInt($('cDays').value, 10) || 5; c.min_keep = parseInt($('cMin').value, 10) || 2;
     c.remote = {enabled: $('rEnabled').checked, host: $('rHost').value.trim(), port: parseInt($('rPort').value, 10) || 22, user: $('rUser').value.trim(),
       path: $('rPath').value.trim(), retention_days: parseInt($('rDays').value, 10) || 30, vpn: $('rVpn').value, vpn_routes: $('rRoutes').value.trim()};
+    c.alerts = {enabled: $('aEnabled').checked, email: $('aEmail').value.trim(), method: $('aMethod').value, from: $('aFrom').value.trim(),
+      smtp_host: $('aHost').value.trim(), smtp_port: parseInt($('aPort').value, 10) || 587, smtp_tls: $('aTls').value, smtp_user: $('aUser').value.trim(),
+      disk_pct: parseInt($('aDisk').value, 10) || 85, stale_hours: parseInt($('aStale').value, 10) || 36,
+      down: $('aDown').checked, unhealthy: $('aUnh').checked, job: $('aJob').checked};
     document.querySelectorAll('#dTable tbody tr[data-ct]').forEach(function (tr) {
       c.containers[tr.dataset.ct] = {backup: tr.querySelector('.ck-b').checked, stop: tr.querySelector('.ck-s').checked};
     });
@@ -310,7 +569,13 @@
     $('rEnabled').checked = !!r.enabled; $('rHost').value = r.host || ''; $('rPort').value = r.port || 22; $('rUser').value = r.user || '';
     $('rPath').value = r.path || ''; $('rDays').value = r.retention_days || 30; $('rVpn').value = r.vpn || 'none'; $('rRoutes').value = r.vpn_routes || '';
     vpnUi();
+    var a = c.alerts || {};
+    $('aEnabled').checked = !!a.enabled; $('aEmail').value = a.email || ''; $('aMethod').value = a.method || 'local'; $('aFrom').value = a.from || '';
+    $('aHost').value = a.smtp_host || ''; $('aPort').value = a.smtp_port || 587; $('aTls').value = a.smtp_tls || 'starttls'; $('aUser').value = a.smtp_user || '';
+    $('aDisk').value = a.disk_pct || 85; $('aStale').value = a.stale_hours || 36;
+    $('aDown').checked = a.down !== false; $('aUnh').checked = a.unhealthy !== false; $('aJob').checked = a.job !== false; smtpUi();
   }
+  function smtpUi() { $('aSmtpBox').style.display = $('aMethod').value === 'smtp' ? 'block' : 'none'; }
   function vpnUi() {
     var v = $('rVpn').value; $('rVpnBox').style.display = v === 'none' ? 'none' : 'block';
     $('rAuthBox').style.display = v === 'openvpn' ? 'block' : 'none';
@@ -321,7 +586,7 @@
     cfg = readForm();
     setBusy(true); msg('info', 'Saving settings...');
     runJob('setconfig', '', b64(JSON.stringify(cfg)), true).then(function (r) { show(r.log); msg(r.success ? 'ok' : 'bad', r.success ? 'Settings saved.' : 'Saving failed.'); return r.success; })
-      .catch(function (e) { msg('bad', e.message); return false; }).then(function (okk) { setBusy(false); if (okk && thenFn) { thenFn(); } });
+      .catch(function (e) { msg('bad', e.message); return false; }).then(function (okk) { setBusy(false); summary(); if (okk && thenFn) { thenFn(); } });
   }
   function loadAll() {
     if (busy) { return; }
@@ -334,41 +599,132 @@
       });
       if (cfg) { fillForm(); }
       return runJob('list', '', '', true);
-    }).then(function (r) { renderList(r.log); msg('ok', 'Loaded.'); })
+    }).then(function (r) {
+      renderList(r.log);
+      if (booted) { return null; }
+      // First visit: also read GLPI and server backup state, so the summary at the top is complete.
+      booted = true;
+      return runJob('glist', '', '', true).then(function (g) { renderGlpi(g.log); $('gInstances').dataset.loaded = '1'; })
+        .then(function () { return runJob('sgetconfig', '', '', true); })
+        .then(function (s) { sState(s.log); })
+        .catch(function () {});
+    }).then(function () { msg('ok', 'Loaded.'); })
       .catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  // ---------------- summary (hero stats, attention cards, schedule timeline) ----------------
+  var booted = false, ST = {run: 0, total: 0, stopped: [], free: null, ctBk: 0, ctSel: 0, glpi: null, srv: null};
+  function setTxt(id, v) { var e = $(id); if (e) { e.innerHTML = v; } }
+  function sState(log) {
+    var c = null; sLines(log, 'CONFIG|').forEach(function (j) { try { c = JSON.parse(j); } catch (e) {} });
+    if (!c) { return; }
+    var key = (sLines(log, 'KEY|')[0] || 'no|none').split('|')[0] === 'yes';
+    ST.srv = {enabled: !!c.enabled, encrypt: !!c.encrypt, key: key, sites: sLines(log, 'SITE|').length, days: c.retention_days};
+    summary();
+  }
+  function alertCard(kind, icon, title, text, btnLabel, fn) {
+    var a = el('div', 'ds-alert ' + kind), d = el('div', 'dot'); d.appendChild(el('i', 'fas ' + icon)); a.appendChild(d);
+    var t = el('div'); t.appendChild(el('b', '', title)); t.appendChild(el('span', '', text));
+    if (btnLabel) { t.appendChild(el('br')); t.appendChild(btn(btnLabel, 'fa-arrow-right', 'sm', fn)); }
+    a.appendChild(t); return a;
+  }
+  function summary() {
+    var c = cfg || {}, sched = c.schedule || '02:30', g = ST.glpi, s = ST.srv;
+    // hero
+    setTxt('hRun', ST.run + '<small>/' + ST.total + '</small>');
+    $('hRunBox').className = 'ds-stat' + (ST.run < ST.total ? ' hot' : '');
+    setTxt('hFree', ST.free == null ? '-' : ST.free + '<small>GB</small>');
+    if (g) { setTxt('hGlpi', String(g.length)); setTxt('hGlpiSub', g.length === 1 ? 'GLPI instance<br>' + (g[0].ver || '') : 'GLPI instances'); $('tabNG').textContent = g.length; }
+    var bk = ST.ctBk + (g ? g.reduce(function (a, x) { return a + (parseInt(x.cnt, 10) || 0); }, 0) : 0);
+    setTxt('hBk', String(bk)); $('hBkBox').className = 'ds-stat' + (bk ? '' : ' hot');
+    setTxt('hBkSub', bk ? 'backups kept' : 'backups so far<br>' + (c.auto ? 'first one at ' + sched : 'nightly job is off'));
+    $('tabND').textContent = ST.total;
+    var live = $('hLive'), down = ST.stopped.length || (g && g.some(function (x) { return x.st !== 'running' || x.dbst !== 'running'; }));
+    live.className = 'ds-live' + (down ? ' bad' : '');
+    $('hLiveText').textContent = (down ? 'Something is stopped' : 'Docker running') + ' · ' + ST.total + ' container' + (ST.total === 1 ? '' : 's') + ' · ' + (c.auto ? 'nightly job at ' + sched : 'nightly job is off');
+    // attention cards
+    var box = $('dAttn'); box.innerHTML = '';
+    ST.stopped.forEach(function (n) { box.appendChild(alertCard('bad', 'fa-circle-stop', n + ' is not running', 'Open the container to see its logs, or start it.', 'Containers', function () { tab('d'); })); });
+    if (g) { g.forEach(function (x) {
+      if (x.st !== 'running' || x.dbst !== 'running') { box.appendChild(alertCard('bad', 'fa-triangle-exclamation', 'GLPI ' + x.name + ' is down', 'Web: ' + x.st + ', database: ' + x.dbst + '. Run a health check.', 'GLPI', function () { tab('g'); })); }
+    }); }
+    if (s && !s.enabled) { box.appendChild(alertCard('warn', 'fa-server', 'Server backup is off', s.sites + ' website' + (s.sites === 1 ? '' : 's') + ' and their databases are not backed up' + (s.encrypt && !s.key ? '. Encryption is on but no passphrase is set yet.' : '.'), 'Set up server backup', function () { tab('b', 'srv'); })); }
+    else if (s && s.encrypt && !s.key) { box.appendChild(alertCard('bad', 'fa-key', 'No passphrase for encrypted backups', 'Set a passphrase, or the server backup cannot run.', 'Set passphrase', function () { tab('b', 'srv'); })); }
+    if (!c.auto) { box.appendChild(alertCard('warn', 'fa-clock', 'Nightly job is off', 'Nothing is backed up automatically.', 'Schedule', function () { tab('b', 'sched'); })); }
+    else if (!bk && g) { box.appendChild(alertCard('info', 'fa-clock', 'No backups yet', 'The first automatic job runs at ' + sched + '. You can run it now to test it.', 'Run now', function () { $('dRunAll').click(); })); }
+    if (ST.free != null && ST.free < 10) { box.appendChild(alertCard('warn', 'fa-hard-drive', 'Low disk space', 'Only ' + ST.free + ' GB free for backups.', '', null)); }
+    if (g && g.length && !g.some(function (x) { return x.st !== 'running' || x.dbst !== 'running'; })) {
+      box.appendChild(alertCard('ok', 'fa-heart-pulse', g.length === 1 ? 'GLPI is running' : 'All GLPI instances are running', g.map(function (x) { return x.name + ' ' + (x.ver || ''); }).join(', ') + '. Web and database containers are up.', '', null));
+    }
+    schedTl(); ovAttn();
+  }
+  function schedTl() { schedTlInto('schedTl'); schedTlInto('schedTl2'); }
+  function schedTlInto(olId) {
+    var c = cfg || {}, r = c.remote || {}, g = ST.glpi, s = ST.srv, ol = $(olId); ol.innerHTML = '';
+    [[ST.ctSel > 0, 'Container volumes', 'Copies the containers ticked under Volumes. Nothing is stopped unless Stop is ticked.', ST.ctSel + ' selected'],
+     [g ? g.length > 0 : true, 'GLPI backup', 'Database dump and files of every instance in /opt/glpi.', g ? g.length + ' instance' + (g.length === 1 ? '' : 's') : '...'],
+     [s ? s.enabled : false, 'Server backup', 'Websites, databases, system and panel settings.', s ? (s.enabled ? 'on' : 'off') : '...'],
+     [g ? g.length > 0 : true, 'GLPI health check', 'Requirements, database schema and recent PHP/SQL errors.', 'on'],
+     [true, 'Retention', 'Removes backups older than ' + (c.retention_days || 5) + ' days, keeps at least ' + (c.min_keep || 2) + '.', 'on'],
+     [!!r.enabled, 'Copy to NAS', 'Over SSH' + (r.vpn && r.vpn !== 'none' ? ' through ' + r.vpn : '') + '.', r.enabled ? 'on' : 'not set']
+    ].forEach(function (x, i) {
+      var li = el('li', x[0] ? '' : 'off'); li.appendChild(el('span', 'k', String(i + 1)));
+      var d = el('div'); d.appendChild(el('b', '', x[1])); d.appendChild(el('p', '', x[2])); li.appendChild(d);
+      li.appendChild(badge(x[0] ? 'ok' : 'gray', x[3])); ol.appendChild(li);
+    });
   }
   function renderList(log) {
     lastList = log;
     var tb = document.querySelector('#dTable tbody'); tb.innerHTML = ''; var n = 0, df = $('dDf'); df.innerHTML = '';
+    ST.run = 0; ST.total = 0; ST.stopped = []; ST.ctBk = 0; ST.ctSel = 0;
+    function pct(v) { var x = parseFloat(String(v).replace('%', '')); return isNaN(x) ? 0 : x; }
+    function mib(v) { var m = /([0-9.]+)\s*([KMG]i?B)/i.exec(v || ''); if (!m) { return 0; } var x = parseFloat(m[1]), u = m[2].charAt(0).toUpperCase(); return u === 'G' ? x * 1024 : (u === 'K' ? x / 1024 : x); }
+    function meter(label, w, txt) { var m = el('div', 'ds-meter'); m.appendChild(el('span', '', label)); var b = el('span', 'ds-bar'), i = el('i'); i.style.width = Math.max(2, Math.min(100, w)) + '%'; b.appendChild(i); m.appendChild(b); m.appendChild(el('span', '', txt)); return m; }
     log.split('\n').forEach(function (line) {
       var p = line.split('|');
-      if (p[0] === 'FREE') { df.appendChild(badge('gray', 'Free for backups: ' + p[1] + ' GB')); }
-      if (p[0] === 'DF') { df.appendChild(badge('gray', p[1] + ': ' + p[2] + ' (reclaimable ' + p[3] + ')')); }
+      if (p[0] === 'FREE') { ST.free = parseInt(p[1], 10); }
+      if (p[0] === 'DF' && (p[1] === 'Images' || p[1] === 'Local Volumes')) { df.appendChild(badge('gray', (p[1] === 'Local Volumes' ? 'Volumes' : p[1]) + ' ' + p[2] + (p[1] === 'Images' ? ' · ' + p[3].replace(/\s*\(.*\)/, '') + ' unused' : ''))); }
       if (p[0] !== 'CT') { return; }
       n++; var name = p[1], tr = document.createElement('tr'); tr.dataset.ct = name;
       var running = p[3] === 'running', en = p[9], saved = cfg && cfg.containers && cfg.containers[name];
-      var td = el('td', 'nm', name); if (p[5] !== '-') { td.appendChild(el('div', 'g-muted', 'compose: ' + p[5])); } tr.appendChild(td);
-      tr.appendChild(el('td', '', p[2]));
-      var st = el('td'); st.appendChild(badge(running ? 'ok' : 'bad', p[3]));
+      ST.total++; if (running) { ST.run++; } else { ST.stopped.push(name); }
+      ST.ctBk += parseInt(p[11], 10) || 0;
+      // name + image
+      var td = el('td'), box = el('div', 'ds-ct'), short = (name.replace(/^.*?[-_]/, '').replace(/[-_]\d+$/, '') || name).slice(0, 2);
+      box.appendChild(el('div', 'ds-logo' + (running ? '' : ' off'), short));
+      var nm = el('div'); nm.appendChild(el('b', '', name)); nm.appendChild(el('div', 'ds-mono', p[2]));
+      if (p[5] !== '-') { nm.appendChild(el('div', 'g-muted', 'stack: ' + p[5])); }
+      if (p[6] && p[6] !== '-') { nm.appendChild(el('div', 'ds-mono', p[6].replace(/->/g, ' → '))); }
+      box.appendChild(nm); td.appendChild(box); tr.appendChild(td);
+      // status
+      var st = el('td'); st.appendChild(badge(running ? 'ok' : 'bad', running ? 'Running' : p[3]));
       var u = upd[name]; if (u) { var ub = badge(u.s === 'yes' ? 'warn' : (u.s === 'no' ? 'ok' : 'gray'), u.s === 'yes' ? 'Update available' : (u.s === 'no' ? 'Up to date' : 'No auto-update')); ub.title = u.m; st.appendChild(ub); }
       st.appendChild(el('div', 'g-muted', p[4])); tr.appendChild(st);
-      tr.appendChild(el('td', '', p[7] + ' / ' + p[8]));
+      // usage
+      var us = el('td'); us.appendChild(meter('CPU', pct(p[7]), p[7])); us.appendChild(meter('RAM', mib(p[8]) / 120, p[8])); tr.appendChild(us);
+      // backup switches
       var bk = el('td'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'ck-b'; cb.checked = saved && 'backup' in saved ? saved.backup : en === 'yes';
       var cs = document.createElement('input'); cs.type = 'checkbox'; cs.className = 'ck-s'; cs.checked = !!(saved && saved.stop);
-      bk.appendChild(cb); bk.appendChild(document.createTextNode(' backup ')); bk.appendChild(cs); bk.appendChild(document.createTextNode(' stop'));
-      if (en === 'auto-excluded' && !(saved && 'backup' in saved)) { bk.appendChild(el('div', 'g-muted', 'GLPI Manager handles this')); }
+      if (cb.checked) { ST.ctSel++; }
+      var l1 = el('label', 'ds-sw'); l1.appendChild(cb); l1.appendChild(document.createTextNode('Volumes'));
+      var l2 = el('label', 'ds-sw'); l2.appendChild(cs); l2.appendChild(document.createTextNode('Stop'));
+      bk.appendChild(l1); bk.appendChild(l2);
+      if (en === 'auto-excluded' && !(saved && 'backup' in saved)) { bk.appendChild(el('div', 'g-muted', 'Backed up in the GLPI tab')); }
       tr.appendChild(bk);
-      tr.appendChild(el('td', '', p[10] === '-' ? 'none' : p[10] + ' (' + p[11] + ')'));
-      var act = el('td'); act.style.whiteSpace = 'nowrap';
-      if (upd[name] && upd[name].s === 'yes') { act.appendChild(btn('Update', 'fa-arrow-up', 'warn', function () { updateDialog(name, p[2]); })); }
-      act.appendChild(btn('Backup', 'fa-floppy-disk', 'primary', function () { simple('backup', name, 'Backup ' + name); }));
-      act.appendChild(btn('Backups', 'fa-clock-rotate-left', '', function () { showBackups(name); }));
-      act.appendChild(btn(running ? 'Restart' : 'Start', 'fa-rotate', '', function () { ctl(name, running ? 'restart' : 'start'); }));
-      if (running) { act.appendChild(btn('Stop', 'fa-stop', 'warn', function () { ctl(name, 'stop'); })); }
-      act.appendChild(btn('Logs', 'fa-terminal', '', function () { simple('logs', name, 'Logs of ' + name); }));
-      tr.appendChild(act); tb.appendChild(tr);
+      tr.appendChild(el('td', '', p[10] === '-' ? 'none yet' : p[10] + ' (' + p[11] + ' kept)'));
+      var act = el('td'), ab = el('div', 'ds-acts'); act.appendChild(ab);
+      if (upd[name] && upd[name].s === 'yes') { ab.appendChild(btn('Update', 'fa-arrow-up', 'warn sm', function () { updateDialog(name, p[2]); })); }
+      ab.appendChild(btn('Details', 'fa-chevron-right', 'primary sm', function () { openCt(name); }));
+      ab.appendChild(btn('Backup', 'fa-floppy-disk', 'sm', function () { simple('backup', name, 'Backup ' + name); }));
+      if (!running) { ab.appendChild(btn('Start', 'fa-play', 'sm', function () { ctl(name, 'start'); })); }
+      tr.appendChild(act);
+      tr.addEventListener('click', function (e) { if (e.target.closest('button,input,label,a')) { return; } openCt(name); });
+      if (CT.name === name) { tr.className = 'sel'; }
+      CTROWS[name] = {img: p[2], running: running, upd: upd[name] && upd[name].s === 'yes'};
+      tb.appendChild(tr);
     });
-    if (!n) { tb.innerHTML = '<tr><td colspan="7" class="g-muted">No containers found.</td></tr>'; }
+    if (!n) { tb.innerHTML = '<tr><td colspan="6" class="g-muted">No containers found.</td></tr>'; }
+    summary();
+    if (CT.name && CTROWS[CT.name]) { ctActions(); }
   }
   function updateDialog(name, img) {
     var box = el('div'); box.appendChild(el('p', '', 'Update "' + name + '" to the newest build of ' + img + '. Steps (automatic):'));
@@ -390,11 +746,17 @@
     var box = el('div'); box.appendChild(el('p', '', cmd.charAt(0).toUpperCase() + cmd.slice(1) + ' container "' + name + '"? Services running in it will be briefly unavailable.'));
     openModal(cmd.charAt(0).toUpperCase() + cmd.slice(1) + ' ' + name, box, 'Yes, ' + cmd, cmd === 'stop', function () { simple('ctl', name, cmd + ' ' + name, cmd); });
   }
+  function delBackup(action, name, id, total, after) {
+    var box = el('div'); box.appendChild(el('p', '', 'Delete backup ' + id + (name ? ' of ' + name : '') + ' from this server? This cannot be undone.'));
+    if (total <= 1) { var w = el('div', 'g-status s-warn', 'This is the only backup' + (name ? ' of ' + name : '') + '. After deleting it there is nothing to restore from.'); w.style.display = 'block'; box.appendChild(w); }
+    box.appendChild(el('p', 'g-muted', 'Copies already sent to the NAS are not touched.'));
+    openModal('Delete backup', box, 'Delete', true, function () { simple(action, name, 'Delete backup ' + id, id, after); });
+  }
   function showBackups(name) {
     if (busy) { return; }
     setBusy(true); msg('info', 'Loading backups of ' + name + '...');
     runJob('backups', name, '', true).then(function (r) {
-      var tb = document.querySelector('#dBackupsTable tbody'); tb.innerHTML = ''; $('dBackupsName').textContent = name; var n = 0;
+      var tb = document.querySelector('#dBackupsTable tbody'); tb.innerHTML = ''; var n = 0, total = sLines(r.log, 'BACKUP|').length;
       r.log.split('\n').forEach(function (line) {
         if (line.indexOf('BACKUP|') !== 0) { return; }
         var p = line.split('|'); n++; var tr = document.createElement('tr');
@@ -404,10 +766,14 @@
           var box = el('div'); box.appendChild(el('p', '', 'Restore "' + name + '" from ' + p[1] + '? The container is stopped, its volumes are replaced with the backup (databases are re-imported from the dump) and it is started again. A safety backup of the current state is made first.'));
           openModal('Restore ' + name, box, 'Restore', true, function () { simple('restore', name, 'Restore ' + name, p[1]); });
         }));
+        td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Test', 'fa-vial', '', function () { testRestore('testrestore', name, p[1]); }));
+        td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Delete', 'fa-trash', 'danger', function () { delBackup('delete', name, p[1], total, function () { showBackups(name); }); }));
         tr.appendChild(td); tb.appendChild(tr);
       });
       if (!n) { tb.innerHTML = '<tr><td colspan="5" class="g-muted">No backups yet.</td></tr>'; }
-      $('dBackupsCard').style.display = 'block'; msg('ok', 'Backups loaded.');
+      msg('ok', 'Backups loaded.');
     }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
   }
   $('dCheck').addEventListener('click', checkUpdates);
@@ -450,14 +816,15 @@
   function tagOf(img) { var m = /:([0-9][0-9A-Za-z._-]*)$/.exec(img || ''); return m ? m[1] : ''; }
   function vcmp(a, b) { var x = a.split('.').map(Number), y = b.split('.').map(Number); for (var i = 0; i < 3; i++) { if (x[i] !== y[i]) { return x[i] - y[i]; } } return 0; }
   function renderGlpi(log) {
-    var box = $('gInstances'); box.innerHTML = ''; var n = 0;
+    var box = $('gInstances'); box.innerHTML = ''; var n = 0, gl = [];
     log.split('\n').forEach(function (line) {
       if (line.indexOf('INST|') !== 0) { return; }
       var p = line.split('|'); n++;
       var name = p[1], img = p[2], st = p[3], dbimg = p[5], dbst = p[6], port = p[7], last = p[8], cnt = p[9], free = p[10], cur = tagOf(img);
+      gl.push({name: name, st: st, dbst: dbst, cnt: cnt, ver: cur});
       if (!glpiMajor && cur) { glpiMajor = cur.split('.')[0]; }
-      var card = el('div', 'g-card'), t = el('div', 'g-title'); t.appendChild(el('span', '', name));
-      var bw = el('span'); bw.appendChild(badge('info', 'GLPI ' + (cur || '?'))); bw.appendChild(badge(st === 'running' ? 'ok' : 'bad', 'glpi: ' + st)); bw.appendChild(badge(dbst === 'running' ? 'ok' : 'bad', 'db: ' + dbst));
+      var card = el('div', 'g-card'), t = el('div', 'g-title'), tn = el('span'), ic = el('span', 'ds-ico'); ic.appendChild(el('i', 'fas fa-headset')); tn.appendChild(ic); tn.appendChild(document.createTextNode(name)); t.appendChild(tn);
+      var bw = el('span'); bw.appendChild(badge('info', 'GLPI ' + (cur || '?'))); bw.appendChild(badge(st === 'running' ? 'ok' : 'bad', 'web: ' + st)); bw.appendChild(badge(dbst === 'running' ? 'ok' : 'bad', 'database: ' + dbst));
       t.appendChild(bw); card.appendChild(t);
       var b = el('div', 'g-body'), g = el('div', 'g-grid');
       [['Image', img], ['Database', dbimg], ['Local port', port === '-' ? '-' : '127.0.0.1:' + port], ['Started', (p[4] || '-').replace('T', ' ').slice(0, 16)],
@@ -473,6 +840,7 @@
       b.appendChild(upd); b.appendChild(act); card.appendChild(b); box.appendChild(card);
     });
     pickVer();
+    ST.glpi = gl; summary();
     if (!n) { var c = el('div', 'g-card'); c.appendChild(el('div', 'g-body g-muted', 'No GLPI instance found. Expected a docker-compose project in /opt/glpi/<name>/.')); box.appendChild(c); }
   }
   function gLoad() {
@@ -520,7 +888,7 @@
     if (busy) { return; }
     setBusy(true); msg('info', 'Loading backups of ' + name + '...');
     runJob('gbackups', name, '', true).then(function (r) {
-      var tb = document.querySelector('#gBackupsTable tbody'); tb.innerHTML = ''; $('gBackupsName').textContent = name; var n = 0;
+      var tb = document.querySelector('#gBackupsTable tbody'); tb.innerHTML = ''; $('gBackupsName').textContent = name; var n = 0, total = sLines(r.log, 'BACKUP|').length;
       r.log.split('\n').forEach(function (line) {
         if (line.indexOf('BACKUP|') !== 0) { return; }
         var p = line.split('|'); n++; var tr = document.createElement('tr');
@@ -530,6 +898,10 @@
           var box = el('div'); box.appendChild(el('p', '', 'Restore ' + name + ' from backup ' + p[1] + '? The current database and files are replaced (a safety backup of the current state is made first). GLPI is briefly unavailable.'));
           openModal('Restore ' + name, box, 'Restore', true, function () { simple('grestore', name, 'GLPI restore', p[1], gLoad); });
         }));
+        td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Test', 'fa-vial', '', function () { testRestore('gtestrestore', name, p[1]); }));
+        td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Delete', 'fa-trash', 'danger', function () { delBackup('gdelete', name, p[1], total, function () { gBackups(name); }); }));
         tr.appendChild(td); tb.appendChild(tr);
       });
       if (!n) { tb.innerHTML = '<tr><td colspan="4" class="g-muted">No backups yet - click "Backup now".</td></tr>'; }
@@ -589,6 +961,7 @@
       sLines(r.log, 'CONFIG|').forEach(function (j) { sCfg = JSON.parse(j); });
       var key = sLines(r.log, 'KEY|')[0] || 'no|none', free = sLines(r.log, 'FREE|')[0] || '?';
       sSites = sLines(r.log, 'SITE|');
+      sState(r.log);
       var c = sCfg, bd = $('sBadges'); bd.innerHTML = '';
       bd.appendChild(badge(c.encrypt ? 'ok' : 'warn', c.encrypt ? 'encrypted' : 'not encrypted'));
       bd.appendChild(badge(key.split('|')[0] === 'yes' ? 'ok' : (c.encrypt ? 'bad' : 'gray'), key.split('|')[0] === 'yes' ? 'passphrase set (' + key.split('|')[1] + ')' : 'no passphrase'));
@@ -602,7 +975,7 @@
   }
   function sRender(log) {
     sBdb = {}; sLines(log, 'BDB|').forEach(function (l) { var p = l.split('|'); sBdb[p[0]] = p[1] ? p[1].split(',') : []; });
-    var tb = document.querySelector('#sTable tbody'); tb.innerHTML = ''; var n = 0;
+    var tb = document.querySelector('#sTable tbody'); tb.innerHTML = ''; var n = 0, total = sLines(log, 'BACKUP|').length;
     sLines(log, 'BACKUP|').forEach(function (l) {
       var p = l.split('|'), id = p[0]; n++;
       var tr = document.createElement('tr');
@@ -613,6 +986,7 @@
         var box = el('div'); box.appendChild(el('p', '', 'Unpack ' + id + ' into /var/restore/' + id + '/ (needs about 3x the backup size in free space). The live server is not changed.'));
         openModal('Extract backup', box, 'Extract', false, function () { simple('sextract', '', 'Extract ' + id, id, function () {}); });
       }));
+      a.appendChild(btn('Delete', 'fa-trash', 'danger', function () { delBackup('sdelete', '', id, total, sLoad); }));
       if (p[5].split(',').indexOf('sites') >= 0) {
         a.appendChild(btn('Restore website', 'fa-clock-rotate-left', 'warn', function () {
           var box = el('div'); box.appendChild(el('p', '', 'Replace the files of ONE website with the copy from ' + id + '. The current folder is kept as <name>.before-restore-<time>. The database is not touched.'));
@@ -661,69 +1035,404 @@
       msg('ok', 'Passphrase shown.');
     }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
   });
-  var curTab = 'o';
-  function ago(ts) {
-    if (!ts) { return 'never'; }
-    var m = Math.floor((Date.now() / 1000 - ts) / 60);
-    if (m < 2) { return 'just now'; } if (m < 90) { return m + ' min ago'; }
-    var h = Math.floor(m / 60); if (h < 48) { return h + ' h ago'; } return Math.floor(h / 24) + ' days ago';
+  // ---------------- tabs (+ deep links: #tab=containers&ct=name) ----------------
+  var TABS = {o: ['tabBtnO', 'tabOverview', 'overview'], d: ['tabBtnD', 'tabDocker', 'containers'], g: ['tabBtnG', 'tabGlpi', 'glpi'],
+    b: ['tabBtnB', 'tabBackups', 'backups'], a: ['tabBtnA', 'tabAssistant', 'assistant'], s: ['tabBtnS', 'tabSettings', 'settings']};
+  var SUBS = {srv: ['subBtnSrv', 'subSrv'], sched: ['subBtnSched', 'subSched'], nas: ['subBtnNas', 'subNas']};
+  var curTab = 'o', curSub = 'srv', versionsLoaded = false, CT = {name: '', timer: null}, CTROWS = {};
+  function setHash() {
+    var h = 'tab=' + TABS[curTab][2] + (curTab === 'b' ? '&sub=' + curSub : '') + (curTab === 'd' && CT.name ? '&ct=' + encodeURIComponent(CT.name) : '');
+    try { history.replaceState(null, '', '#' + h); } catch (e) {}
   }
-  function gb(n) { return (n / 1073741824).toFixed(n >= 10737418240 ? 0 : 1) + ' GB'; }
-  function mb(n) { return n >= 1073741824 ? gb(n) : Math.max(1, Math.round(n / 1048576)) + ' MB'; }
-  function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
-  function bar(id, p) { var e = $(id); e.style.width = Math.min(p, 100) + '%'; e.className = p >= 90 ? 'bad' : (p >= 75 ? 'warn' : ''); }
-  function row(k, v) { var r = el('div', 'o-row'); r.appendChild(el('span', '', k)); var s2 = el('span'); if (typeof v === 'string') { s2.textContent = v; } else { s2.appendChild(v); } r.appendChild(s2); return r; }
+  function whenIdle(fn) { if (!busy) { fn(); return; } var t = setInterval(function () { if (!busy) { clearInterval(t); fn(); } }, 500); }
+  function sub(which) {
+    curSub = SUBS[which] ? which : 'srv';
+    Object.keys(SUBS).forEach(function (k) { $(SUBS[k][0]).className = k === curSub ? 'on' : ''; $(SUBS[k][1]).style.display = k === curSub ? 'block' : 'none'; });
+    if (curSub === 'srv' && !$('sTable').dataset.loaded) { $('sTable').dataset.loaded = '1'; whenIdle(sLoad); }
+    setHash();
+  }
+  function tab(which, subName) {
+    if (!TABS[which]) { which = 'o'; }
+    curTab = which;
+    Object.keys(TABS).forEach(function (k) { $(TABS[k][0]).className = 'ds-tab' + (k === which ? ' on' : ''); $(TABS[k][1]).style.display = k === which ? 'block' : 'none'; });
+    if (which === 'o') { loadOverview(); }
+    if (which === 'g') {
+      if (!versionsLoaded) { versionsLoaded = true; gLoadVersions(); }
+      if (!$('gInstances').dataset.loaded) { $('gInstances').dataset.loaded = '1'; whenIdle(gLoad); }
+    }
+    if (which === 'b') { sub(subName || curSub); }
+    if (which === 'a') { aiLoadSettings(); loadAudit(); }
+    if (which === 's') { aiLoadSettings(); if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
+    if (which !== 'd') { ctStop(); }
+    setHash();
+  }
+  Object.keys(TABS).forEach(function (k) { $(TABS[k][0]).addEventListener('click', function () { tab(k); }); });
+  Object.keys(SUBS).forEach(function (k) { $(SUBS[k][0]).addEventListener('click', function () { sub(k); }); });
+  $('gRefresh').addEventListener('click', gLoad);
+  $('dRefresh').addEventListener('click', function () {
+    if (curTab === 'g') { gLoad(); } else if (curTab === 'b' && curSub === 'srv') { sLoad(); } else if (curTab === 'o') { loadOverview(); loadAll(); } else if (curTab === 'a') { loadAudit(); } else { loadAll(); }
+  });
+  $('dSaveSel').addEventListener('click', function () { saveSettings(); });
+  $('rSave').addEventListener('click', function () { saveSettings(); });
+  $('dAsk').addEventListener('click', function () { tab('a'); $('aiInput').focus(); });
+  $('oSchedEdit').addEventListener('click', function () { tab('b', 'sched'); });
+  $('oClean').addEventListener('click', function () { tab('s'); $('cleanCard').scrollIntoView({behavior: 'smooth'}); });
+  $('opToggle').addEventListener('click', function () { var o = $('opbar').classList.toggle('open'); this.querySelector('span').textContent = o ? 'Hide log' : 'Show log'; });
+  $('opToggle').classList.add('nb');
+
+  // ---------------- overview (server health) ----------------
+  function gbs(n) { return (n / 1073741824).toFixed(n >= 10737418240 ? 0 : 1) + ' GB'; }
+  function hsize(n) { return n >= 1073741824 ? gbs(n) : (n >= 1048576 ? Math.round(n / 1048576) + ' MB' : Math.round(n / 1024) + ' KB'); }
+  function gauge(id, pct) { var b = $(id); pct = Math.max(0, Math.min(100, pct)); b.style.width = Math.max(2, pct) + '%'; b.className = pct >= 90 ? 'hi' : (pct >= 75 ? 'mid' : ''); }
+  function ago(ts) { var s = Math.max(0, Math.floor(Date.now() / 1000) - ts); return s < 3600 ? Math.max(1, Math.round(s / 60)) + ' min ago' : (s < 172800 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' days ago'); }
+  var ovTimer = null, OV = null;
   function loadOverview() {
+    clearTimeout(ovTimer);
     post(URLS.overview, {}).then(function (d) {
       if (!d.ok) { throw new Error(d.error || 'Overview failed'); }
-      var al = $('oAlerts'); al.innerHTML = '';
-      function alert(cls, icon, t) { var a = el('div', 'o-alert ' + cls); a.appendChild(el('i', 'fas ' + icon)); a.appendChild(el('span', '', t)); al.appendChild(a); }
-      var load = d.load ? d.load[0] : 0, lp = pct(load, d.cpus || 1);
-      $('oLoad').textContent = load.toFixed(2); bar('oLoadBar', lp); $('oLoadSub').textContent = (d.cpus || 1) + ' CPU cores - 5 min: ' + (d.load ? d.load[1] : '-');
-      if (d.mem) { var mp = pct(d.mem.used, d.mem.total); $('oMem').textContent = mp + '%'; bar('oMemBar', mp); $('oMemSub').textContent = gb(d.mem.used) + ' of ' + gb(d.mem.total); }
-      var dp = d.disk ? pct(d.disk.used, d.disk.total) : 0;
-      if (d.disk) { $('oDisk').textContent = dp + '%'; bar('oDiskBar', dp); $('oDiskSub').textContent = gb(d.disk.used) + ' of ' + gb(d.disk.total); $('hDisk').textContent = dp + '%'; $('hDiskBox').className = 'd-stat' + (dp >= 85 ? ' hot' : ''); }
-      var days = Math.floor((d.uptime || 0) / 86400), hrs = Math.floor(((d.uptime || 0) % 86400) / 3600);
-      $('oUp').textContent = days + 'd ' + hrs + 'h'; $('oUpSub').textContent = d.reboot_required ? 'Restart required after updates' : 'No restart pending';
-      var sv = $('oServices'); sv.innerHTML = '';
-      var names = {docker: 'Docker', lsws: 'OpenLiteSpeed', lscpd: 'CyberPanel', mariadb: 'MariaDB'};
-      Object.keys(names).forEach(function (k) { var st = (d.services || {})[k] || 'unknown'; sv.appendChild(row(names[k], badge(st === 'active' ? 'ok' : 'bad', st))); if (st !== 'active' && k !== 'docker') { alert('bad', 'fa-circle-exclamation', names[k] + ' is not running (' + st + ').'); } });
-      var bk = d.backups || {}, bx = $('oBackups'); bx.innerHTML = '';
-      var newest = 0;
-      [['docker', 'Containers'], ['glpi', 'GLPI'], ['server', 'Server (sites, system, databases)']].forEach(function (p) {
-        var b = bk[p[0]] || {count: 0, newest: 0, size: 0}; if (b.newest > newest) { newest = b.newest; }
-        bx.appendChild(row(p[1], b.count ? b.count + ' files - ' + mb(b.size) + ' - ' + ago(b.newest) : 'none yet'));
+      OV = d;
+      if (d.load) {
+        var lp = d.load[0] / d.cpus * 100, mp = d.mem.total ? d.mem.used / d.mem.total * 100 : 0, dp = d.disk.total ? d.disk.used / d.disk.total * 100 : 0;
+        $('oCpu').textContent = d.load[0]; $('oCpuSub').textContent = d.cpus + ' cores · 5 min ' + d.load[1] + ', 15 min ' + d.load[2]; gauge('oCpuBar', lp);
+        $('oMem').textContent = Math.round(mp) + '%'; $('oMemSub').textContent = gbs(d.mem.used) + ' of ' + gbs(d.mem.total); gauge('oMemBar', mp);
+        $('oDisk').textContent = Math.round(dp) + '%'; $('oDiskSub').textContent = gbs(d.disk.used) + ' of ' + gbs(d.disk.total); gauge('oDiskBar', dp);
+        $('oUp').textContent = 'Up ' + Math.floor(d.uptime / 86400) + ' d ' + Math.floor(d.uptime % 86400 / 3600) + ' h' + (d.sites ? ' · ' + d.sites + ' website' + (d.sites === 1 ? '' : 's') : '');
+      }
+      var bk = d.backups || {}, newest = 0, src = '';
+      [['docker', 'containers'], ['glpi', 'GLPI'], ['server', 'server'], ['wp', 'WordPress Toolkit']].forEach(function (k) { var b = bk[k[0]]; if (b && b.newest > newest) { newest = b.newest; src = k[1]; } });
+      $('oBk').textContent = newest ? ago(newest) : 'none';
+      $('oBkSub').textContent = newest ? 'newest: ' + src + ' backup' : 'no backups found';
+      gauge('oBkBar', newest ? Math.min(100, (Date.now() / 1000 - newest) / 864 / 2) : 100);
+      var sv = $('oSvc'); sv.innerHTML = '';
+      var names = {lsws: 'OpenLiteSpeed', lscpd: 'CyberPanel', mariadb: 'MariaDB', docker: 'Docker', fail2ban: 'Fail2ban', ufw: 'Firewall (ufw)'};
+      Object.keys(names).forEach(function (k) {
+        var st = (d.services || {})[k]; if (!st || (st !== 'active' && ['fail2ban', 'ufw'].indexOf(k) >= 0)) { return; }
+        var up = st === 'active', c = el('span', 'ds-pill' + (up ? '' : ' down')); c.appendChild(el('i')); c.appendChild(document.createTextNode(names[k] + (up ? ' running' : ' ' + st))); sv.appendChild(c);
       });
-      $('hBk').textContent = newest ? ago(newest).replace(' ago', '') : 'none';
-      var dk = $('oDocker'); dk.innerHTML = '';
-      if (d.docker) { dk.appendChild(row('Containers', d.docker.running + ' running of ' + d.docker.total)); dk.appendChild(row('Images', String(d.docker.images))); $('hCt').textContent = d.docker.running + '/' + d.docker.total; }
-      else { dk.appendChild(row('Docker', badge('bad', 'not available'))); $('hCt').textContent = '-'; alert('warn', 'fa-triangle-exclamation', 'Docker is not running or not installed on this server.'); }
-      dk.appendChild(row('Daily job', d.cron && d.cron.present ? badge('ok', 'on - ' + (d.cron.time || '')) : badge('gray', 'off')));
-      if (d.reboot_required) { alert('warn', 'fa-rotate', 'A server restart is required to finish system updates.'); }
-      if (dp >= 85) { alert('bad', 'fa-hard-drive', 'The system disk is ' + dp + '% full. Old backups or Docker images may need cleaning.'); }
-      if (newest && (Date.now() / 1000 - newest) > 172800) { alert('warn', 'fa-clock', 'The newest backup is older than 2 days.'); }
-      if (!newest) { alert('warn', 'fa-box-archive', 'No backups yet. Open Containers & backups and run the full job once.'); }
-      if (d.plugin_errors) { alert('warn', 'fa-bug', d.plugin_errors + ' plugin error(s) logged in /var/log/dockermanager/plugin-errors.log.'); }
-      if (!al.children.length) { alert('ok', 'fa-circle-check', 'Everything looks fine.'); }
-    }).catch(function (e) { var al = $('oAlerts'); al.innerHTML = ''; var a = el('div', 'o-alert bad'); a.appendChild(el('i', 'fas fa-circle-exclamation')); a.appendChild(el('span', '', e.message)); al.appendChild(a); });
+      if (!sv.children.length) { sv.appendChild(el('span', 'g-muted', 'Service status is not available (systemctl).')); }
+      if (d.reboot_required) { var rb = el('span', 'ds-pill down'); rb.appendChild(el('i')); rb.appendChild(document.createTextNode('Reboot needed for system updates')); sv.appendChild(rb); }
+      var rows = $('oBkSizes'); rows.innerHTML = '';
+      var lbl = {'/var/backups/docker': 'Container backups', '/var/backups/glpi': 'GLPI backups', '/var/backups/server': 'Server backups', '/home/wptoolkit-backups': 'WordPress Toolkit backups', '/var/restore': 'Extracted backups (/var/restore)'};
+      Object.keys(lbl).forEach(function (p) { if (d.dirs && p in d.dirs) { var r = el('div', 'ds-row'); r.appendChild(el('span', '', lbl[p])); r.appendChild(el('b', '', hsize(d.dirs[p]))); rows.appendChild(r); } });
+      if (d.disk) { var r2 = el('div', 'ds-row'); r2.appendChild(el('span', '', 'Free on /')); r2.appendChild(el('b', '', gbs(d.disk.total - d.disk.used))); rows.appendChild(r2); }
+      if (!rows.children.length) { rows.appendChild(el('span', 'g-muted', 'Nothing measured yet.')); }
+      ovAttn();
+    }).catch(function (e) { $('oSvc').innerHTML = ''; $('oSvc').appendChild(el('span', 'g-status s-bad', e.message)); });
+    ovTimer = setTimeout(function () { if (curTab === 'o' && !document.hidden) { loadOverview(); } }, 30000);
   }
-  function tab(which) {
-    curTab = which;
-    var map = {o: ['tabOverview', 'tabBtnO'], d: ['tabDocker', 'tabBtnD'], g: ['tabGlpi', 'tabBtnG'], s: ['tabSrv', 'tabBtnS']};
-    Object.keys(map).forEach(function (k) { $(map[k][0]).style.display = k === which ? 'block' : 'none'; $(map[k][1]).className = 'd-tab' + (k === which ? ' on' : ''); });
-    $('dCheck').style.display = $('dRunAll').style.display = which === 'd' ? '' : 'none';
-    if (which === 'o') { loadOverview(); }
-    if (which === 'd' && !$('tabDocker').dataset.loaded) { $('tabDocker').dataset.loaded = '1'; loadAll(); }
-    if (which === 'g' && !$('gInstances').dataset.loaded) { $('gInstances').dataset.loaded = '1'; gLoad(); gLoadVersions(); }
-    if (which === 's' && !$('sTable').dataset.loaded) { $('sTable').dataset.loaded = '1'; sLoad(); }
+  // overview-only attention cards (added after the backup/container cards made by summary())
+  function ovAttn() {
+    var box = $('dAttn'), d = OV; if (!d) { return; }
+    box.querySelectorAll('.ov-x').forEach(function (x) { x.remove(); });
+    function add(card) { card.classList.add('ov-x'); box.insertBefore(card, box.firstChild); }
+    if (d.disk && d.disk.used / d.disk.total >= 0.85) { add(alertCard('bad', 'fa-hard-drive', 'Disk almost full', Math.round(d.disk.used / d.disk.total * 100) + '% used on /.', 'Clean up', function () { tab('s'); })); }
+    if (d.reboot_required) { add(alertCard('warn', 'fa-power-off', 'Reboot needed', 'System updates wait for a restart of the server.', '', null)); }
+    ['lsws', 'lscpd', 'mariadb', 'docker'].forEach(function (k) { var st = (d.services || {})[k]; if (st && st !== 'active') { add(alertCard('bad', 'fa-circle-exclamation', k + ' is ' + st, 'This service is not running.', 'Ask the assistant', function () { tab('a'); $('aiInput').value = 'Usługa ' + k + ' nie działa (' + st + '). Sprawdź dlaczego.'; })); } });
+    if (!d.alerts_on && !box.querySelector('.ov-al')) { var c = alertCard('info', 'fa-bell', 'E-mail alerts are off', 'Get a mail when a container stops, the disk fills up or a backup fails.', 'Turn on', function () { tab('s'); }); c.classList.add('ov-al'); add(c); }
   }
-  $('tabBtnO').addEventListener('click', function () { tab('o'); });
-  $('tabBtnD').addEventListener('click', function () { tab('d'); });
-  $('tabBtnG').addEventListener('click', function () { tab('g'); });
-  $('tabBtnS').addEventListener('click', function () { tab('s'); });
-  $('dRefresh').addEventListener('click', function () { if (curTab === 'o') { loadOverview(); } else if (curTab === 'g') { gLoad(); } else if (curTab === 's') { sLoad(); } else { loadAll(); } });
-  $('gRefresh').addEventListener('click', gLoad);
-  tab('o');
+
+  // ---------------- container details + live stats ----------------
+  function tile(label, val, small) { var t = el('div', 'ds-tile'); t.appendChild(el('span', '', label)); t.appendChild(el('b', '', val)); if (small) { t.appendChild(el('small', '', small)); } return t; }
+  function renderStats(line) {
+    var p = line.split('|'), box = $('ctStats'); box.innerHTML = '';
+    if (p[0] !== 'STATS') { box.appendChild(tile('Usage', 'not running')); return; }
+    box.appendChild(tile('CPU', p[1])); box.appendChild(tile('Memory', p[2].split(' / ')[0], 'of ' + (p[2].split(' / ')[1] || '?') + ' · ' + p[3]));
+    box.appendChild(tile('Network in / out', p[4].replace(' / ', ' / '))); box.appendChild(tile('Disk read / write', p[5])); box.appendChild(tile('Processes', p[6]));
+  }
+  function ctActions() {
+    var n = CT.name, r = CTROWS[n] || {}, a = $('ctActs'); a.innerHTML = '';
+    if (r.upd) { a.appendChild(btn('Update image', 'fa-arrow-up', 'warn', function () { updateDialog(n, r.img); })); }
+    a.appendChild(btn('Back up now', 'fa-floppy-disk', 'primary', function () { simple('backup', n, 'Backup ' + n, '', function () { showBackups(n); loadAllQuiet(); }); }));
+    a.appendChild(btn(r.running ? 'Restart' : 'Start', r.running ? 'fa-rotate' : 'fa-play', '', function () { ctl(n, r.running ? 'restart' : 'start'); }));
+    if (r.running) { a.appendChild(btn('Stop', 'fa-stop', 'danger', function () { ctl(n, 'stop'); })); }
+    a.appendChild(btn('Full log (200 lines)', 'fa-terminal', '', function () { simple('logs', n, 'Logs of ' + n, '', function () {}); }));
+    a.appendChild(btn('Ask the assistant', 'fa-wand-magic-sparkles', '', function () { tab('a'); $('aiInput').value = 'Sprawdź kontener Docker "' + n + '": stan, ostatnie logi i czy coś jest nie tak.'; $('aiInput').focus(); }));
+  }
+  function ctStop() { clearTimeout(CT.timer); CT.timer = null; }
+  function ctPoll() {
+    ctStop();
+    if (!CT.name || !$('ctLive').checked || curTab !== 'd') { return; }
+    CT.timer = setTimeout(function () {
+      if (busy || document.hidden) { ctPoll(); return; }
+      var n = CT.name;
+      runJob('stats', n, '', true).then(function (r) { if (CT.name === n) { var l = r.log.split('\n').filter(function (x) { return x.indexOf('STATS|') === 0; })[0]; renderStats(l || ''); } })
+        .catch(function () {}).then(ctPoll);
+    }, 10000);
+  }
+  function openCt(name) {
+    if (busy) { return; }
+    CT.name = name; ctStop();
+    document.querySelectorAll('#dTable tbody tr[data-ct]').forEach(function (tr) { tr.className = tr.dataset.ct === name ? 'sel' : ''; });
+    var r = CTROWS[name] || {};
+    $('ctDetail').style.display = 'block'; $('ctName').textContent = name; $('ctImg').textContent = r.img || '';
+    $('ctLogo').textContent = (name.replace(/^.*?[-_]/, '').replace(/[-_]\d+$/, '') || name).slice(0, 2); $('ctLogo').className = 'ds-logo' + (r.running ? '' : ' off');
+    $('ctStats').innerHTML = ''; $('ctInfo').innerHTML = ''; $('ctNet').innerHTML = ''; $('ctLog').textContent = 'Loading...'; $('ctBadges').innerHTML = '';
+    ctActions(); setHash();
+    setBusy(true); msg('info', 'Reading ' + name + '...');
+    runJob('inspect', name, '', true).then(function (res) {
+      var logs = [], sizes = {}, statsLine = '';
+      res.log.split('\n').forEach(function (l) {
+        var p = l.split('|');
+        if (p[0] === 'INFO') {
+          if (p[1] === 'Status') { $('ctBadges').appendChild(badge(p[2] === 'running' ? 'ok' : 'bad', p[2])); }
+          if (p[1] === 'Health' && p[2] !== 'no health check') { $('ctBadges').appendChild(badge(p[2] === 'healthy' ? 'ok' : (p[2] === 'unhealthy' ? 'bad' : 'warn'), p[2])); }
+          var d = el('div', 'g-kv'); d.appendChild(el('span', '', p[1])); d.appendChild(el('b', '', p.slice(2).join('|'))); $('ctInfo').appendChild(d);
+        }
+        if (p[0] === 'IMG') { var d2 = el('div', 'g-kv'); d2.appendChild(el('span', '', 'Image built / size')); d2.appendChild(el('b', '', p[1].slice(0, 10) + ' · ' + hsize(+p[2]))); $('ctInfo').appendChild(d2); }
+        if (p[0] === 'STATS') { statsLine = l; }
+        if (p[0] === 'MSIZE') { sizes[p[1]] = p[2]; }
+        if (p[0] === 'LOG') { logs.push(l.slice(4)); }
+      });
+      res.log.split('\n').forEach(function (l) {
+        var p = l.split('|'), row;
+        if (p[0] === 'NET') { row = el('div', 'ds-row'); row.appendChild(el('span', '', 'Network ' + p[1])); row.appendChild(el('b', '', p[2])); }
+        if (p[0] === 'PORT') { row = el('div', 'ds-row'); row.appendChild(el('span', '', 'Port ' + p[1])); row.appendChild(el('b', '', p[2])); }
+        if (p[0] === 'MOUNT') { row = el('div', 'ds-row'); row.appendChild(el('span', '', (p[1] === 'volume' ? 'Volume ' : 'Folder ') + p[3] + (p[4] === 'ro' ? ' (read-only)' : ''))); row.appendChild(el('b', '', p[2] + (sizes[p[3]] ? ' · ' + sizes[p[3]] : ''))); }
+        if (row) { $('ctNet').appendChild(row); }
+      });
+      if (!$('ctNet').children.length) { $('ctNet').appendChild(el('span', 'g-muted', 'No networks, ports or volumes.')); }
+      renderStats(statsLine);
+      var lg = $('ctLog'); lg.textContent = logs.join('\n') || '(empty log)'; lg.scrollTop = lg.scrollHeight;
+      msg('ok', 'Details of ' + name + ' loaded.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); showBackups(name); ctPoll(); });
+    $('ctDetail').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+  $('ctClose').addEventListener('click', function () { CT.name = ''; ctStop(); $('ctDetail').style.display = 'none'; document.querySelectorAll('#dTable tbody tr.sel').forEach(function (tr) { tr.className = ''; }); setHash(); });
+  $('ctClose').classList.add('nb');
+  $('ctLive').addEventListener('change', ctPoll);
+  function loadAllQuiet() { runJob('list', '', '', true).then(function (r) { renderList(r.log); }).catch(function () {}); }
+
+  // ---------------- test restore ----------------
+  function checkTable(log) {
+    var t = el('table', 'g-table'), tb = el('tbody'), sum = el('div'); t.appendChild(tb);
+    log.split('\n').forEach(function (line) {
+      var p = line.split('|');
+      if (p[0] === 'CHECK') { var tr = el('tr'); tr.appendChild(el('td', 'nm', p[1])); var b = el('td'); b.appendChild(badge(p[2] === 'OK' ? 'ok' : (p[2] === 'WARN' ? 'warn' : 'bad'), p[2])); tr.appendChild(b); tr.appendChild(el('td', '', p.slice(3).join('|'))); tb.appendChild(tr); }
+      if (p[0] === 'RESULT') { sum.appendChild(badge('ok', p[2] + ' OK')); if (+p[3]) { sum.appendChild(badge('warn', p[3] + ' warning(s)')); } if (+p[4]) { sum.appendChild(badge('bad', p[4] + ' failed')); } }
+    });
+    var box = el('div'); box.appendChild(sum); var sc = el('div', 'ds-scroll'); sc.style.marginTop = '10px'; sc.appendChild(t); box.appendChild(sc); return box;
+  }
+  function testRestore(action, name, id) {
+    var box = el('div'); box.appendChild(el('p', '', 'Check that backup ' + id + ' of ' + name + ' can really be restored:'));
+    var ul = el('ul'); ['Checksums of every file', 'Every archive is unpacked in memory (nothing is written)', 'The database dump is imported into a temporary container with no network, then the container is deleted'].forEach(function (x) { ul.appendChild(el('li', '', x)); });
+    box.appendChild(ul); box.appendChild(el('p', 'g-muted', 'The live container is not touched. Takes 1-3 minutes.'));
+    openModal('Test restore', box, 'Start test', false, function () {
+      if (busy) { return false; }
+      setBusy(true); show('Start...'); msg('info', 'Testing backup ' + id + ' of ' + name + '...');
+      runJob(action, name, id).then(function (r) {
+        msg(r.success ? 'ok' : 'bad', r.success ? 'Backup ' + id + ' passed the restore test.' : 'Backup ' + id + ' did NOT pass - see the result.');
+        setBusy(false);
+        openModal((r.success ? 'Passed: ' : 'Problems: ') + name + ' / ' + id, checkTable(r.log), 'Close', false, function () {});
+        $('dModalCancel').style.display = 'none';
+      }).catch(function (e) { msg('bad', e.message); setBusy(false); });
+    });
+  }
+  $('dModalOk').addEventListener('click', function () { $('dModalCancel').style.display = ''; });
+  $('dModalCancel').addEventListener('click', function () { $('dModalCancel').style.display = ''; });
+
+  // ---------------- alerts ----------------
+  $('aMethod').addEventListener('change', smtpUi);
+  $('aSave').addEventListener('click', function () {
+    if ($('aEnabled').checked && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test($('aEmail').value.trim())) { msg('bad', 'Enter a valid e-mail address first.'); return; }
+    saveSettings(function () { if (curTab === 'o') { loadOverview(); } });
+  });
+  $('aTest').addEventListener('click', function () { saveSettings(function () { simple('alerttest', '', 'Test mail', '', function () {}); }); });
+  $('aCheck').addEventListener('click', function () { saveSettings(function () { simple('alertcheck', '', 'Alert check', '', function () {}); }); });
+  $('aPassSave').addEventListener('click', function () {
+    var p = $('aPass').value; if (!p) { msg('bad', 'Enter the SMTP password.'); return; }
+    simple('smtpsave', '', 'Save SMTP password', b64(p), function () { $('aPass').value = ''; });
+  });
+
+  // ---------------- disk cleanup ----------------
+  var cleanLoaded = false;
+  function cleanMeasure(quiet) {
+    if (busy) { return; }
+    setBusy(true); if (!quiet) { msg('info', 'Measuring Docker disk usage...'); }
+    runJob('diskinfo', '', '', true).then(function (r) {
+      var df = {}, vols = [], logs = [], dangling = 0, root = null, restoreSz = '';
+      r.log.split('\n').forEach(function (l) {
+        var p = l.split('|');
+        if (p[0] === 'DF') { df[p[1]] = {total: p[2], active: p[3], size: p[4], recl: (p[5] || '').replace(/\s*\(.*\)/, '')}; }
+        if (p[0] === 'VOL') { vols.push(p[1] + (p[2] ? ' (' + p[2] + ')' : '')); }
+        if (p[0] === 'CLOG' && +p[2] > 52428800) { logs.push(p[1] + ' (' + hsize(+p[2]) + ')'); }
+        if (p[0] === 'DANGLING') { dangling = +p[1]; }
+        if (p[0] === 'ROOT') { root = p; }
+        if (p[0] === 'DIR' && p[1] === '/var/restore') { restoreSz = p[2]; }
+      });
+      var box = $('cList'); box.innerHTML = '';
+      if (root) { var rr = el('div', 'ds-row'); rr.appendChild(el('span', '', 'System disk')); rr.appendChild(el('b', '', root[1] + ' used (' + root[2] + ' of ' + root[3] + ')')); box.appendChild(rr); }
+      function item(title, text, size, key, danger, list) {
+        var it = el('div', 'ds-citem'), d = el('div'); d.appendChild(el('b', '', title)); d.appendChild(el('p', '', text));
+        if (list && list.length) { var ul = el('ul', 'ds-cl'); list.slice(0, 8).forEach(function (x) { ul.appendChild(el('li', '', x)); }); if (list.length > 8) { ul.appendChild(el('li', 'g-muted', '... and ' + (list.length - 8) + ' more')); } d.appendChild(ul); }
+        it.appendChild(d); it.appendChild(el('span', 'sz', size || '-'));
+        it.appendChild(btn('Clean', 'fa-broom', danger ? 'danger sm' : 'sm', function () { cleanDo(key, title, danger, list); })); box.appendChild(it);
+      }
+      var im = df.Images || {}, bc = df['Build Cache'] || {}, lv = df['Local Volumes'] || {};
+      item('Dangling images', dangling + ' untagged leftover image(s) from updates. Always safe to remove.', dangling ? '' : '0 B', 'dangling', false);
+      item('Unused images', (im.total || 0) + ' images, ' + (im.active || 0) + ' in use. Also removes the old images kept for rolling back an update.', im.recl, 'images', false);
+      item('Build cache', 'Left over from docker build.', bc.recl || bc.size, 'buildcache', false);
+      item('Unused volumes', vols.length ? 'Not attached to any container. Check the list: this data is deleted for good.' : 'No unused volumes.', lv.recl, 'volumes', true, vols);
+      item('Big container logs', logs.length ? 'Container log files over 50 MB are emptied.' : 'No container log is over 50 MB.', logs.length + ' file(s)', 'logs', false, logs);
+      item('Extracted backups', 'Files unpacked by "Extract" in /var/restore. The backups themselves stay.', restoreSz || '0', 'restore', false);
+      if (!quiet) { msg('ok', 'Measured.'); }
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function cleanDo(key, title, danger, list) {
+    var box = el('div'); box.appendChild(el('p', '', 'Clean "' + title + '"?'));
+    var cf = null;
+    if (danger) {
+      if (list && list.length) { var ul = el('ul'); list.forEach(function (x) { ul.appendChild(el('li', '', x)); }); box.appendChild(ul); }
+      box.appendChild(el('p', '', 'This data cannot be recovered (unless it is in a backup). Type DELETE to confirm:'));
+      cf = document.createElement('input'); cf.className = 'g-in'; cf.type = 'text'; box.appendChild(cf);
+    }
+    openModal('Disk cleanup', box, 'Clean', !!danger, function () { if (cf && cf.value !== 'DELETE') { return false; } simple('cleanup', '', 'Cleanup: ' + title, key, function () { cleanMeasure(true); }); });
+  }
+  $('cRefresh').addEventListener('click', function () { cleanMeasure(false); });
+
+  // ---------------- self-update ----------------
+  var updChecked = false, updNew = '';
+  function updCheck(quiet) {
+    if (busy) { return; }
+    setBusy(true); if (!quiet) { msg('info', 'Checking GitHub for a new Docker Suite...'); }
+    runJob('selfupdate', '', 'check', true).then(function (r) {
+      updChecked = true;
+      var su = r.log.split('\n').filter(function (l) { return l.indexOf('SU|') === 0; })[0], info = $('uInfo'); info.innerHTML = '';
+      if (!r.success || !su) { $('uBadge').innerHTML = ''; $('uBadge').appendChild(badge('bad', 'check failed')); info.appendChild(el('div', 'g-status s-bad', (r.log.match(/ERROR: .*/) || ['Could not check GitHub.'])[0])); return; }
+      var p = su.split('|'), cur = p[1], nw = p[2], newer = cur !== nw && vcmp(nw, cur) > 0;
+      $('uBadge').innerHTML = ''; $('uBadge').appendChild(badge(newer ? 'warn' : 'ok', newer ? cur + ' → ' + nw : 'up to date (' + cur + ')'));
+      $('tabNS').style.display = newer ? '' : 'none';
+      $('uApply').style.display = newer ? '' : 'none'; updNew = newer ? nw : '';
+      var g = el('div', 'g-grid'); [['Installed', cur], ['On GitHub', nw + ' (' + p[3] + ')']].forEach(function (kv) { var d = el('div', 'g-kv'); d.appendChild(el('span', '', kv[0])); d.appendChild(el('b', '', kv[1])); g.appendChild(d); }); info.appendChild(g);
+      var cl = r.log.split('\n').filter(function (l) { return l.indexOf('CL|') === 0; }).map(function (l) { return l.slice(3); }).join('\n').trim();
+      if (cl) { var pre = el('pre', 'g-log', cl); pre.style.marginBottom = '12px'; pre.style.maxHeight = '260px'; info.appendChild(pre); }
+      if (!quiet) { msg('ok', newer ? 'Version ' + nw + ' is available.' : 'Docker Suite is up to date.'); }
+    }).catch(function (e) { if (!quiet) { msg('bad', e.message); } }).then(function () { setBusy(false); });
+  }
+  $('uCheck').addEventListener('click', function () { updCheck(false); });
+  $('uApply').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Install Docker Suite ' + updNew + ' from GitHub?'));
+    var ol = el('ol'); ['Download and check the new files', 'Save the current version to /root/dockersuite-<version>-<date>.tar.gz', 'Replace the plugin files and restart the panel (about 10 seconds)'].forEach(function (x) { ol.appendChild(el('li', '', x)); });
+    box.appendChild(ol); box.appendChild(el('p', 'g-muted', 'Settings, backups, containers and running jobs are not affected.'));
+    openModal('Update Docker Suite', box, 'Install ' + updNew, false, function () {
+      simple('selfupdate', '', 'Update to ' + updNew, 'apply', function () {
+        if ($('dResult').className.indexOf('s-ok') >= 0) {
+          msg('ok', 'Updated to ' + updNew + '. The page reloads in 15 seconds...');
+          setTimeout(function () { location.reload(); }, 15000);
+        }
+      });
+    });
+  });
+
+  // ---------------- assistant (merged Server Command Center) ----------------
+  var convo = [], aiBusy = false, MAX_ROUNDS = 12, chatEl = $('aiChat');
+  function scrollChat() { chatEl.scrollTop = chatEl.scrollHeight; }
+  function bubble(kind, text) { var m = el('div', 'ds-msg ' + kind, text); chatEl.appendChild(m); scrollChat(); return m; }
+  function aiSetBusy(b) { aiBusy = b; $('aiSend').disabled = b; $('aiInput').disabled = b; document.querySelectorAll('#aiSugg button').forEach(function (x) { x.disabled = b; }); }
+  function typing(on) {
+    var t = $('aiTyping');
+    if (on && !t) { t = el('div', 'ds-typing'); t.id = 'aiTyping'; t.appendChild(el('span', 'g-spin')); t.appendChild(document.createTextNode('Thinking...')); chatEl.appendChild(t); scrollChat(); }
+    if (!on && t) { t.remove(); }
+  }
+  function aiFail(m) { typing(false); bubble('bot err', m); aiSetBusy(false); }
+  function cmdCard(tu) {
+    var card = el('div', 'ds-cmd'), head = el('div', 'hd'); head.appendChild(el('b', '', tu.input.reason || 'Command'));
+    var bd = badge('gray', 'checking...'); head.appendChild(bd); card.appendChild(head); card.appendChild(el('pre', '', tu.input.command));
+    chatEl.appendChild(card); scrollChat(); return {card: card, badge: bd};
+  }
+  function setB(ui, cls, t) { ui.badge.className = 'g-badge b-' + cls; ui.badge.textContent = t; }
+  function showOut(ui, r) { if (r.output) { ui.card.appendChild(el('pre', 'out', r.output)); } scrollChat(); }
+  function finishRun(ui, r) {
+    ui.card.classList.remove('wait'); setB(ui, r.rc === 0 ? 'ok' : 'warn', (r.rc === 0 ? 'done' : 'exit ' + r.rc) + (r.readonly ? ' · read-only' : ''));
+    showOut(ui, r); return (r.output || '(no output)') + '\n[exit code ' + r.rc + ']';
+  }
+  function handleTool(tu) {
+    var ui = cmdCard(tu), cmd = tu.input.command;
+    return post(URLS.aiexec, {command64: b64u(cmd), approved: '0'}).then(function (r) {
+      if (!r.ok) { setB(ui, 'bad', 'error'); return 'Error: ' + (r.error || 'failed'); }
+      if (r.status === 'blocked') { ui.card.classList.add('bad'); setB(ui, 'bad', 'blocked'); showOut(ui, r); return r.output; }
+      if (r.status === 'ran') { return finishRun(ui, r); }
+      ui.card.classList.add('wait'); setB(ui, 'warn', 'needs your approval');
+      return new Promise(function (resolve) {
+        var bar = el('div', 'g-actions'); bar.style.marginTop = '10px';
+        var ok = btn('Run it', 'fa-play', 'primary sm', function () {
+          bar.remove(); setB(ui, 'info', 'running...');
+          post(URLS.aiexec, {command64: b64u(cmd), approved: '1'}).then(function (r2) {
+            if (!r2.ok) { setB(ui, 'bad', 'error'); resolve('Error: ' + (r2.error || 'failed')); return; }
+            if (r2.status === 'blocked') { setB(ui, 'bad', 'blocked'); showOut(ui, r2); resolve(r2.output); return; }
+            resolve(finishRun(ui, r2));
+          }).catch(function (e) { setB(ui, 'bad', 'error'); resolve('Error: ' + e.message); });
+        });
+        var no = btn('Do not run', 'fa-xmark', 'danger sm', function () {
+          bar.remove(); ui.card.classList.remove('wait'); setB(ui, 'gray', 'not run');
+          post(URLS.aiexec, {command64: b64u(cmd), deny: '1'}).catch(function () {});
+          resolve('The user did not approve this command. Do not run it. Suggest an alternative or ask what to do.');
+        });
+        bar.appendChild(ok); bar.appendChild(no); ui.card.appendChild(bar); scrollChat();
+      });
+    });
+  }
+  function aiRound(n) {
+    if (n > MAX_ROUNDS) { bubble('bot', 'Stopped after ' + MAX_ROUNDS + ' steps. Tell me how to continue.'); aiSetBusy(false); return; }
+    typing(true);
+    post(URLS.aichat, {messages64: b64u(JSON.stringify(convo))}).then(function (d) {
+      typing(false);
+      if (!d.ok) { throw new Error(d.error || 'The assistant failed'); }
+      convo.push({role: 'assistant', content: d.content});
+      var tools = [];
+      d.content.forEach(function (b) { if (b.type === 'text' && b.text.trim()) { bubble('bot', b.text); } else if (b.type === 'tool_use') { tools.push(b); } });
+      if (!tools.length) { aiSetBusy(false); return; }
+      var results = [];
+      return tools.reduce(function (p, tu) { return p.then(function () { return handleTool(tu).then(function (t) { results.push({type: 'tool_result', tool_use_id: tu.id, content: t}); }); }); }, Promise.resolve())
+        .then(function () { convo.push({role: 'user', content: results}); return aiRound(n + 1); });
+    }).catch(function (e) { aiFail(e.message); });
+  }
+  function aiSend(text) {
+    text = (text || '').trim(); if (!text || aiBusy) { return; }
+    $('aiSugg').style.display = 'none'; convo.push({role: 'user', content: text}); bubble('user', text); $('aiInput').value = ''; aiSetBusy(true); aiRound(1);
+  }
+  $('aiSend').addEventListener('click', function () { aiSend($('aiInput').value); });
+  $('aiInput').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { aiSend($('aiInput').value); } });
+  document.querySelectorAll('#aiSugg [data-ask]').forEach(function (b) { b.addEventListener('click', function () { aiSend(b.getAttribute('data-ask')); }); });
+  $('aiNew').addEventListener('click', function () { if (aiBusy) { return; } convo = []; chatEl.innerHTML = ''; $('aiSugg').style.display = ''; });
+  $('aiGoSet').addEventListener('click', function (e) { e.preventDefault(); tab('s'); });
+  function loadAudit() {
+    post(URLS.aiaudit, {}).then(function (d) {
+      var tb = $('auditBody'); tb.innerHTML = '';
+      if (!d.ok) { throw new Error(d.error); }
+      if (!d.items.length) { tb.innerHTML = '<tr><td colspan="3" class="g-muted">Nothing has been run yet.</td></tr>'; return; }
+      var cls = {'ran-readonly': 'ok', 'ran-approved': 'info', 'denied-by-user': 'gray', 'blocked-by-policy': 'bad'}, lbl = {'ran-readonly': 'read-only', 'ran-approved': 'approved', 'denied-by-user': 'declined', 'blocked-by-policy': 'blocked'};
+      d.items.forEach(function (it) {
+        var tr = el('tr'); tr.appendChild(el('td', '', (it.ts || '').replace('T', ' ').slice(0, 19)));
+        var s2 = el('td'); s2.appendChild(badge(cls[it.status] || 'gray', (lbl[it.status] || it.status) + (it.rc != null && it.rc !== 0 ? ' (exit ' + it.rc + ')' : ''))); tr.appendChild(s2);
+        var c = el('td'); c.appendChild(el('code', '', it.command)); tr.appendChild(c); tb.appendChild(tr);
+      });
+    }).catch(function (e) { $('auditBody').innerHTML = ''; var tr = el('tr'), td = el('td', 'g-muted', e.message); td.colSpan = 3; tr.appendChild(td); $('auditBody').appendChild(tr); });
+  }
+  $('auditRefresh').addEventListener('click', loadAudit);
+  function aiState(d) {
+    var s2 = $('setState'); s2.className = 'g-badge ' + (d.has_key ? 'b-ok' : 'b-warn'); s2.textContent = d.has_key ? 'Key saved' : 'No key yet';
+    $('setModel').value = d.model || ''; $('aiNoKey').style.display = d.has_key ? 'none' : 'block';
+  }
+  function aiLoadSettings() { post(URLS.aiset, {action: 'status'}).then(function (d) { if (d.ok) { aiState(d); } }).catch(function () {}); }
+  $('setSave').addEventListener('click', function () {
+    post(URLS.aiset, {action: 'save', api_key64: b64u($('setKey').value), model: $('setModel').value}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); msg('ok', 'Assistant settings saved.');
+    }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('setDelete').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Remove the saved Anthropic API key? The assistant stops working until you add a key again.'));
+    openModal('Remove API key', box, 'Remove', true, function () { post(URLS.aiset, {action: 'delete_key'}).then(function (d) { if (!d.ok) { throw new Error(d.error); } aiState(d); msg('ok', 'Key removed.'); }).catch(function (e) { msg('bad', e.message); }); });
+  });
+  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
+
+  // ---------------- start ----------------
+  (function () {
+    var h = {}; (location.hash || '').replace(/^#/, '').split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) { h[p[0]] = decodeURIComponent(p[1] || ''); } });
+    var key = Object.keys(TABS).filter(function (k) { return TABS[k][2] === h.tab; })[0] || 'o';
+    tab(key, h.sub);
+    if (key === 'd' && h.ct) { var t = setInterval(function () { if (CTROWS[h.ct] && !busy) { clearInterval(t); openCt(h.ct); } }, 400); setTimeout(function () { clearInterval(t); }, 20000); }
+  })();
+  loadAll();
 })();
 </script>
 {% endblock %}

@@ -4,6 +4,10 @@ CyberPanel plugin: containers overview, GLPI (Docker) backup/update with rollbac
 server backup (websites, system, databases; optional AES-256 encryption) and optional copy to a NAS over SSH
 (OpenVPN / WireGuard). Version 0.7.0 adds a new design, an Overview tab and readable error messages.
 
+## Update
+
+From version 0.8.0 on: **Settings > Docker Suite updates > Install update** in the plugin.
+
 ## Install (as root)
 ```
 cp dockerSuite.zip /usr/local/CyberCP/dockerSuite.zip      # the zip must be named exactly dockerSuite.zip
