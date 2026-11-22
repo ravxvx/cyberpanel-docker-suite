@@ -195,18 +195,49 @@ def _audit(request, command, status, rc=None):
 
 
 # ------------------------------------------------------------------ settings
-def _read_key():
-    return _sh("cat %s 2>/dev/null" % shlex.quote(KEY_FILE)).strip()
+# Providers: Anthropic (native API) or any OpenAI-compatible chat API (Groq, Google Gemini, OpenRouter, Ollama, ...).
+PROVIDERS = {
+    "anthropic": {"label": "Anthropic Claude", "url": API_URL, "model": DEFAULT_MODEL, "key": KEY_FILE},
+    "groq": {"label": "Groq (free tier)", "url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile", "key": CONF_DIR + "/groq.key"},
+    "gemini": {"label": "Google Gemini (free tier)", "url": "https://generativelanguage.googleapis.com/v1beta/openai", "model": "gemini-flash-latest", "key": CONF_DIR + "/gemini.key"},
+    "openrouter": {"label": "OpenRouter", "url": "https://openrouter.ai/api/v1", "model": "", "key": CONF_DIR + "/openrouter.key"},
+    "custom": {"label": "Other OpenAI-compatible API", "url": "", "model": "", "key": CONF_DIR + "/custom.key"},
+}
+PROVIDER_FILE = CONF_DIR + "/provider"
+URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]+(:[0-9]{1,5})?(/[A-Za-z0-9._~/-]*)?$")
+ANY_KEY_RE = re.compile(r"^[A-Za-z0-9_.:-]{8,300}$")
 
 
-def _read_model():
-    model = _sh("cat %s 2>/dev/null" % shlex.quote(MODEL_FILE)).strip()
-    return model if MODEL_RE.match(model) else DEFAULT_MODEL
+def _cat(path):
+    return _sh("cat %s 2>/dev/null" % shlex.quote(path)).strip()
+
+
+def _provider():
+    p = _cat(PROVIDER_FILE)
+    return p if p in PROVIDERS else "anthropic"
+
+
+def _read_key(prov=None):
+    return _cat(PROVIDERS[prov or _provider()]["key"])
+
+
+def _read_model(prov=None):
+    prov = prov or _provider()
+    model = _cat(MODEL_FILE if prov == "anthropic" else CONF_DIR + "/model-" + prov)
+    return model if MODEL_RE.match(model) or (prov != "anthropic" and re.match(r"^[A-Za-z0-9._:/-]{2,120}$", model)) else PROVIDERS[prov]["model"]
+
+
+def _base_url(prov=None):
+    prov = prov or _provider()
+    if prov == "custom":
+        url = _cat(CONF_DIR + "/custom.url")
+        return url if URL_RE.match(url) else ""
+    return PROVIDERS[prov]["url"]
 
 
 def _install_root_file(content, dest):
     """Receive content in a private temp file, then let root move it into place (no secrets on a command line)."""
-    fd, tmp = tempfile.mkstemp(prefix="scc-", dir="/tmp")
+    fd, tmp = tempfile.mkstemp(prefix="dsai-", dir="/tmp")
     try:
         with os.fdopen(fd, "w") as handle:
             handle.write(content)
@@ -219,28 +250,74 @@ def _install_root_file(content, dest):
             pass
 
 
+def _status():
+    prov = _provider()
+    keys = {k: _test("s", v["key"]) for k, v in PROVIDERS.items()}
+    return {"ok": True, "provider": prov, "has_key": keys[prov], "keys": keys, "model": _read_model(prov),
+            "base_url": _cat(CONF_DIR + "/custom.url"),
+            "providers": [{"id": k, "label": v["label"], "model": _read_model(k)} for k, v in PROVIDERS.items()]}
+
+
+def _openai_get(url, key, timeout=20):
+    req = urllib.request.Request(url, headers={"Authorization": "Bearer " + key, "User-Agent": "dockerSuite"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
 @require_POST
 @guarded
 def ai_settings(request):
     if not _is_admin(request):
         return _deny()
     action = request.POST.get("action", "status")
+    prov = request.POST.get("provider", "") or _provider()
+    if prov not in PROVIDERS:
+        return JsonResponse({"ok": False, "error": "Unknown provider."})
     if action == "save":
         key = _b64field(request, "api_key").strip()
         model = request.POST.get("model", "").strip()
+        if prov == "custom":
+            url = _b64field(request, "base_url").strip().rstrip("/")
+            if url:
+                if not URL_RE.match(url):
+                    return JsonResponse({"ok": False, "error": "Invalid API address. Example: https://api.example.com/v1"})
+                _install_root_file(url + "\n", CONF_DIR + "/custom.url")
         if key:
-            if not KEY_RE.match(key):
+            if prov == "anthropic" and not KEY_RE.match(key):
                 return JsonResponse({"ok": False, "error": "That does not look like an Anthropic API key (it starts with sk-ant-)."})
-            _install_root_file(key + "\n", KEY_FILE)
+            if prov != "anthropic" and not ANY_KEY_RE.match(key):
+                return JsonResponse({"ok": False, "error": "That does not look like an API key."})
+            _install_root_file(key + "\n", PROVIDERS[prov]["key"])
         if model:
-            if not MODEL_RE.match(model):
+            if not re.match(r"^[A-Za-z0-9._:/-]{2,120}$", model):
                 return JsonResponse({"ok": False, "error": "Invalid model name."})
-            _install_root_file(model + "\n", MODEL_FILE)
+            _install_root_file(model + "\n", MODEL_FILE if prov == "anthropic" else CONF_DIR + "/model-" + prov)
+        _install_root_file(prov + "\n", PROVIDER_FILE)
     elif action == "delete_key":
-        _sh("rm -f %s" % shlex.quote(KEY_FILE))
+        _sh("rm -f %s" % shlex.quote(PROVIDERS[prov]["key"]))
+    elif action == "models":
+        key = _read_key(prov)
+        if not key:
+            return JsonResponse({"ok": False, "error": "Save the API key for this provider first."})
+        try:
+            if prov == "anthropic":
+                req = urllib.request.Request("https://api.anthropic.com/v1/models?limit=100", headers={"x-api-key": key, "anthropic-version": "2023-06-01"})
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+            else:
+                base = _base_url(prov)
+                if not base:
+                    return JsonResponse({"ok": False, "error": "Set the API address first."})
+                data = _openai_get(base + "/models", key)
+        except urllib.error.HTTPError as exc:
+            return JsonResponse({"ok": False, "error": "API error %d: %s" % (exc.code, _redact(exc.read(300).decode("utf-8", "replace")))})
+        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+            return JsonResponse({"ok": False, "error": "Cannot reach the API: %s" % exc})
+        ids = sorted({str(m.get("id", "")).replace("models/", "") for m in (data.get("data") or []) if m.get("id")})
+        return JsonResponse({"ok": True, "models": ids[:300]})
     elif action != "status":
         return JsonResponse({"ok": False, "error": "Unknown action."})
-    return JsonResponse({"ok": True, "has_key": _test("s", KEY_FILE), "model": _read_model()})
+    return JsonResponse(_status())
 
 
 # ------------------------------------------------------------------ assistant
@@ -275,6 +352,78 @@ def _clean_messages(raw):
     return clean
 
 
+def _to_openai(messages):
+    """Anthropic-style conversation (what the page keeps) -> OpenAI chat messages."""
+    out = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for m in messages:
+        c = m["content"]
+        if isinstance(c, str):
+            out.append({"role": m["role"], "content": c}); continue
+        if m["role"] == "assistant":
+            text = "\n".join(b["text"] for b in c if b["type"] == "text").strip()
+            calls = [{"id": b["id"] or "call_%d" % i, "type": "function",
+                      "function": {"name": "run_shell", "arguments": json.dumps(b["input"])}} for i, b in enumerate(c) if b["type"] == "tool_use"]
+            msg = {"role": "assistant", "content": text or None}
+            if calls:
+                msg["tool_calls"] = calls
+            out.append(msg)
+        else:
+            for i, b in enumerate(c):
+                if b["type"] == "tool_result":
+                    out.append({"role": "tool", "tool_call_id": b["tool_use_id"] or "call_%d" % i, "content": b["content"]})
+                elif b["type"] == "text":
+                    out.append({"role": "user", "content": b["text"]})
+    return out
+
+
+def _chat_anthropic(messages, key, model):
+    body = {"model": model, "max_tokens": 2048, "system": SYSTEM_PROMPT, "tools": [TOOL], "messages": messages}
+    req = urllib.request.Request(API_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
+        "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01"})
+    with urllib.request.urlopen(req, timeout=110) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    content = []
+    for block in data.get("content", []):
+        if block.get("type") == "text":
+            content.append({"type": "text", "text": block.get("text", "")})
+        elif block.get("type") == "tool_use" and block.get("name") == "run_shell":
+            inp = block.get("input") or {}
+            content.append({"type": "tool_use", "id": block.get("id", ""), "name": "run_shell",
+                            "input": {"command": str(inp.get("command", "")), "reason": str(inp.get("reason", ""))}})
+    return content, data.get("stop_reason")
+
+
+def _chat_openai(messages, key, model, base):
+    body = {"model": model, "max_tokens": 2048, "messages": _to_openai(messages),
+            "tools": [{"type": "function", "function": {"name": TOOL["name"], "description": TOOL["description"], "parameters": TOOL["input_schema"]}}]}
+    req = urllib.request.Request(base + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST", headers={
+        "content-type": "application/json", "Authorization": "Bearer " + key, "User-Agent": "dockerSuite"})
+    with urllib.request.urlopen(req, timeout=110) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    choice = (data.get("choices") or [{}])[0]
+    msg = choice.get("message") or {}
+    content = []
+    if msg.get("content"):
+        text = msg["content"] if isinstance(msg["content"], str) else " ".join(str(x.get("text", "")) for x in msg["content"] if isinstance(x, dict))
+        if text.strip():
+            content.append({"type": "text", "text": text})
+    for i, call in enumerate(msg.get("tool_calls") or []):
+        fn = call.get("function") or {}
+        if fn.get("name") != "run_shell":
+            continue
+        try:
+            inp = json.loads(fn.get("arguments") or "{}")
+        except ValueError:
+            inp = {}
+        if not isinstance(inp, dict):
+            inp = {}
+        content.append({"type": "tool_use", "id": call.get("id") or "call_%d_%d" % (len(messages), i), "name": "run_shell",
+                        "input": {"command": str(inp.get("command", "")), "reason": str(inp.get("reason", ""))}})
+    if not content:
+        content.append({"type": "text", "text": "(the model gave an empty answer - try again or pick another model)"})
+    return content, choice.get("finish_reason")
+
+
 @require_POST
 @guarded
 def ai_chat(request):
@@ -284,29 +433,27 @@ def ai_chat(request):
         messages = _clean_messages(_b64field(request, "messages") or "[]")
     except (ValueError, TypeError) as exc:
         return JsonResponse({"ok": False, "error": str(exc) or "Invalid conversation."})
-    key = _read_key()
+    prov = _provider()
+    key, model, label = _read_key(prov), _read_model(prov), PROVIDERS[prov]["label"]
     if not key:
-        return JsonResponse({"ok": False, "error": "Add your Anthropic API key in the Settings tab first."})
-    body = {"model": _read_model(), "max_tokens": 2048, "system": SYSTEM_PROMPT, "tools": [TOOL], "messages": messages}
-    req = urllib.request.Request(API_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
-        "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01"})
+        return JsonResponse({"ok": False, "error": "Add your %s API key in the Settings tab first." % label})
+    if not model:
+        return JsonResponse({"ok": False, "error": "Choose a model for %s in the Settings tab first." % label})
     try:
-        with urllib.request.urlopen(req, timeout=110) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        if prov == "anthropic":
+            content, stop = _chat_anthropic(messages, key, model)
+        else:
+            base = _base_url(prov)
+            if not base:
+                return JsonResponse({"ok": False, "error": "Set the API address in the Settings tab first."})
+            content, stop = _chat_openai(messages, key, model, base)
     except urllib.error.HTTPError as exc:
         detail = _redact(exc.read(600).decode("utf-8", "replace"))
-        return JsonResponse({"ok": False, "error": "Anthropic API error %d: %s" % (exc.code, detail)})
+        hint = " (free-tier limit reached - wait a minute or try a smaller model)" if exc.code == 429 else ""
+        return JsonResponse({"ok": False, "error": "%s API error %d%s: %s" % (label, exc.code, hint, detail)})
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        return JsonResponse({"ok": False, "error": "Cannot reach the Anthropic API: %s" % exc})
-    content = []
-    for block in data.get("content", []):
-        if block.get("type") == "text":
-            content.append({"type": "text", "text": block.get("text", "")})
-        elif block.get("type") == "tool_use" and block.get("name") == "run_shell":
-            inp = block.get("input") or {}
-            content.append({"type": "tool_use", "id": block.get("id", ""), "name": "run_shell",
-                            "input": {"command": str(inp.get("command", "")), "reason": str(inp.get("reason", ""))}})
-    return JsonResponse({"ok": True, "content": content, "stop_reason": data.get("stop_reason")})
+        return JsonResponse({"ok": False, "error": "Cannot reach the %s API: %s" % (label, exc)})
+    return JsonResponse({"ok": True, "content": content, "stop_reason": stop, "provider": label, "model": model})
 
 
 @require_POST

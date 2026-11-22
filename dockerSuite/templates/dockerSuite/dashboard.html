@@ -206,7 +206,7 @@
   <div class="ds-hero">
     <div>
       <div class="ds-live" id="hLive"><i></i> <span id="hLiveText">Loading...</span></div>
-      <h2>Docker Suite <span class="ds-ver">0.8.0</span></h2>
+      <h2>Docker Suite <span class="ds-ver">0.8.1</span></h2>
       <p>Server, containers, GLPI and backups in one place. Every update makes a backup first and rolls back on its own if the new version does not start.</p>
       <div class="ds-hero-actions">
         <button type="button" id="dRunAll" class="g-btn glow"><i class="fas fa-play"></i> Run full job now</button>
@@ -405,7 +405,7 @@
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-wand-magic-sparkles"></i></span> Assistant</span>
         <span class="g-actions"><span class="g-badge b-info" title="Read-only commands run at once, everything else waits for you">Changes need your approval</span><button type="button" class="g-btn sm" id="aiNew"><i class="fas fa-rotate-left"></i> New chat</button></span></div>
       <div class="g-body">
-        <div id="aiNoKey" class="g-status s-warn" style="display:none">Add your Anthropic API key in <a href="#" id="aiGoSet">Settings</a> to start.</div>
+        <div id="aiNoKey" class="g-status s-warn" style="display:none">Choose an AI provider and add its API key in <a href="#" id="aiGoSet">Settings</a> to start (Groq and Gemini have free plans).</div>
         <div class="ds-chat" id="aiChat" aria-live="polite"></div>
         <div class="g-actions" id="aiSugg">
           <button type="button" class="g-btn sm" data-ask="Sprawdź ogólny stan serwera: obciążenie, pamięć, dysk i usługi.">Check server health</button>
@@ -416,7 +416,7 @@
         <div style="margin-top:14px">
           <textarea class="g-in" id="aiInput" rows="3" placeholder="Napisz, co mam zrobić na serwerze... (Ctrl+Enter wysyła)"></textarea>
           <div class="g-actions" style="margin-top:10px;justify-content:space-between">
-            <span class="g-muted" style="font-size:12.5px">Command output is sent to the Anthropic API. Secrets are masked and secret files are blocked.</span>
+            <span class="g-muted" style="font-size:12.5px">Command output is sent to the chosen AI provider. Secrets are masked and secret files are blocked.</span>
             <button type="button" class="g-btn primary" id="aiSend"><i class="fas fa-paper-plane"></i> Send</button>
           </div>
         </div>
@@ -430,14 +430,17 @@
 
   <div id="tabSettings" style="display:none">
     <div class="g-card">
-      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-key"></i></span> Assistant (Anthropic API)</span><span id="setState" class="g-badge b-gray">...</span></div>
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-key"></i></span> Assistant (AI provider)</span><span id="setState" class="g-badge b-gray">...</span></div>
       <div class="g-body">
         <div class="g-form">
-          <div><label for="setKey">API key</label><input id="setKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
-          <div><label for="setModel">Model</label><input id="setModel" type="text" placeholder="claude-sonnet-5-5"></div>
+          <div><label for="setProv">Provider</label><select id="setProv"><option value="anthropic">Anthropic Claude</option></select></div>
+          <div id="setUrlBox" style="display:none"><label for="setUrl">API address (OpenAI-compatible)</label><input id="setUrl" type="text" placeholder="http://127.0.0.1:11434/v1"></div>
+          <div><label for="setKey">API key <span id="setKeyState" class="g-muted"></span></label><input id="setKey" type="password" autocomplete="off" placeholder="paste a new key (leave empty to keep the saved one)"></div>
+          <div><label for="setModel">Model</label><input id="setModel" type="text" list="setModels"><datalist id="setModels"></datalist></div>
         </div>
-        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
-        <div class="ds-note" style="margin-top:12px">The key is stored on the server in a file only root can read and is never shown again. API usage is billed by Anthropic. Turn on two-factor login for CyberPanel: the assistant can run commands as root after your approval.</div>
+        <div class="g-status s-info" id="setHelp" style="display:block;margin-bottom:12px"></div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save and use this provider</button><button type="button" class="g-btn" id="setLoadModels"><i class="fas fa-list"></i> Load models</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
+        <div class="ds-note" style="margin-top:12px">Keys are stored on the server in files only root can read and are never shown again. Command output (with secrets masked) is sent to the chosen provider; free tiers may use it to improve their models. Turn on two-factor login for CyberPanel: the assistant can run commands as root after your approval.</div>
       </div>
     </div>
     <div class="g-card">
@@ -1409,21 +1412,57 @@
     }).catch(function (e) { $('auditBody').innerHTML = ''; var tr = el('tr'), td = el('td', 'g-muted', e.message); td.colSpan = 3; tr.appendChild(td); $('auditBody').appendChild(tr); });
   }
   $('auditRefresh').addEventListener('click', loadAudit);
+  var AIS = null;
+  var PROV_HELP = {
+    anthropic: 'Paid per use. Key: console.anthropic.com → API Keys (starts with sk-ant-). Best at server work.',
+    groq: 'Free tier, no card: console.groq.com → API Keys. Very fast; when the free limit is hit you get a "429" error and wait a minute. Press "Load models" to pick a model that supports tool use.',
+    gemini: 'Free tier, no card: aistudio.google.com → Get API key. Small daily limit on the free tier (one question = 3-6 requests).',
+    openrouter: 'openrouter.ai → Keys. Models whose name ends in ":free" cost nothing (low limits).',
+    custom: 'Any OpenAI-compatible API, e.g. Ollama on this server: http://127.0.0.1:11434/v1 (key: any text). Small local models are slow and weak at server tasks.'
+  };
   function aiState(d) {
-    var s2 = $('setState'); s2.className = 'g-badge ' + (d.has_key ? 'b-ok' : 'b-warn'); s2.textContent = d.has_key ? 'Key saved' : 'No key yet';
-    $('setModel').value = d.model || ''; $('aiNoKey').style.display = d.has_key ? 'none' : 'block';
+    AIS = d;
+    var sel = $('setProv'), cur = sel.value && d.providers.some(function (p) { return p.id === sel.value; }) && sel.dataset.touched ? sel.value : d.provider;
+    sel.innerHTML = ''; d.providers.forEach(function (p) { var o = document.createElement('option'); o.value = p.id; o.textContent = p.label + (d.keys[p.id] ? '  ✓' : '') + (p.id === d.provider ? '  (in use)' : ''); sel.appendChild(o); });
+    sel.value = cur; provUi();
+    var s2 = $('setState'), active = d.providers.filter(function (p) { return p.id === d.provider; })[0];
+    s2.className = 'g-badge ' + (d.has_key ? 'b-ok' : 'b-warn'); s2.textContent = d.has_key ? 'In use: ' + active.label.replace(/ \(.*\)/, '') + ' · ' + d.model : 'No key yet';
+    $('aiNoKey').style.display = d.has_key ? 'none' : 'block';
   }
+  function provUi() {
+    var d = AIS, p = $('setProv').value; if (!d) { return; }
+    var info = d.providers.filter(function (x) { return x.id === p; })[0] || {};
+    $('setModel').value = info.model || ''; $('setUrlBox').style.display = p === 'custom' ? '' : 'none'; $('setUrl').value = d.base_url || '';
+    $('setKeyState').textContent = d.keys[p] ? '(saved)' : '(not set)'; $('setHelp').textContent = PROV_HELP[p] || '';
+    $('setModels').innerHTML = '';
+  }
+  $('setProv').addEventListener('change', function () { this.dataset.touched = '1'; provUi(); });
   function aiLoadSettings() { post(URLS.aiset, {action: 'status'}).then(function (d) { if (d.ok) { aiState(d); } }).catch(function () {}); }
   $('setSave').addEventListener('click', function () {
-    post(URLS.aiset, {action: 'save', api_key64: b64u($('setKey').value), model: $('setModel').value}).then(function (d) {
-      if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); msg('ok', 'Assistant settings saved.');
+    var p = $('setProv').value;
+    post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: $('setModel').value.trim(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; $('setProv').dataset.touched = ''; aiState(d); msg('ok', 'Assistant now uses ' + p + ' · ' + d.model + '.');
+    }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('setLoadModels').addEventListener('click', function () {
+    var p = $('setProv').value; msg('info', 'Loading models...');
+    var save = Promise.resolve();
+    // a new key or address must be saved before models can be listed
+    if ($('setKey').value || (p === 'custom' && $('setUrl').value.trim() !== (AIS && AIS.base_url))) {
+      save = post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: $('setModel').value.trim(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) { if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); $('setProv').value = p; provUi(); });
+    }
+    save.then(function () { return post(URLS.aiset, {action: 'models', provider: p}); }).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); }
+      var dl = $('setModels'); dl.innerHTML = ''; d.models.forEach(function (m) { var o = document.createElement('option'); o.value = m; dl.appendChild(o); });
+      msg('ok', d.models.length + ' models found - click the Model field to choose one, then Save.');
+      $('setModel').focus();
     }).catch(function (e) { msg('bad', e.message); });
   });
   $('setDelete').addEventListener('click', function () {
-    var box = el('div'); box.appendChild(el('p', '', 'Remove the saved Anthropic API key? The assistant stops working until you add a key again.'));
-    openModal('Remove API key', box, 'Remove', true, function () { post(URLS.aiset, {action: 'delete_key'}).then(function (d) { if (!d.ok) { throw new Error(d.error); } aiState(d); msg('ok', 'Key removed.'); }).catch(function (e) { msg('bad', e.message); }); });
+    var p = $('setProv').value, box = el('div'); box.appendChild(el('p', '', 'Remove the saved API key for ' + p + '?'));
+    openModal('Remove API key', box, 'Remove', true, function () { post(URLS.aiset, {action: 'delete_key', provider: p}).then(function (d) { if (!d.ok) { throw new Error(d.error); } aiState(d); msg('ok', 'Key removed.'); }).catch(function (e) { msg('bad', e.message); }); });
   });
-  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
+  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'setLoadModels', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
 
   // ---------------- start ----------------
   (function () {
