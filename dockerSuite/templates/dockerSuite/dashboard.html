@@ -118,6 +118,7 @@
 #dmgr .g-form label,#dmgr .ds-lbl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:none;letter-spacing:0}
 #dmgr input[type=text],#dmgr input[type=number],#dmgr input[type=time],#dmgr input[type=password],#dmgr input[type=file],#dmgr select,#dmgr textarea,#dmgr input.g-in,#dmgr select.g-in,#dmgr textarea.g-in{
   width:100%;padding:9px 11px;border:1px solid var(--line)!important;border-radius:10px;background:#fff!important;color:var(--fg)!important;-webkit-text-fill-color:var(--fg);font-size:14px;height:auto;box-shadow:none}
+#dmgr .g-form input,#dmgr .g-form select,#dmgr .g-actions input{background:#fff!important;color:var(--fg)!important;-webkit-text-fill-color:var(--fg)}
 #dmgr textarea{min-height:68px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
 #dmgr input::placeholder,#dmgr textarea::placeholder{color:#9aaba3!important;-webkit-text-fill-color:#9aaba3}
 #dmgr input:focus,#dmgr select:focus,#dmgr textarea:focus{border-color:var(--pine)!important;outline:3px solid rgba(61,220,151,.35);outline-offset:0}
@@ -206,7 +207,7 @@
   <div class="ds-hero">
     <div>
       <div class="ds-live" id="hLive"><i></i> <span id="hLiveText">Loading...</span></div>
-      <h2>Docker Suite <span class="ds-ver">0.8.1</span></h2>
+      <h2>Docker Suite <span class="ds-ver">0.8.2</span></h2>
       <p>Server, containers, GLPI and backups in one place. Every update makes a backup first and rolls back on its own if the new version does not start.</p>
       <div class="ds-hero-actions">
         <button type="button" id="dRunAll" class="g-btn glow"><i class="fas fa-play"></i> Run full job now</button>
@@ -436,10 +437,10 @@
           <div><label for="setProv">Provider</label><select id="setProv"><option value="anthropic">Anthropic Claude</option></select></div>
           <div id="setUrlBox" style="display:none"><label for="setUrl">API address (OpenAI-compatible)</label><input id="setUrl" type="text" placeholder="http://127.0.0.1:11434/v1"></div>
           <div><label for="setKey">API key <span id="setKeyState" class="g-muted"></span></label><input id="setKey" type="password" autocomplete="off" placeholder="paste a new key (leave empty to keep the saved one)"></div>
-          <div><label for="setModel">Model</label><input id="setModel" type="text" list="setModels"><datalist id="setModels"></datalist></div>
+          <div><label for="setModelSel">Model</label><select id="setModelSel"></select><input id="setModel" type="text" placeholder="model name" style="display:none;margin-top:8px"></div>
         </div>
         <div class="g-status s-info" id="setHelp" style="display:block;margin-bottom:12px"></div>
-        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save and use this provider</button><button type="button" class="g-btn" id="setLoadModels"><i class="fas fa-list"></i> Load models</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save and use this provider</button><button type="button" class="g-btn" id="setLoadModels"><i class="fas fa-list"></i> Load models</button><button type="button" class="g-btn" id="setTest"><i class="fas fa-plug"></i> Test</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
         <div class="ds-note" style="margin-top:12px">Keys are stored on the server in files only root can read and are never shown again. Command output (with secrets masked) is sent to the chosen provider; free tiers may use it to improve their models. Turn on two-factor login for CyberPanel: the assistant can run commands as root after your approval.</div>
       </div>
     </div>
@@ -1429,18 +1430,28 @@
     s2.className = 'g-badge ' + (d.has_key ? 'b-ok' : 'b-warn'); s2.textContent = d.has_key ? 'In use: ' + active.label.replace(/ \(.*\)/, '') + ' · ' + d.model : 'No key yet';
     $('aiNoKey').style.display = d.has_key ? 'none' : 'block';
   }
+  var OTHER = '__other__';
+  function fillModels(list, current) {
+    var sel = $('setModelSel'); sel.innerHTML = '';
+    var all = list.slice(); if (current && all.indexOf(current) < 0) { all.unshift(current); }
+    all.forEach(function (m) { var o = document.createElement('option'); o.value = m; o.textContent = m + (m === current ? '  (saved)' : ''); sel.appendChild(o); });
+    var o2 = document.createElement('option'); o2.value = OTHER; o2.textContent = 'Type another model name...'; sel.appendChild(o2);
+    sel.value = current || (all[0] || OTHER); modelUi();
+  }
+  function modelUi() { var other = $('setModelSel').value === OTHER; $('setModel').style.display = other ? '' : 'none'; if (!other) { $('setModel').value = $('setModelSel').value; } }
+  function curModel() { return ($('setModelSel').value === OTHER ? $('setModel').value : $('setModelSel').value).trim(); }
+  $('setModelSel').addEventListener('change', modelUi);
   function provUi() {
     var d = AIS, p = $('setProv').value; if (!d) { return; }
     var info = d.providers.filter(function (x) { return x.id === p; })[0] || {};
-    $('setModel').value = info.model || ''; $('setUrlBox').style.display = p === 'custom' ? '' : 'none'; $('setUrl').value = d.base_url || '';
+    fillModels([], info.model || ''); $('setUrlBox').style.display = p === 'custom' ? '' : 'none'; $('setUrl').value = d.base_url || '';
     $('setKeyState').textContent = d.keys[p] ? '(saved)' : '(not set)'; $('setHelp').textContent = PROV_HELP[p] || '';
-    $('setModels').innerHTML = '';
   }
   $('setProv').addEventListener('change', function () { this.dataset.touched = '1'; provUi(); });
   function aiLoadSettings() { post(URLS.aiset, {action: 'status'}).then(function (d) { if (d.ok) { aiState(d); } }).catch(function () {}); }
   $('setSave').addEventListener('click', function () {
     var p = $('setProv').value;
-    post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: $('setModel').value.trim(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) {
+    post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: curModel(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) {
       if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; $('setProv').dataset.touched = ''; aiState(d); msg('ok', 'Assistant now uses ' + p + ' · ' + d.model + '.');
     }).catch(function (e) { msg('bad', e.message); });
   });
@@ -1449,20 +1460,31 @@
     var save = Promise.resolve();
     // a new key or address must be saved before models can be listed
     if ($('setKey').value || (p === 'custom' && $('setUrl').value.trim() !== (AIS && AIS.base_url))) {
-      save = post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: $('setModel').value.trim(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) { if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); $('setProv').value = p; provUi(); });
+      save = post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: curModel(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) { if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); $('setProv').value = p; provUi(); });
     }
     save.then(function () { return post(URLS.aiset, {action: 'models', provider: p}); }).then(function (d) {
       if (!d.ok) { throw new Error(d.error); }
-      var dl = $('setModels'); dl.innerHTML = ''; d.models.forEach(function (m) { var o = document.createElement('option'); o.value = m; dl.appendChild(o); });
-      msg('ok', d.models.length + ' models found - click the Model field to choose one, then Save.');
-      $('setModel').focus();
+      fillModels(d.models.filter(function (m) { return !/whisper|tts|embed|guard|orpheus|playai|imagen|veo|aqa/i.test(m); }), curModel());
+      msg('ok', d.models.length + ' models found - choose one in the Model list, then press Save.');
+      $('setModelSel').focus();
+    }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('setTest').addEventListener('click', function () {
+    var p = $('setProv').value; msg('info', 'Saving and testing ' + p + ' · ' + curModel() + '...');
+    post(URLS.aiset, {action: 'save', provider: p, api_key64: b64u($('setKey').value), model: curModel(), base_url64: b64u($('setUrl').value.trim())}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; $('setProv').dataset.touched = ''; aiState(d);
+      return post(URLS.aiset, {action: 'test', provider: p});
+    }).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); }
+      if (d.tool_use) { msg('ok', 'Works: ' + d.provider + ' · ' + d.model + ' answered in ' + d.seconds + ' s and can run commands (it asked for: ' + d.command + ').'); }
+      else { msg('bad', d.provider + ' · ' + d.model + ' answered in ' + d.seconds + ' s but did NOT ask to run a command, so it cannot work as the assistant. Pick another model. Its answer: ' + (d.text || '(empty)')); }
     }).catch(function (e) { msg('bad', e.message); });
   });
   $('setDelete').addEventListener('click', function () {
     var p = $('setProv').value, box = el('div'); box.appendChild(el('p', '', 'Remove the saved API key for ' + p + '?'));
     openModal('Remove API key', box, 'Remove', true, function () { post(URLS.aiset, {action: 'delete_key', provider: p}).then(function (d) { if (!d.ok) { throw new Error(d.error); } aiState(d); msg('ok', 'Key removed.'); }).catch(function (e) { msg('bad', e.message); }); });
   });
-  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'setLoadModels', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
+  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'setLoadModels', 'setTest', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
 
   // ---------------- start ----------------
   (function () {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2
+- Assistant settings: the model is now a normal drop-down list (filled by "Load models"), with "Type another model name..." for anything else.
+- New "Test" button: saves the provider and checks that the model answers and can run commands (tool use).
+- Groq default model is now openai/gpt-oss-120b (llama-3.3-70b-versatile is not available to every key).
+- Form fields stay white when the panel uses a dark theme.
+
 ## 0.8.1
 - Assistant: choose the AI provider in Settings - Anthropic Claude, Groq (free tier), Google Gemini (free tier),
   OpenRouter, or any OpenAI-compatible API (e.g. Ollama). One key per provider, stored root-only.

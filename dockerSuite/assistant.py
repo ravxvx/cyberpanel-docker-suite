@@ -7,6 +7,7 @@ import re
 import shlex
 import shutil
 import tempfile
+import time
 import traceback
 import urllib.error
 import urllib.request
@@ -198,7 +199,7 @@ def _audit(request, command, status, rc=None):
 # Providers: Anthropic (native API) or any OpenAI-compatible chat API (Groq, Google Gemini, OpenRouter, Ollama, ...).
 PROVIDERS = {
     "anthropic": {"label": "Anthropic Claude", "url": API_URL, "model": DEFAULT_MODEL, "key": KEY_FILE},
-    "groq": {"label": "Groq (free tier)", "url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile", "key": CONF_DIR + "/groq.key"},
+    "groq": {"label": "Groq (free tier)", "url": "https://api.groq.com/openai/v1", "model": "openai/gpt-oss-120b", "key": CONF_DIR + "/groq.key"},
     "gemini": {"label": "Google Gemini (free tier)", "url": "https://generativelanguage.googleapis.com/v1beta/openai", "model": "gemini-flash-latest", "key": CONF_DIR + "/gemini.key"},
     "openrouter": {"label": "OpenRouter", "url": "https://openrouter.ai/api/v1", "model": "", "key": CONF_DIR + "/openrouter.key"},
     "custom": {"label": "Other OpenAI-compatible API", "url": "", "model": "", "key": CONF_DIR + "/custom.key"},
@@ -315,6 +316,29 @@ def ai_settings(request):
             return JsonResponse({"ok": False, "error": "Cannot reach the API: %s" % exc})
         ids = sorted({str(m.get("id", "")).replace("models/", "") for m in (data.get("data") or []) if m.get("id")})
         return JsonResponse({"ok": True, "models": ids[:300]})
+    elif action == "test":
+        key, model, label = _read_key(prov), _read_model(prov), PROVIDERS[prov]["label"]
+        if not key:
+            return JsonResponse({"ok": False, "error": "No API key saved for %s." % label})
+        probe = [{"role": "user", "content": "Connection test. Call the run_shell tool once with the command `uptime` and the reason `test`. Do not write anything else."}]
+        started = time.time()
+        try:
+            if prov == "anthropic":
+                content, _ = _chat_anthropic(probe, key, model)
+            else:
+                base = _base_url(prov)
+                if not base:
+                    return JsonResponse({"ok": False, "error": "Set the API address first."})
+                content, _ = _chat_openai(probe, key, model, base)
+        except urllib.error.HTTPError as exc:
+            hint = " (free-tier limit reached - wait a minute)" if exc.code == 429 else (" (this key cannot use model %s - press Load models and pick another)" % model if exc.code in (400, 404) else "")
+            return JsonResponse({"ok": False, "error": "%s answered HTTP %d%s: %s" % (label, exc.code, hint, _redact(exc.read(400).decode("utf-8", "replace")))})
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            return JsonResponse({"ok": False, "error": "Cannot reach %s: %s" % (label, exc)})
+        tools = [b for b in content if b["type"] == "tool_use" and b["input"].get("command")]
+        return JsonResponse({"ok": True, "provider": label, "model": model, "seconds": round(time.time() - started, 1),
+                             "tool_use": bool(tools), "command": tools[0]["input"]["command"] if tools else "",
+                             "text": " ".join(b.get("text", "") for b in content if b["type"] == "text")[:300]})
     elif action != "status":
         return JsonResponse({"ok": False, "error": "Unknown action."})
     return JsonResponse(_status())
