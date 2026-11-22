@@ -9,7 +9,7 @@ BR="${DM_BACKUP_ROOT:-/var/backups/docker}"; GBR="${DM_GLPI_BACKUP_ROOT:-/var/ba
 RUNDIR="${DM_RUN_DIR:-/run/dockermanager}"; CRON_FILE="${DM_CRON_FILE:-/etc/cron.d/dockermanager-backup}"
 SELF="$(readlink -f "$0")"
 umask 077
-[[ "$ACTION" =~ ^(list|checkupd|update|ctl|logs|backup|backups|restore|prune|getconfig|setconfig|vpnsave|remotetest|keyshow|keyinstall|remotesend|run)$ ]] || exit 1
+[[ "$ACTION" =~ ^(list|checkupd|update|ctl|logs|backup|backups|restore|prune|getconfig|setconfig|vpnsave|remotetest|keyshow|keyinstall|remotesend|run|delete)$ ]] || exit 1
 [[ "$NONCE" =~ ^[0-9a-f]{12}$ ]] || exit 1
 mkdir -p "$LOGDIR" "$CONF_DIR/vpn" "$BR" "$RUNDIR"; chmod 700 "$LOGDIR" "$CONF_DIR" "$CONF_DIR/vpn" "$BR" "$RUNDIR"
 ID="$ACTION-${NAME:-all}"
@@ -329,6 +329,13 @@ backups)
   [ -d "$BR/$NAME" ] && for d in $(ls -1 "$BR/$NAME" | grep -E "$TS_RE" | sort -r); do
     echo "BACKUP|$d|$(du -sk "$BR/$NAME/$d" | cut -f1)|${d:0:4}-${d:4:2}-${d:6:2} ${d:9:2}:${d:11:2}|$(ls "$BR/$NAME/$d" | grep -c '^mount-')|$([ -f "$BR/$NAME/$d/db.sql.gz" ] && echo db || echo -)"; done
   ok;;
+delete)
+  lock_ops
+  [[ "$NAME" =~ $CT_RE ]] || fail "invalid container name"
+  [[ "$EXTRA" =~ $TS_RE ]] || fail "invalid backup id"
+  [ -d "$BR/$NAME/$EXTRA" ] || fail "backup not found"
+  rm -rf "${BR:?}/$NAME/$EXTRA" || fail "could not delete $EXTRA"
+  say "Deleted backup $EXTRA of $NAME"; ok;;
 restore)
   lock_ops
   [[ "$NAME" =~ $CT_RE ]] || fail "invalid container name"

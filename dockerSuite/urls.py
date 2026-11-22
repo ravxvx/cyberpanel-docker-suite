@@ -6,6 +6,5 @@ urlpatterns = [
     path("", views.dashboard, name="dockerSuite"),
     path("job/", views.job, name="dockerSuiteJob"),
     path("jobstatus/", views.jobstatus, name="dockerSuiteJobStatus"),
-    path("overview/", views.overview, name="dockerSuiteOverview"),
     path("glpilatest/", views.glpilatest, name="dockerSuiteGlpiLatest"),
 ]
