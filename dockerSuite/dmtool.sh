@@ -1,6 +1,7 @@
 #!/bin/bash
 # Docker Suite - runs as root. Usage: dmtool.sh ACTION NAME|- EXTRA|- NONCE
-# ACTION: list checkupd update ctl logs backup backups restore prune getconfig setconfig vpnsave remotetest keyshow keyinstall remotesend run
+# ACTION: list checkupd update ctl logs backup backups restore prune getconfig setconfig vpnsave remotetest keyshow keyinstall remotesend run delete
+#         inspect stats diskinfo cleanup testrestore gtestrestore alertcheck alerttest smtpsave selfupdate
 set -uo pipefail
 ACTION="${1:-}"; NAME="${2:--}"; EXTRA="${3:--}"; NONCE="${4:-}"
 [ "$NAME" = "-" ] && NAME=""; [ "$EXTRA" = "-" ] && EXTRA=""
@@ -9,7 +10,7 @@ BR="${DM_BACKUP_ROOT:-/var/backups/docker}"; GBR="${DM_GLPI_BACKUP_ROOT:-/var/ba
 RUNDIR="${DM_RUN_DIR:-/run/dockermanager}"; CRON_FILE="${DM_CRON_FILE:-/etc/cron.d/dockermanager-backup}"
 SELF="$(readlink -f "$0")"
 umask 077
-[[ "$ACTION" =~ ^(list|checkupd|update|ctl|logs|backup|backups|restore|prune|getconfig|setconfig|vpnsave|remotetest|keyshow|keyinstall|remotesend|run|delete)$ ]] || exit 1
+[[ "$ACTION" =~ ^(list|checkupd|update|ctl|logs|backup|backups|restore|prune|getconfig|setconfig|vpnsave|remotetest|keyshow|keyinstall|remotesend|run|delete|inspect|stats|diskinfo|cleanup|testrestore|gtestrestore|alertcheck|alerttest|smtpsave|selfupdate)$ ]] || exit 1
 [[ "$NONCE" =~ ^[0-9a-f]{12}$ ]] || exit 1
 mkdir -p "$LOGDIR" "$CONF_DIR/vpn" "$BR" "$RUNDIR"; chmod 700 "$LOGDIR" "$CONF_DIR" "$CONF_DIR/vpn" "$BR" "$RUNDIR"
 ID="$ACTION-${NAME:-all}"
@@ -23,9 +24,9 @@ say(){ echo "[$(date +%H:%M:%S)] $*"; }
 CT_RE='^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$'
 TS_RE='^20[0-9]{6}-[0-9]{6}$'
 command -v python3 >/dev/null || fail "python3 is required"
-case "$ACTION" in vpnsave|getconfig|setconfig|keyshow|prune) : ;; *) command -v docker >/dev/null || fail "docker is not installed";; esac
+case "$ACTION" in vpnsave|getconfig|setconfig|keyshow|prune|alerttest|smtpsave|selfupdate|alertcheck) : ;; *) command -v docker >/dev/null || fail "docker is not installed";; esac
 
-DEFAULT_CONF='{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true,"exclude_paths":["/opt/glpi/"],"containers":{},"remote":{"enabled":false,"host":"","port":22,"user":"","path":"","retention_days":30,"vpn":"none","vpn_routes":""}}'
+DEFAULT_CONF='{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true,"exclude_paths":["/opt/glpi/"],"containers":{},"remote":{"enabled":false,"host":"","port":22,"user":"","path":"","retention_days":30,"vpn":"none","vpn_routes":""},"alerts":{"enabled":false,"email":"","method":"local","smtp_host":"","smtp_port":587,"smtp_user":"","smtp_tls":"starttls","from":"","disk_pct":85,"stale_hours":36,"down":true,"job":true,"unhealthy":true}}'
 [ -f "$CONF" ] || { echo "$DEFAULT_CONF" > "$CONF"; chmod 600 "$CONF"; }
 cget(){ python3 - "$CONF" "$1" "${2:-}" <<'PY'
 import json,sys
@@ -196,7 +197,7 @@ vpn_down(){
   esac
   rm -f "$RUNDIR/dmvpn.type"; VPN_UP=0; say "VPN disconnected"
 }
-trap vpn_down EXIT
+trap 'test_cleanup; vpn_down' EXIT
 need_pkg(){ command -v "$1" >/dev/null 2>&1 || { say "Installing $2 ..."; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$2" >/dev/null 2>&1 || return 1; }; command -v "$1" >/dev/null 2>&1; }
 route_for(){ # dev routes...
   local dev="$1" host="$2" ip r
@@ -259,6 +260,88 @@ remote_vars(){
   SSHOPT=(-i "$KEY" -p "$RPORT" -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$CONF_DIR/known_hosts" -o ConnectTimeout=15)
 }
 ensure_key(){ [ -f "$CONF_DIR/id_ed25519" ] || ssh-keygen -q -t ed25519 -N '' -f "$CONF_DIR/id_ed25519" -C "dockermanager@$(hostname)"; }
+
+# ---------------- checks table (same format as the GLPI health check) ----------------
+CK_OK=0; CK_WARN=0; CK_FAIL=0
+ck(){ echo "CHECK|$1|$2|$3"; case "$2" in OK) CK_OK=$((CK_OK+1));; WARN) CK_WARN=$((CK_WARN+1));; *) CK_FAIL=$((CK_FAIL+1));; esac; }
+ck_result(){ echo "RESULT|$1|$CK_OK|$CK_WARN|$CK_FAIL"; }
+
+# ---------------- test restore ----------------
+# Archives are unpacked to /dev/null (integrity + file count); a database dump is imported into a throw-away
+# container of the same image, with no network and no volume of the live container. Nothing live is touched.
+TEST_CT=""
+test_cleanup(){ [ -n "$TEST_CT" ] && docker rm -f -v "$TEST_CT" >/dev/null 2>&1; TEST_CT=""; }
+test_archive(){ # label file
+  local n
+  if ! gzip -t "$2" 2>/dev/null; then ck "$1" FAIL "$(basename "$2") is damaged (gzip test failed)"; return 1; fi
+  n="$(tar -tzf "$2" 2>/dev/null | wc -l; exit "${PIPESTATUS[0]}")"
+  if [ $? != 0 ]; then ck "$1" FAIL "$(basename "$2") cannot be listed"; return 1; fi
+  ck "$1" OK "$n entries, $(du -h "$2" | cut -f1)"
+}
+test_db(){ # dumpfile image kind(mysql|postgres)
+  local dump="$1" img="$2" kind="$3" pw t out
+  [[ "$img" =~ ^[A-Za-z0-9._/:@-]+$ ]] || { ck "Database import" WARN "unknown database image '$img' - dump checked only"; return 0; }
+  [ "$(free_gb)" -ge 2 ] 2>/dev/null || { ck "Database import" WARN "less than 2 GB free - import test skipped"; return 0; }
+  pw="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  TEST_CT="dstest-$(date +%s)-$RANDOM"
+  say "Starting a temporary $img container ($TEST_CT, no network)..."
+  if [ "$kind" = postgres ]; then
+    docker run -d --name "$TEST_CT" --network none --memory 1g -e POSTGRES_PASSWORD="$pw" "$img" >/dev/null 2>&1 || { ck "Database import" WARN "could not start a test container from $img"; TEST_CT=""; return 0; }
+    for t in $(seq 1 60); do [ "$(docker logs "$TEST_CT" 2>&1 | grep -c 'ready to accept connections')" -ge 2 ] && break; sleep 2; done
+    zcat "$dump" | docker exec -i "$TEST_CT" psql -q -U postgres -d postgres >/dev/null 2>"$RUNDIR/test.err"
+    out="$(docker exec "$TEST_CT" psql -At -U postgres -d postgres -c "select count(*) from pg_database where not datistemplate and datname<>'postgres'" 2>/dev/null)"
+    if [[ "$out" =~ ^[0-9]+$ ]] && [ "$out" -gt 0 ]; then ck "Database import" OK "imported into a clean $img: $out database(s)"
+    elif [[ "$out" =~ ^[0-9]+$ ]]; then ck "Database import" WARN "import ran but no user database was found"
+    else ck "Database import" FAIL "import failed: $(head -c 200 "$RUNDIR/test.err")"; fi
+  else
+    docker run -d --name "$TEST_CT" --network none --memory 1g -e MARIADB_ROOT_PASSWORD="$pw" -e MYSQL_ROOT_PASSWORD="$pw" "$img" >/dev/null 2>&1 || { ck "Database import" WARN "could not start a test container from $img"; TEST_CT=""; return 0; }
+    # the image first starts a temporary server without networking (port: 0); wait for the real one
+    for t in $(seq 1 90); do docker logs "$TEST_CT" 2>&1 | grep -qE 'port: 3306([^0-9]|$)' && break; sleep 2; done
+    zcat "$dump" | docker exec -i "$TEST_CT" sh -c 'C=$(command -v mariadb || command -v mysql); MYSQL_PWD="$MARIADB_ROOT_PASSWORD" "$C" -uroot' 2>"$RUNDIR/test.err"
+    if [ "${PIPESTATUS[1]}" = 0 ]; then
+      out="$(docker exec "$TEST_CT" sh -c 'C=$(command -v mariadb || command -v mysql); MYSQL_PWD="$MARIADB_ROOT_PASSWORD" "$C" -uroot -N -e "select count(distinct table_schema), count(*) from information_schema.tables where table_schema not in (\"mysql\",\"sys\",\"information_schema\",\"performance_schema\")"' 2>/dev/null | tr '\t' ' ')"
+      ck "Database import" OK "imported into a clean $img: ${out%% *} database(s), ${out##* } table(s)"
+    else ck "Database import" FAIL "import failed: $(head -c 200 "$RUNDIR/test.err")"; fi
+  fi
+  rm -f "$RUNDIR/test.err"; test_cleanup
+}
+
+# ---------------- mail ----------------
+send_mail(){ # subject ; body on stdin
+  python3 - "$CONF" "$CONF_DIR/smtp.pass" "$1" <<'PY'
+import json,smtplib,ssl,sys,socket,subprocess,os
+from email.message import EmailMessage
+d=json.load(open(sys.argv[1])); a=d.get("alerts") or {}
+to=a.get("email","")
+if not to: print("ERROR: no e-mail address set"); sys.exit(2)
+host=socket.getfqdn()
+m=EmailMessage(); m["To"]=to; m["From"]=a.get("from") or ("Docker Suite <root@%s>"%host); m["Subject"]="[%s] %s"%(host,sys.argv[3])
+m.set_content(sys.stdin.read())
+try:
+    if a.get("method")=="smtp":
+        pw=open(sys.argv[2]).read().strip() if os.path.exists(sys.argv[2]) else ""
+        port=int(a.get("smtp_port") or 587); tls=a.get("smtp_tls","starttls")
+        s=smtplib.SMTP_SSL(a["smtp_host"],port,timeout=30,context=ssl.create_default_context()) if tls=="ssl" else smtplib.SMTP(a["smtp_host"],port,timeout=30)
+        if tls=="starttls": s.starttls(context=ssl.create_default_context())
+        if a.get("smtp_user"): s.login(a["smtp_user"],pw)
+        s.send_message(m); s.quit()
+    elif os.path.exists("/usr/sbin/sendmail"):
+        p=subprocess.run(["/usr/sbin/sendmail","-t","-oi"],input=m.as_bytes(),timeout=60)
+        if p.returncode: raise RuntimeError("sendmail exit %d"%p.returncode)
+    else:
+        s=smtplib.SMTP("localhost",25,timeout=30); s.send_message(m); s.quit()
+    print("Mail sent to %s"%to)
+except Exception as e:
+    print("ERROR: mail not sent: %s"%e); sys.exit(1)
+PY
+}
+
+# ---------------- self-update from GitHub ----------------
+REPO="${DS_REPO:-ravxvx/cyberpanel-docker-suite}"; BRANCH="${DS_BRANCH:-main}"; API="${DS_API:-https://api.github.com}"; CODELOAD="${DS_CODELOAD:-https://codeload.github.com}"
+PDIR="${DS_PLUGIN_DIR:-$(dirname "$SELF")}"
+gh_get(){ curl -fsSL --max-time 30 -H "User-Agent: dockerSuite-cyberpanel" -H "Accept: ${2:-application/vnd.github+json}" "$1"; }
+meta_ver(){ grep -o '<version>[^<]*' "$1" 2>/dev/null | head -1 | cut -d'>' -f2; }
+ver_gt(){ [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1)" = "$1" ]; }
 
 # ---------------- actions ----------------
 case "$ACTION" in
@@ -397,6 +480,16 @@ out={"retention_days":num(d.get("retention_days"),1,365,5),"min_keep":num(d.get(
   "retention_days":num(r.get("retention_days"),1,3650,30),
   "vpn":r.get("vpn") if r.get("vpn") in ("none","openvpn","wireguard") else "none",
   "vpn_routes":",".join(x for x in re.split(r'[,\s]+',str(r.get("vpn_routes",""))) if re.match(r'^[0-9.]+/[0-9]{1,2}$',x))}}
+a=d.get("alerts") or {}
+em=lambda v: str(v) if re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',str(v or "")) else ""
+out["alerts"]={"enabled":bool(a.get("enabled",False)),"email":em(a.get("email")),
+ "method":a.get("method") if a.get("method") in ("local","smtp") else "local",
+ "smtp_host":a.get("smtp_host","") if re.match(r'^[A-Za-z0-9.-]{0,200}$',str(a.get("smtp_host",""))) else "",
+ "smtp_port":num(a.get("smtp_port"),1,65535,587),
+ "smtp_user":str(a.get("smtp_user",""))[:120] if re.match(r'^[A-Za-z0-9._%+@-]{0,120}$',str(a.get("smtp_user",""))) else "",
+ "smtp_tls":a.get("smtp_tls") if a.get("smtp_tls") in ("starttls","ssl","none") else "starttls",
+ "from":em(a.get("from")),"disk_pct":num(a.get("disk_pct"),50,99,85),"stale_hours":num(a.get("stale_hours"),12,720,36),
+ "down":bool(a.get("down",True)),"job":bool(a.get("job",True)),"unhealthy":bool(a.get("unhealthy",True))}
 open(sys.argv[2],"w").write(json.dumps(out,indent=1))
 PY
   rm -f "$RUNDIR/newconf.json"; chmod 600 "$CONF"
@@ -405,6 +498,11 @@ PY
     printf '%s %s * * * root %s run - - 0123456789ab\n' "${sch:3:2}" "${sch:0:2}" "$(dirname "$SELF")/dmtool.sh" > "$CRON_FILE.tmp" && mv "$CRON_FILE.tmp" "$CRON_FILE" && chmod 644 "$CRON_FILE"
     say "Saved. Automatic job at $sch every day."
   else rm -f "$CRON_FILE"; say "Saved. Automatic job is OFF."; fi
+  ACRON="${DM_ALERT_CRON:-/etc/cron.d/dockermanager-alerts}"
+  if [ "$(cget alerts.enabled false)" = true ]; then
+    printf '*/10 * * * * root %s alertcheck - - 0123456789ab\n' "$(dirname "$SELF")/dmtool.sh" > "$ACRON.tmp" && mv "$ACRON.tmp" "$ACRON" && chmod 644 "$ACRON"
+    say "Alerts are ON: checked every 10 minutes, mail to $(cget alerts.email)."
+  else rm -f "$ACRON"; fi
   ok;;
 vpnsave)
   case "$NAME" in wireguard|openvpn|openvpn-auth) :;; *) fail "bad name";; esac
@@ -481,4 +579,216 @@ run)
     grep -q '__DONE__ OK' "$LOGDIR/job-remotesend-all.log" 2>/dev/null || bad=1
   fi
   [ "$bad" = 0 ] && ok || fail "finished with errors";;
+inspect)
+  [[ "$NAME" =~ $CT_RE ]] || fail "invalid container name"
+  docker inspect "$NAME" > "$RUNDIR/inspect.json" 2>/dev/null || fail "container not found"
+  python3 - "$RUNDIR/inspect.json" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1]))[0]; c=d["Config"]; s=d["State"]; h=d["HostConfig"]; l=c.get("Labels") or {}
+def o(*a): print("|".join(str(x).replace("|","/").replace("\n"," ") for x in a))
+o("INFO","Image",c.get("Image",""))
+o("INFO","Status",s.get("Status",""))
+o("INFO","Health",(s.get("Health") or {}).get("Status","no health check"))
+o("INFO","Started",s.get("StartedAt","")[:19].replace("T"," "))
+o("INFO","Created",d.get("Created","")[:19].replace("T"," "))
+o("INFO","Restart policy",(h.get("RestartPolicy") or {}).get("Name") or "no")
+o("INFO","Restarts",d.get("RestartCount",0))
+o("INFO","Exit code",s.get("ExitCode",0))
+cmd=" ".join((c.get("Entrypoint") or [])+(c.get("Cmd") or []))
+o("INFO","Command",cmd[:160] or "-")
+if l.get("com.docker.compose.project"): o("INFO","Compose","%s / %s (%s)"%(l.get("com.docker.compose.project"),l.get("com.docker.compose.service",""),l.get("com.docker.compose.project.working_dir","")))
+o("INFO","Environment","%d variables (values hidden)"%len(c.get("Env") or []))
+mem=h.get("Memory") or 0; o("INFO","Memory limit","%d MB"%(mem//1048576) if mem else "none")
+for n,v in ((d.get("NetworkSettings") or {}).get("Networks") or {}).items(): o("NET",n,v.get("IPAddress") or "-")
+for p,b in ((d.get("NetworkSettings") or {}).get("Ports") or {}).items():
+    o("PORT",p,", ".join("%s:%s"%(x.get("HostIp"),x.get("HostPort")) for x in (b or [])) or "not published")
+for m in d.get("Mounts",[]): o("MOUNT",m.get("Type"),m.get("Name") or m.get("Source"),m.get("Destination"),"rw" if m.get("RW") else "ro",m.get("Source",""))
+PY
+  docker image inspect -f 'IMG|{{.Created}}|{{.Size}}' "$(docker inspect -f '{{.Image}}' "$NAME")" 2>/dev/null
+  docker stats --no-stream --format 'STATS|{{.CPUPerc}}|{{.MemUsage}}|{{.MemPerc}}|{{.NetIO}}|{{.BlockIO}}|{{.PIDs}}' "$NAME" 2>/dev/null
+  while IFS='|' read -r _ typ nm dst rw src; do
+    [ -n "$src" ] && [ -d "$src" ] && echo "MSIZE|$dst|$(timeout 8 du -sh "$src" 2>/dev/null | cut -f1)"
+  done < <(grep '^MOUNT|' <(python3 -c 'import json,sys
+for m in json.load(open(sys.argv[1]))[0].get("Mounts",[]): print("MOUNT|%s|%s|%s|x|%s"%(m.get("Type"),m.get("Name") or "",m.get("Destination"),m.get("Source","")))' "$RUNDIR/inspect.json"))
+  rm -f "$RUNDIR/inspect.json"
+  docker logs --tail 60 --timestamps "$NAME" 2>&1 | tail -60 | sed 's/^/LOG|/'
+  ok;;
+stats)
+  [[ "$NAME" =~ $CT_RE ]] || fail "invalid container name"
+  docker stats --no-stream --format 'STATS|{{.CPUPerc}}|{{.MemUsage}}|{{.MemPerc}}|{{.NetIO}}|{{.BlockIO}}|{{.PIDs}}' "$NAME" 2>/dev/null || fail "container not running"
+  ok;;
+diskinfo)
+  echo "ROOT|$(df --output=pcent,used,size -BG / | tail -1 | tr -s ' ' | sed 's/^ //;s/ /|/g')"
+  docker system df --format 'DF|{{.Type}}|{{.TotalCount}}|{{.Active}}|{{.Size}}|{{.Reclaimable}}' 2>/dev/null
+  echo "DANGLING|$(docker images -qf dangling=true 2>/dev/null | wc -l)"
+  docker volume ls -qf dangling=true 2>/dev/null | while read -r v; do
+    mp="$(docker volume inspect -f '{{.Mountpoint}}' "$v" 2>/dev/null)"; echo "VOL|$v|$(timeout 5 du -sh "$mp" 2>/dev/null | cut -f1)"; done
+  docker ps -aq 2>/dev/null | xargs -r docker inspect -f '{{.Name}}|{{.LogPath}}' 2>/dev/null | while IFS='|' read -r n lp; do
+    [ -f "$lp" ] && echo "CLOG|${n#/}|$(stat -c %s "$lp")"; done
+  for d in "$BR" "$GBR" "${DM_SERVER_BACKUP_ROOT:-/var/backups/server}" /var/restore; do [ -d "$d" ] && echo "DIR|$d|$(du -sh "$d" 2>/dev/null | cut -f1)"; done
+  ok;;
+cleanup)
+  lock_ops
+  before="$(df --output=avail -BM / | tail -1 | tr -dc '0-9')"
+  case "$EXTRA" in
+    dangling) say "Removing dangling images..."; docker image prune -f;;
+    images) say "Removing every image no container uses (incl. old images kept for rollback)..."; docker image prune -af;;
+    buildcache) say "Removing the build cache..."; docker builder prune -af;;
+    volumes)
+      mapfile -t vols < <(docker volume ls -qf dangling=true)
+      [ "${#vols[@]}" -gt 0 ] || { say "No unused volumes."; ok; }
+      for v in "${vols[@]}"; do say "Removing volume $v"; docker volume rm "$v" >/dev/null || echo "WARN: could not remove $v"; done;;
+    logs)
+      docker ps -aq | xargs -r docker inspect -f '{{.Name}}|{{.LogPath}}' | while IFS='|' read -r n lp; do
+        if [ -f "$lp" ] && [ "$(stat -c %s "$lp")" -gt 52428800 ]; then say "Emptying log of ${n#/} ($(du -h "$lp" | cut -f1))"; truncate -s 0 "$lp"; fi; done;;
+    restore) say "Removing extracted backups in /var/restore ..."; [ -d /var/restore ] && find /var/restore -mindepth 1 -maxdepth 1 -exec rm -rf {} +;;
+    *) fail "unknown cleanup";;
+  esac
+  after="$(df --output=avail -BM / | tail -1 | tr -dc '0-9')"
+  fr=$((after-before)); [ "$fr" -lt 0 ] && fr=0
+  say "Freed about $fr MB on /"; ok;;
+testrestore)
+  [[ "$NAME" =~ $CT_RE ]] || fail "invalid container name"
+  [[ "$EXTRA" =~ $TS_RE ]] || fail "invalid backup id"
+  B="$BR/$NAME/$EXTRA"; [ -d "$B" ] || fail "backup not found"
+  say "Test restore of $NAME / $EXTRA (the live container is not touched)"
+  if ( cd "$B" && sha256sum -c --quiet SHA256SUMS ) >/dev/null 2>&1; then ck "Checksums" OK "every file matches SHA256SUMS"; else ck "Checksums" FAIL "a file does not match SHA256SUMS - the backup is damaged"; fi
+  while IFS=$'\t' read -r i typ nm dst f; do [ -n "$i" ] && test_archive "Volume $dst" "$B/$f"; done < "$B/mounts.tsv"
+  [ -f "$B/compose.tar.gz" ] && test_archive "Compose files" "$B/compose.tar.gz"
+  if [ -f "$B/db.sql.gz" ]; then
+    if gzip -t "$B/db.sql.gz" 2>/dev/null && zcat "$B/db.sql.gz" | tail -3 | grep -qiE 'dump completed|dump complete'; then ck "Database dump" OK "complete ($(du -h "$B/db.sql.gz" | cut -f1))"
+      img="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))[0]["Config"]["Image"])' "$B/inspect.json" 2>/dev/null)"
+      case "$(grep '^image=' "$B/manifest.txt" | cut -d= -f2)" in postgres) test_db "$B/db.sql.gz" "$img" postgres;; *) test_db "$B/db.sql.gz" "$img" mysql;; esac
+    else ck "Database dump" FAIL "dump is damaged or incomplete"; fi
+  fi
+  [ -s "$B/mounts.tsv" ] || [ -f "$B/db.sql.gz" ] || ck "Contents" WARN "only container settings in this backup (no volumes, no database)"
+  ck_result "$NAME"; [ "$CK_FAIL" = 0 ] && ok || fail "the backup did not pass the test";;
+gtestrestore)
+  [[ "$NAME" =~ ^[a-z0-9][a-z0-9_-]{0,40}$ ]] || fail "invalid instance name"
+  [[ "$EXTRA" =~ $TS_RE ]] || fail "invalid backup id"
+  B="$GBR/$NAME/$EXTRA"; [ -d "$B" ] || fail "backup not found"
+  say "Test restore of GLPI $NAME / $EXTRA (the live instance is not touched)"
+  if ( cd "$B" && sha256sum -c --quiet SHA256SUMS ) >/dev/null 2>&1; then ck "Checksums" OK "every file matches SHA256SUMS"; else ck "Checksums" FAIL "a file does not match SHA256SUMS - the backup is damaged"; fi
+  for f in glpi_data glpi_plugins compose; do [ -f "$B/$f.tar.gz" ] && test_archive "Archive $f" "$B/$f.tar.gz"; done
+  if [ -f "$B/glpi_data.tar.gz" ]; then tar -tzf "$B/glpi_data.tar.gz" 2>/dev/null | grep -q glpicrypt.key && ck "Encryption key" OK "glpicrypt.key is in the backup" || ck "Encryption key" WARN "glpicrypt.key not found - encrypted passwords could not be read after a restore"; fi
+  if [ -f "$B/db.sql.gz" ] && gzip -t "$B/db.sql.gz" 2>/dev/null && zcat "$B/db.sql.gz" | tail -3 | grep -q "Dump completed"; then
+    ck "Database dump" OK "complete ($(du -h "$B/db.sql.gz" | cut -f1))"
+    img="$(docker ps -a --filter "label=com.docker.compose.project.working_dir=/opt/glpi/$NAME" --format '{{.Image}}' | grep -iE 'mariadb|mysql' | head -1)"
+    test_db "$B/db.sql.gz" "${img:-mariadb:11}" mysql
+  else ck "Database dump" FAIL "missing, damaged or incomplete"; fi
+  ck_result "$NAME"; [ "$CK_FAIL" = 0 ] && ok || fail "the backup did not pass the test";;
+smtpsave)
+  echo "$EXTRA" | base64 -d > "$CONF_DIR/smtp.pass.tmp" 2>/dev/null || fail "invalid data"
+  mv "$CONF_DIR/smtp.pass.tmp" "$CONF_DIR/smtp.pass"; chmod 600 "$CONF_DIR/smtp.pass"
+  say "SMTP password saved (readable by root only)."; ok;;
+alerttest)
+  printf 'This is a test message from Docker Suite on %s.\nIf you can read this, alerts will reach you.\n' "$(hostname)" | send_mail "Docker Suite test alert" || fail "the test mail was not sent"
+  ok;;
+alertcheck)
+  [ "$(cget alerts.enabled false)" = true ] || { say "Alerts are off."; ok; }
+  report="$(python3 - "$CONF" "$CONF_DIR/alertstate.json" "$BR" "$GBR" "${DM_SERVER_BACKUP_ROOT:-/var/backups/server}" "$LOGDIR/job-run-all.log" <<'PY'
+import json,os,subprocess,sys,time,glob,shutil
+conf,statef,br,gbr,sbr,runlog=sys.argv[1:7]
+d=json.load(open(conf)); a=d.get("alerts") or {}
+try: st=json.load(open(statef))
+except Exception: st={}
+sent=st.get("sent",{}); texts=st.get("texts",{}); prev=set(st.get("running",[])); now=time.time(); probs={}
+running=[]
+try:
+    ids=subprocess.run(["docker","ps","-aq"],capture_output=True,text=True,timeout=30).stdout.split()
+    info=json.loads(subprocess.run(["docker","inspect"]+ids,capture_output=True,text=True,timeout=60).stdout or "[]") if ids else []
+except Exception: info=[]
+for c in info:
+    n=c["Name"].lstrip("/"); s=c["State"]; pol=(c["HostConfig"].get("RestartPolicy") or {}).get("Name","no")
+    if s.get("Running"): running.append(n)
+    key="down:"+n
+    if a.get("down",True) and not s.get("Running") and (n in prev or key in sent or pol in ("always","unless-stopped")):
+        probs[key]="Container %s is not running (%s, exit code %s)."%(n,s.get("Status"),s.get("ExitCode"))
+    if a.get("unhealthy",True) and (s.get("Health") or {}).get("Status")=="unhealthy":
+        probs["unhealthy:"+n]="Container %s is unhealthy."%n
+lim=int(a.get("disk_pct") or 85)
+for mp in sorted(set(["/"]+[p for p in (br,) if os.path.isdir(p)])):
+    u=shutil.disk_usage(mp); pct=int(u.used*100/u.total)
+    if pct>=lim: probs["disk:"+mp]="Disk %s is %d%% full (%d GB free)."%(mp,pct,u.free//1073741824)
+if d.get("auto",True):
+    newest=0
+    for root in (br,gbr,sbr):
+        for p in glob.glob(os.path.join(root,"*","20??????-??????"))+glob.glob(os.path.join(root,"20??????-??????")):
+            newest=max(newest,os.path.getmtime(p))
+    hrs=int(a.get("stale_hours") or 36)
+    if newest and now-newest>hrs*3600: probs["stale"]="The newest backup is %d hours old (limit %d h). Check the nightly job."%((now-newest)//3600,hrs)
+if a.get("job",True) and os.path.exists(runlog):
+    txt=open(runlog,errors="replace").read()
+    if "__DONE__ FAIL" in txt:
+        probs["job:%d"%os.path.getmtime(runlog)]="The nightly job finished with errors:\n"+"\n".join(l for l in txt.splitlines() if "ERROR" in l or "WARN" in l)[-1500:]
+new=[k for k in probs if k not in sent or now-sent[k]>86400]
+resolved=[k for k in sent if k not in probs and not k.startswith("job:")]
+for k in new: sent[k]=now
+for k in resolved: sent.pop(k,None)
+for k in [k for k in sent if k.startswith("job:") and k not in probs]: sent.pop(k,None)
+old_texts=texts; texts={k:probs[k][:300] for k in sent if k in probs}
+json.dump({"sent":sent,"texts":texts,"running":running},open(statef,"w"))
+if new or resolved:
+    print("SUBJECT|"+("%d problem(s) on the server"%len(probs) if probs else "All clear again"))
+    for k in sorted(probs): print(("NEW: " if k in new else "STILL: ")+probs[k])
+    for k in resolved: print("FIXED: "+old_texts.get(k,k).split("\n")[0].split(" (")[0].replace(" is not running"," runs again").replace(" is unhealthy"," is healthy again"))
+else:
+    print("NOTHING|%d open problem(s), nothing new to send"%len(probs))
+PY
+)" || fail "alert check failed"
+  echo "$report" | grep -v '^SUBJECT|'
+  if echo "$report" | grep -q '^SUBJECT|'; then
+    subj="$(echo "$report" | grep '^SUBJECT|' | cut -d'|' -f2)"
+    { echo "$report" | grep -v '^SUBJECT|'; echo; echo "-- Docker Suite on $(hostname). Settings: CyberPanel > Docker Suite > Settings."; } | send_mail "$subj" || fail "mail not sent"
+  fi
+  ok;;
+selfupdate)
+  command -v curl >/dev/null || fail "curl is required"
+  cur="$(meta_ver "$PDIR/meta.xml")"
+  sha="$(gh_get "$API/repos/$REPO/commits/$BRANCH" | python3 -c 'import json,sys;print(json.load(sys.stdin)["sha"])' 2>/dev/null)"
+  [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || fail "cannot reach GitHub ($REPO)"
+  # The contents API is read at a fixed commit, so a fresh merge is seen at once (raw.githubusercontent.com caches ~5 min).
+  gh_get "$API/repos/$REPO/contents/dockerSuite/meta.xml?ref=$sha" application/vnd.github.raw > "$RUNDIR/remote-meta.xml" || fail "cannot read meta.xml from GitHub"
+  new="$(meta_ver "$RUNDIR/remote-meta.xml")"; rm -f "$RUNDIR/remote-meta.xml"
+  [[ "$new" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "unexpected version on GitHub: '$new'"
+  echo "SU|$cur|$new|${sha:0:7}"
+  if [ "$EXTRA" = check ]; then
+    if ver_gt "$new" "$cur"; then
+      gh_get "$API/repos/$REPO/contents/CHANGELOG.md?ref=$sha" application/vnd.github.raw 2>/dev/null | python3 -c '
+import re,sys
+cur=tuple(int(x) for x in sys.argv[1].split("."))
+show=False
+for l in sys.stdin.read().splitlines():
+    m=re.match(r"^## +([0-9]+)\.([0-9]+)\.([0-9]+)",l)
+    if m: show=tuple(map(int,m.groups()))>cur
+    if show: print("CL|"+l)' "$cur"
+    fi
+    ok
+  fi
+  [ "$EXTRA" = apply ] || fail "unknown selfupdate mode"
+  ver_gt "$new" "$cur" || { say "Already up to date ($cur)."; ok; }
+  T="$(mktemp -d /tmp/dsupdate.XXXXXX)"
+  say "Downloading $new (${sha:0:7})..."
+  curl -fsSL --max-time 180 "$CODELOAD/$REPO/tar.gz/$sha" -o "$T/src.tgz" || { rm -rf "$T"; fail "download failed"; }
+  tar -xzf "$T/src.tgz" -C "$T" || { rm -rf "$T"; fail "archive is damaged"; }
+  N="$(find "$T" -mindepth 2 -maxdepth 2 -type d -name dockerSuite | head -1)"
+  [ -n "$N" ] && [ "$(meta_ver "$N/meta.xml")" = "$new" ] || { rm -rf "$T"; fail "downloaded files do not match version $new"; }
+  say "Checking the new files..."
+  for f in views.py urls.py; do python3 -c 'import ast,sys;ast.parse(open(sys.argv[1]).read())' "$N/$f" || { rm -rf "$T"; fail "$f has a syntax error - update cancelled"; }; done
+  for f in dmtool.sh glpitool.sh srvtool.sh post_install; do [ -f "$N/$f" ] && { bash -n "$N/$f" || { rm -rf "$T"; fail "$f has a syntax error - update cancelled"; }; }; done
+  [ -f "$N/templates/dockerSuite/dashboard.html" ] || { rm -rf "$T"; fail "dashboard template missing - update cancelled"; }
+  BK="/root/dockersuite-$cur-$(date +%Y%m%d-%H%M%S).tar.gz"
+  tar -czf "$BK" -C "$(dirname "$PDIR")" "$(basename "$PDIR")" || { rm -rf "$T"; fail "could not back up the current version"; }
+  say "Current version saved to $BK"
+  ls -1t /root/dockersuite-*.tar.gz 2>/dev/null | tail -n +4 | xargs -r rm -f
+  find "$N" -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null
+  cp -a "$N" "$PDIR.new" || { rm -rf "$T" "$PDIR.new"; fail "copy failed"; }
+  OLD="$PDIR.old-$$"
+  mv "$PDIR" "$OLD" && mv "$PDIR.new" "$PDIR" || { [ -d "$OLD" ] && [ ! -d "$PDIR" ] && mv "$OLD" "$PDIR"; rm -rf "$T"; fail "could not switch folders - old version kept"; }
+  chown -R --reference="$OLD" "$PDIR" 2>/dev/null
+  rm -rf "$T" "$OLD"
+  say "Files replaced. Running post_install (the panel restarts in a few seconds)..."
+  sh "$PDIR/post_install" 2>&1 | tail -3
+  say "Updated $cur -> $new. Reload the page (Ctrl+F5) in about 15 seconds."
+  ok;;
 esac

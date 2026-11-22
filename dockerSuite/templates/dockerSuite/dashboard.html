@@ -140,6 +140,63 @@
 #dmgr .g-modal-box h3{margin:0 0 12px;font-size:18px;font-weight:700;color:var(--head)} #dmgr .g-modal-box ol,#dmgr .g-modal-box ul{padding-left:20px;margin:8px 0}
 #dmgr .g-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 
+
+/* 0.8: overview, sub-tabs, container detail, activity bar, chat */
+#dmgr{padding-bottom:90px}
+#dmgr .ds-tab .n.dot{background:#ffd37a;color:#5a3a00}
+#dmgr .ds-sys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+#dmgr .ds-sysc{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(10,30,22,.06),0 8px 24px rgba(10,30,22,.07)}
+#dmgr .ds-sysc span{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+#dmgr .ds-sysc b{display:block;font-size:28px;line-height:1.15;margin:6px 0 2px;color:var(--head);font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+#dmgr .ds-sysc small{display:block;color:var(--muted);font-size:12.5px;margin-bottom:10px;min-height:16px}
+#dmgr .ds-bar i.mid{background:#d89614} #dmgr .ds-bar i.hi{background:#c0271a}
+#dmgr .ds-pills{display:flex;flex-wrap:wrap;gap:8px}
+#dmgr .ds-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;background:var(--soft);font-size:13px;font-weight:600;color:var(--fg)}
+#dmgr .ds-pill i{width:8px;height:8px;border-radius:50%;background:#2fbf71} #dmgr .ds-pill.down i{background:#d63a2b} #dmgr .ds-pill.down{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-split2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+#dmgr .ds-split2>.g-card{margin-bottom:16px}
+#dmgr .ds-rows{display:flex;flex-direction:column;gap:2px}
+#dmgr .ds-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+#dmgr .ds-row:last-child{border-bottom:0} #dmgr .ds-row b{color:var(--head);font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+#dmgr .ds-row span{color:var(--muted)}
+#dmgr .ds-sub{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+#dmgr .ds-sub button{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}
+#dmgr .ds-sub button.on{background:var(--mint);border-color:var(--mint2);color:var(--pine-d)}
+#dmgr #dTable tbody tr[data-ct]{cursor:pointer}
+#dmgr #dTable tbody tr.sel td{background:var(--mint)!important}
+#dmgr .ds-detail{border:2px solid var(--mint2)}
+#dmgr .ds-detail .ds-logo{margin-right:2px}
+#dmgr .ds-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+#dmgr .ds-tile{padding:12px 14px;border-radius:12px;background:var(--soft)}
+#dmgr .ds-tile span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+#dmgr .ds-tile b{display:block;font-size:19px;color:var(--head);margin-top:3px;font-variant-numeric:tabular-nums}
+#dmgr .ds-tile small{color:var(--muted);font-size:12px}
+#dmgr .ds-clean{display:flex;flex-direction:column;gap:10px}
+#dmgr .ds-citem{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+#dmgr .ds-citem b{display:block;color:var(--head)} #dmgr .ds-citem p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+#dmgr .ds-citem .sz{font-weight:700;font-variant-numeric:tabular-nums;color:var(--head);white-space:nowrap}
+#dmgr .ds-cl{margin:6px 0 0;padding-left:18px;color:var(--fg);font-size:13px}
+#dmgr .ds-opbar{position:fixed;left:auto;right:18px;bottom:14px;width:min(760px,calc(100% - 36px));z-index:900;background:#0d231b;border-radius:16px;box-shadow:0 14px 40px rgba(5,20,15,.4);padding:8px 10px}
+#dmgr .ds-ophead{display:flex;align-items:center;gap:10px}
+#dmgr .ds-opbar .g-status{flex:1;margin:0;padding:8px 12px;min-height:36px}
+#dmgr .ds-opbar .g-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e9f6ef;flex:none}
+#dmgr .ds-opbar pre.g-log{display:none;margin-top:8px;max-height:42vh}
+#dmgr .ds-opbar.open pre.g-log{display:block}
+#dmgr .ds-chat{display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow:auto;margin-bottom:12px}
+#dmgr .ds-chat:empty{display:none}
+#dmgr .ds-msg{max-width:85%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.5}
+#dmgr .ds-msg.user{align-self:flex-end;background:var(--pine);color:#fff;border-bottom-right-radius:4px}
+#dmgr .ds-msg.bot{align-self:flex-start;background:var(--soft);color:var(--fg);border-bottom-left-radius:4px}
+#dmgr .ds-msg.err{background:var(--badbg);color:var(--bad)}
+#dmgr .ds-cmd{align-self:stretch;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
+#dmgr .ds-cmd.wait{border-color:#e2b04a;background:#fffaf0} #dmgr .ds-cmd.bad{border-color:#e7a29a}
+#dmgr .ds-cmd .hd{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px}
+#dmgr .ds-cmd pre{margin:8px 0 0;background:#0b1712;color:#bfe0cf;padding:9px 11px;border-radius:9px;font:12.5px/1.5 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;border:0;max-height:300px;overflow:auto}
+#dmgr .ds-cmd pre.out{background:var(--soft);color:var(--fg)}
+#dmgr .ds-typing{align-self:flex-start;color:var(--muted);font-size:13px;display:flex;gap:8px;align-items:center}
+#dmgr code{word-break:break-all}
+@media (max-width:991px){ #dmgr .ds-sys{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){ #dmgr .ds-sys{grid-template-columns:1fr} #dmgr .ds-citem{grid-template-columns:1fr} #dmgr .ds-opbar{right:8px;width:calc(100% - 16px)}}
 @media (max-width:991px){ #dmgr .ds-hero{grid-template-columns:1fr} #dmgr .ds-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){ #dmgr .ds-hero{padding:22px 18px} #dmgr .ds-hero h2{font-size:27px} #dmgr .g-title,#dmgr .g-body{padding-left:16px;padding-right:16px}}
 @media (prefers-reduced-motion:reduce){ #dmgr *{transition:none!important;animation:none!important}}
@@ -149,11 +206,11 @@
   <div class="ds-hero">
     <div>
       <div class="ds-live" id="hLive"><i></i> <span id="hLiveText">Loading...</span></div>
-      <h2>Docker Suite <span class="ds-ver">0.7.1</span></h2>
-      <p>Containers, GLPI and server backups in one place. Every update makes a backup first and rolls back on its own if the new version does not start.</p>
+      <h2>Docker Suite <span class="ds-ver">0.8.0</span></h2>
+      <p>Server, containers, GLPI and backups in one place. Every update makes a backup first and rolls back on its own if the new version does not start.</p>
       <div class="ds-hero-actions">
         <button type="button" id="dRunAll" class="g-btn glow"><i class="fas fa-play"></i> Run full job now</button>
-        <button type="button" id="dCheck" class="g-btn glass"><i class="fas fa-cloud-arrow-down"></i> Check for updates</button>
+        <button type="button" id="dAsk" class="g-btn glass"><i class="fas fa-wand-magic-sparkles"></i> Ask the assistant</button>
         <button type="button" id="dRefresh" class="g-btn glass"><i class="fas fa-arrows-rotate"></i> Refresh</button>
       </div>
     </div>
@@ -165,26 +222,62 @@
     </div>
   </div>
 
-  <div class="ds-attn" id="dAttn"></div>
-
   <div class="ds-tabs" role="tablist">
-    <button type="button" class="ds-tab on" id="tabBtnD"><i class="fas fa-cubes"></i> Containers <span class="n" id="tabND">-</span></button>
+    <button type="button" class="ds-tab on" id="tabBtnO"><i class="fas fa-gauge-high"></i> Overview</button>
+    <button type="button" class="ds-tab" id="tabBtnD"><i class="fas fa-cubes"></i> Containers <span class="n" id="tabND">-</span></button>
     <button type="button" class="ds-tab" id="tabBtnG"><i class="fas fa-headset"></i> GLPI <span class="n" id="tabNG">-</span></button>
-    <button type="button" class="ds-tab" id="tabBtnS"><i class="fas fa-server"></i> Server backup</button>
-    <button type="button" class="ds-tab" id="tabBtnC"><i class="fas fa-clock"></i> Schedule</button>
-    <button type="button" class="ds-tab" id="tabBtnN"><i class="fas fa-cloud-arrow-up"></i> NAS / VPN</button>
+    <button type="button" class="ds-tab" id="tabBtnB"><i class="fas fa-box-archive"></i> Backups</button>
+    <button type="button" class="ds-tab" id="tabBtnA"><i class="fas fa-wand-magic-sparkles"></i> Assistant</button>
+    <button type="button" class="ds-tab" id="tabBtnS"><i class="fas fa-gear"></i> Settings <span class="n dot" id="tabNS" style="display:none">!</span></button>
   </div>
 
-  <div id="tabDocker">
+  <div id="tabOverview">
+    <div class="ds-attn" id="dAttn"></div>
+    <div class="ds-sys" id="oSys">
+      <div class="ds-sysc"><span>CPU load (now)</span><b id="oCpu">-</b><small id="oCpuSub"></small><div class="ds-bar"><i id="oCpuBar"></i></div></div>
+      <div class="ds-sysc"><span>Memory</span><b id="oMem">-</b><small id="oMemSub"></small><div class="ds-bar"><i id="oMemBar"></i></div></div>
+      <div class="ds-sysc"><span>Disk (/)</span><b id="oDisk">-</b><small id="oDiskSub"></small><div class="ds-bar"><i id="oDiskBar"></i></div></div>
+      <div class="ds-sysc"><span>Newest backup</span><b id="oBk">-</b><small id="oBkSub"></small><div class="ds-bar"><i id="oBkBar"></i></div></div>
+    </div>
     <div class="g-card">
-      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cubes"></i></span> Containers</span><span id="dDf"></span></div>
-      <div class="ds-scroll"><table class="g-table" id="dTable"><thead><tr><th>Container</th><th>Status</th><th>Usage</th><th>Nightly backup</th><th>Last backup</th><th>Actions</th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Loading...</td></tr></tbody></table></div>
-      <div class="g-body ds-note"><b>Volumes</b> = the container is copied in the nightly job. <b>Stop</b> = it is stopped for a moment during the copy, so files are consistent (databases are dumped without stopping). Containers in <code>/opt/glpi/</code> are backed up by the GLPI tab, so they are off here by default.
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-server"></i></span> Services</span><span class="g-muted" id="oUp"></span></div>
+      <div class="g-body"><div class="ds-pills" id="oSvc"><span class="g-muted">Loading...</span></div></div>
+    </div>
+    <div class="ds-split2">
+      <div class="g-card">
+        <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock"></i></span> Nightly job</span><button type="button" class="g-btn sm" id="oSchedEdit"><i class="fas fa-pen"></i> Change</button></div>
+        <div class="g-body"><ol class="ds-tl" id="schedTl"></ol></div>
+      </div>
+      <div class="g-card">
+        <div class="g-title"><span><span class="ds-ico"><i class="fas fa-hard-drive"></i></span> Space used</span><button type="button" class="g-btn sm" id="oClean"><i class="fas fa-broom"></i> Clean up</button></div>
+        <div class="g-body"><div id="oBkSizes" class="ds-rows"><span class="g-muted">Loading...</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabDocker" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cubes"></i></span> Containers</span>
+        <span class="g-actions"><span id="dDf"></span><button type="button" id="dCheck" class="g-btn sm"><i class="fas fa-cloud-arrow-down"></i> Check image updates</button></span></div>
+      <div class="ds-scroll"><table class="g-table" id="dTable"><thead><tr><th>Container</th><th>Status</th><th>Usage</th><th>Nightly backup</th><th>Last backup</th><th></th></tr></thead><tbody><tr><td colspan="6" class="g-muted">Loading...</td></tr></tbody></table></div>
+      <div class="g-body ds-note"><b>Volumes</b> = the container is copied in the nightly job. <b>Stop</b> = it is stopped for a moment during the copy, so files are consistent (databases are dumped without stopping). Containers in <code>/opt/glpi/</code> are backed up by the GLPI tab. Click a container to see details, live usage, logs and its backups.
         <div class="g-actions" style="margin-top:12px"><button type="button" class="g-btn primary" id="dSaveSel"><i class="fas fa-floppy-disk"></i> Save backup selection</button></div></div>
     </div>
-    <div class="g-card" id="dBackupsCard" style="display:none">
-      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock-rotate-left"></i></span> Backups of <span id="dBackupsName" class="g-muted"></span></span></div>
-      <div class="ds-scroll"><table class="g-table" id="dBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="g-card ds-detail" id="ctDetail" style="display:none">
+      <div class="g-title"><span><span class="ds-logo" id="ctLogo"></span><span><span id="ctName"></span><br><small class="ds-mono" id="ctImg"></small></span></span>
+        <span class="g-actions"><span id="ctBadges"></span><label class="ds-sw" title="Refresh usage every 10 seconds"><input type="checkbox" id="ctLive" checked> Live</label><button type="button" class="g-btn sm" id="ctClose"><i class="fas fa-xmark"></i> Close</button></span></div>
+      <div class="g-body">
+        <div class="ds-tiles" id="ctStats"></div>
+        <div class="g-actions" id="ctActs" style="margin:4px 0 16px"></div>
+        <div class="ds-split2">
+          <div><span class="ds-lbl">Details</span><div class="g-grid" id="ctInfo"></div></div>
+          <div><span class="ds-lbl">Network and storage</span><div id="ctNet" class="ds-rows"></div></div>
+        </div>
+        <span class="ds-lbl" style="margin-top:6px">Backups</span>
+        <div class="ds-scroll"><table class="g-table" id="dBackupsTable"><thead><tr><th>Backup</th><th>Size</th><th>Date</th><th>Contents</th><th></th></tr></thead><tbody></tbody></table></div>
+        <span class="ds-lbl" style="margin-top:16px">Recent log (last 60 lines)</span>
+        <pre class="g-log" id="ctLog"></pre>
+      </div>
     </div>
   </div>
 
@@ -216,7 +309,13 @@
     </div>
   </div>
 
-  <div id="tabSrv" style="display:none">
+  <div id="tabBackups" style="display:none">
+    <div class="ds-sub" role="tablist">
+      <button type="button" class="on" id="subBtnSrv"><i class="fas fa-server"></i> Server backup</button>
+      <button type="button" id="subBtnSched"><i class="fas fa-clock"></i> Schedule &amp; retention</button>
+      <button type="button" id="subBtnNas"><i class="fas fa-cloud-arrow-up"></i> NAS / VPN copy</button>
+    </div>
+  <div id="subSrv">
     <div class="g-card">
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-server"></i></span> Server backup</span><span id="sBadges"></span></div>
       <div class="g-body">
@@ -254,7 +353,7 @@
     </div>
   </div>
 
-  <div id="tabSched" style="display:none">
+  <div id="subSched" style="display:none">
     <div class="g-card">
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clock"></i></span> Nightly job</span><span class="g-check" style="margin:0"><input type="checkbox" id="cAuto"><label for="cAuto">Run every day</label></span></div>
       <div class="g-body ds-split">
@@ -267,12 +366,12 @@
           <div class="ds-note" style="margin-bottom:14px">Old backups are removed only after a run and never below the “always keep” number, so a broken job cannot delete your last good copies. Local folder: <code>/var/backups/docker/&lt;container&gt;/</code>.</div>
           <div class="g-actions"><button type="button" class="g-btn primary" id="dSave"><i class="fas fa-floppy-disk"></i> Save settings</button><button type="button" class="g-btn" id="dPrune"><i class="fas fa-broom"></i> Apply retention now</button></div>
         </div>
-        <div><span class="ds-lbl">What the nightly job does</span><ol class="ds-tl" id="schedTl"></ol></div>
+        <div><span class="ds-lbl">What the nightly job does</span><ol class="ds-tl" id="schedTl2"></ol></div>
       </div>
     </div>
   </div>
 
-  <div id="tabNas" style="display:none">
+  <div id="subNas" style="display:none">
     <div class="g-card">
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cloud-arrow-up"></i></span> Copy to a NAS or another server</span><span class="g-check" style="margin:0"><input type="checkbox" id="rEnabled"><label for="rEnabled">Send after each nightly job</label></span></div>
       <div class="g-body">
@@ -299,25 +398,121 @@
     </div>
   </div>
 
-  <div class="g-card"><div class="g-title"><span><span class="ds-ico"><i class="fas fa-terminal"></i></span> Activity</span></div><div class="g-body"><div id="dResult" class="g-status"></div><pre id="dLog" class="g-log">No operation running.</pre></div></div>
+  </div>
+
+  <div id="tabAssistant" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-wand-magic-sparkles"></i></span> Assistant</span>
+        <span class="g-actions"><span class="g-badge b-info" title="Read-only commands run at once, everything else waits for you">Changes need your approval</span><button type="button" class="g-btn sm" id="aiNew"><i class="fas fa-rotate-left"></i> New chat</button></span></div>
+      <div class="g-body">
+        <div id="aiNoKey" class="g-status s-warn" style="display:none">Add your Anthropic API key in <a href="#" id="aiGoSet">Settings</a> to start.</div>
+        <div class="ds-chat" id="aiChat" aria-live="polite"></div>
+        <div class="g-actions" id="aiSugg">
+          <button type="button" class="g-btn sm" data-ask="Sprawdź ogólny stan serwera: obciążenie, pamięć, dysk i usługi.">Check server health</button>
+          <button type="button" class="g-btn sm" data-ask="Co zajmuje najwięcej miejsca na dysku?">What fills the disk?</button>
+          <button type="button" class="g-btn sm" data-ask="Pokaż ostatnie błędy w logach OpenLiteSpeed.">Recent web server errors</button>
+          <button type="button" class="g-btn sm" data-ask="Sprawdź kontenery Docker i ich stan.">Docker containers</button>
+        </div>
+        <div style="margin-top:14px">
+          <textarea class="g-in" id="aiInput" rows="3" placeholder="Napisz, co mam zrobić na serwerze... (Ctrl+Enter wysyła)"></textarea>
+          <div class="g-actions" style="margin-top:10px;justify-content:space-between">
+            <span class="g-muted" style="font-size:12.5px">Command output is sent to the Anthropic API. Secrets are masked and secret files are blocked.</span>
+            <button type="button" class="g-btn primary" id="aiSend"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-clipboard-list"></i></span> Audit log</span><button type="button" class="g-btn sm" id="auditRefresh"><i class="fas fa-arrows-rotate"></i> Refresh</button></div>
+      <div class="ds-scroll"><table class="g-table"><thead><tr><th>When (UTC)</th><th>Result</th><th>Command</th></tr></thead><tbody id="auditBody"><tr><td colspan="3" class="g-muted">Loading...</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tabSettings" style="display:none">
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-key"></i></span> Assistant (Anthropic API)</span><span id="setState" class="g-badge b-gray">...</span></div>
+      <div class="g-body">
+        <div class="g-form">
+          <div><label for="setKey">API key</label><input id="setKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
+          <div><label for="setModel">Model</label><input id="setModel" type="text" placeholder="claude-sonnet-5-5"></div>
+        </div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="setSave"><i class="fas fa-floppy-disk"></i> Save</button><button type="button" class="g-btn danger" id="setDelete"><i class="fas fa-trash"></i> Remove key</button></div>
+        <div class="ds-note" style="margin-top:12px">The key is stored on the server in a file only root can read and is never shown again. API usage is billed by Anthropic. Turn on two-factor login for CyberPanel: the assistant can run commands as root after your approval.</div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-bell"></i></span> E-mail alerts</span><span class="g-check" style="margin:0"><input type="checkbox" id="aEnabled"><label for="aEnabled">Send alerts</label></span></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Checked every 10 minutes. You get one mail when a problem starts, a reminder after 24 hours if it is still there, and a mail when it is fixed.</div>
+        <div class="g-form">
+          <div><label for="aEmail">Send to</label><input type="text" id="aEmail" placeholder="you@example.com"></div>
+          <div><label for="aDisk">Disk full alert at (%)</label><input type="number" id="aDisk" min="50" max="99"></div>
+          <div><label for="aStale">No new backup for (hours)</label><input type="number" id="aStale" min="12" max="720"></div>
+        </div>
+        <div class="g-check"><input type="checkbox" id="aDown"><label for="aDown">A container stops (one that was running or should always run)</label></div>
+        <div class="g-check"><input type="checkbox" id="aUnh"><label for="aUnh">A container reports “unhealthy”</label></div>
+        <div class="g-check"><input type="checkbox" id="aJob"><label for="aJob">The nightly job finishes with errors</label></div>
+        <h4>How to send</h4>
+        <div class="g-form">
+          <div><label for="aMethod">Method</label><select id="aMethod"><option value="local">This server (sendmail / Postfix)</option><option value="smtp">SMTP server (Gmail, Microsoft 365, ...)</option></select></div>
+          <div><label for="aFrom">From address (optional)</label><input type="text" id="aFrom" placeholder="alerts@yourdomain.ie"></div>
+        </div>
+        <div id="aSmtpBox" style="display:none">
+          <div class="g-form">
+            <div><label for="aHost">SMTP host</label><input type="text" id="aHost" placeholder="smtp.office365.com"></div>
+            <div><label for="aPort">Port</label><input type="number" id="aPort" min="1" max="65535"></div>
+            <div><label for="aTls">Security</label><select id="aTls"><option value="starttls">STARTTLS (587)</option><option value="ssl">SSL/TLS (465)</option><option value="none">None</option></select></div>
+            <div><label for="aUser">Username</label><input type="text" id="aUser" autocomplete="off"></div>
+          </div>
+          <div class="g-actions"><input type="password" id="aPass" class="g-in" autocomplete="new-password" placeholder="SMTP password (stored root-only)" style="max-width:340px"><button type="button" class="g-btn" id="aPassSave"><i class="fas fa-key"></i> Save password</button></div>
+        </div>
+        <div class="g-actions" style="margin-top:16px"><button type="button" class="g-btn primary" id="aSave"><i class="fas fa-floppy-disk"></i> Save alerts</button><button type="button" class="g-btn" id="aTest"><i class="fas fa-paper-plane"></i> Send test mail</button><button type="button" class="g-btn" id="aCheck"><i class="fas fa-magnifying-glass"></i> Check now</button></div>
+      </div>
+    </div>
+    <div class="g-card" id="cleanCard">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-broom"></i></span> Disk cleanup</span><button type="button" class="g-btn sm" id="cRefresh"><i class="fas fa-arrows-rotate"></i> Measure</button></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Shows what Docker keeps on disk and frees it safely. Running containers, their images and their volumes are never removed. Backups are not touched here.</div>
+        <div class="ds-clean" id="cList"><span class="g-muted">Press Measure.</span></div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-cloud-arrow-down"></i></span> Docker Suite updates</span><span id="uBadge"></span></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Updates this plugin straight from GitHub (<code>ravxvx/cyberpanel-docker-suite</code>). Files are checked first, the current version is saved to <code>/root/dockersuite-&lt;version&gt;-&lt;date&gt;.tar.gz</code>, and your settings, backups and containers are not touched. The panel restarts for a few seconds.</div>
+        <div id="uInfo"></div>
+        <div class="g-actions"><button type="button" class="g-btn" id="uCheck"><i class="fas fa-magnifying-glass"></i> Check for updates</button><button type="button" class="g-btn primary" id="uApply" style="display:none"><i class="fas fa-download"></i> Install update</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ds-opbar" id="opbar">
+    <div class="ds-ophead"><div id="dResult" class="g-status"><span>Ready.</span></div><button type="button" class="g-btn sm" id="opToggle"><i class="fas fa-terminal"></i> <span>Show log</span></button></div>
+    <pre id="dLog" class="g-log">No operation running.</pre>
+  </div>
   <div class="g-modal" id="dModal"><div class="g-modal-box"><h3 id="dModalTitle"></h3><div id="dModalBody"></div><div class="g-modal-actions"><button type="button" class="g-btn" id="dModalCancel">Cancel</button><button type="button" class="g-btn primary" id="dModalOk">OK</button></div></div></div>
 </div>
 <script>
 (function () {
-  var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}"};
+  var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}", overview: "{% url 'dockerSuiteOverview' %}",
+    aichat: "{% url 'dockerSuiteAiChat' %}", aiexec: "{% url 'dockerSuiteAiExec' %}", aiset: "{% url 'dockerSuiteAiSettings' %}", aiaudit: "{% url 'dockerSuiteAiAudit' %}"};
   var csrf = document.querySelector('#dmgr [name=csrfmiddlewaretoken]').value;
   var $ = function (id) { return document.getElementById(id); };
   var busy = false, cfg = null, vpnFiles = {}, upd = {}, lastList = '';
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (text != null) { e.textContent = text; } return e; }
   function b64(s) { return btoa(unescape(encodeURIComponent(s))); }
+  function b64u(s) { return b64(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function post(url, data) {
     var fd = new FormData(); fd.append('csrfmiddlewaretoken', csrf);
     Object.keys(data || {}).forEach(function (k) { fd.append(k, data[k]); });
-    return fetch(url, {method: 'POST', body: fd, credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (r) { return r.json(); });
+    return fetch(url, {method: 'POST', body: fd, credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (r) {
+      if ((r.headers.get('content-type') || '').indexOf('json') === -1) { throw new Error('The panel answered HTTP ' + r.status + ' (not JSON). If Docker Suite was just updated, wait 15 s and reload. Details: /var/log/dockermanager/plugin-errors.log'); }
+      return r.json();
+    });
   }
-  function setBusy(b) { busy = b; document.querySelectorAll('#dmgr button:not(.ds-tab)').forEach(function (x) { x.disabled = b; }); }
+  function setBusy(b) { busy = b; document.querySelectorAll('#dmgr button:not(.ds-tab):not(.nb)').forEach(function (x) { if (!x.closest('.ds-sub') && !x.closest('#tabAssistant')) { x.disabled = b; } }); }
   function msg(type, text) { var r = $('dResult'); r.className = 'g-status s-' + type; r.innerHTML = ''; if (type === 'info') { r.appendChild(el('span', 'g-spin')); } r.appendChild(el('span', '', text)); }
-  function show(t) { var l = $('dLog'); l.textContent = t; l.scrollTop = l.scrollHeight; }
+  function show(t) { var l = $('dLog'); l.textContent = t; l.scrollTop = l.scrollHeight; if (t && t !== 'Start...') { $('opbar').classList.add('open'); $('opToggle').querySelector('span').textContent = 'Hide log'; } }
   function btn(label, icon, cls, fn) { var b = el('button', 'g-btn ' + cls); b.type = 'button'; b.appendChild(el('i', 'fas ' + icon)); b.appendChild(document.createTextNode(' ' + label)); b.addEventListener('click', fn); return b; }
   function badge(cls, t) { return el('span', 'g-badge b-' + cls, t); }
   function runJob(action, name, extra, quiet) {
@@ -359,6 +554,10 @@
     c.retention_days = parseInt($('cDays').value, 10) || 5; c.min_keep = parseInt($('cMin').value, 10) || 2;
     c.remote = {enabled: $('rEnabled').checked, host: $('rHost').value.trim(), port: parseInt($('rPort').value, 10) || 22, user: $('rUser').value.trim(),
       path: $('rPath').value.trim(), retention_days: parseInt($('rDays').value, 10) || 30, vpn: $('rVpn').value, vpn_routes: $('rRoutes').value.trim()};
+    c.alerts = {enabled: $('aEnabled').checked, email: $('aEmail').value.trim(), method: $('aMethod').value, from: $('aFrom').value.trim(),
+      smtp_host: $('aHost').value.trim(), smtp_port: parseInt($('aPort').value, 10) || 587, smtp_tls: $('aTls').value, smtp_user: $('aUser').value.trim(),
+      disk_pct: parseInt($('aDisk').value, 10) || 85, stale_hours: parseInt($('aStale').value, 10) || 36,
+      down: $('aDown').checked, unhealthy: $('aUnh').checked, job: $('aJob').checked};
     document.querySelectorAll('#dTable tbody tr[data-ct]').forEach(function (tr) {
       c.containers[tr.dataset.ct] = {backup: tr.querySelector('.ck-b').checked, stop: tr.querySelector('.ck-s').checked};
     });
@@ -370,7 +569,13 @@
     $('rEnabled').checked = !!r.enabled; $('rHost').value = r.host || ''; $('rPort').value = r.port || 22; $('rUser').value = r.user || '';
     $('rPath').value = r.path || ''; $('rDays').value = r.retention_days || 30; $('rVpn').value = r.vpn || 'none'; $('rRoutes').value = r.vpn_routes || '';
     vpnUi();
+    var a = c.alerts || {};
+    $('aEnabled').checked = !!a.enabled; $('aEmail').value = a.email || ''; $('aMethod').value = a.method || 'local'; $('aFrom').value = a.from || '';
+    $('aHost').value = a.smtp_host || ''; $('aPort').value = a.smtp_port || 587; $('aTls').value = a.smtp_tls || 'starttls'; $('aUser').value = a.smtp_user || '';
+    $('aDisk').value = a.disk_pct || 85; $('aStale').value = a.stale_hours || 36;
+    $('aDown').checked = a.down !== false; $('aUnh').checked = a.unhealthy !== false; $('aJob').checked = a.job !== false; smtpUi();
   }
+  function smtpUi() { $('aSmtpBox').style.display = $('aMethod').value === 'smtp' ? 'block' : 'none'; }
   function vpnUi() {
     var v = $('rVpn').value; $('rVpnBox').style.display = v === 'none' ? 'none' : 'block';
     $('rAuthBox').style.display = v === 'openvpn' ? 'block' : 'none';
@@ -442,18 +647,19 @@
     if (g) { g.forEach(function (x) {
       if (x.st !== 'running' || x.dbst !== 'running') { box.appendChild(alertCard('bad', 'fa-triangle-exclamation', 'GLPI ' + x.name + ' is down', 'Web: ' + x.st + ', database: ' + x.dbst + '. Run a health check.', 'GLPI', function () { tab('g'); })); }
     }); }
-    if (s && !s.enabled) { box.appendChild(alertCard('warn', 'fa-server', 'Server backup is off', s.sites + ' website' + (s.sites === 1 ? '' : 's') + ' and their databases are not backed up' + (s.encrypt && !s.key ? '. Encryption is on but no passphrase is set yet.' : '.'), 'Set up server backup', function () { tab('s'); })); }
-    else if (s && s.encrypt && !s.key) { box.appendChild(alertCard('bad', 'fa-key', 'No passphrase for encrypted backups', 'Set a passphrase, or the server backup cannot run.', 'Set passphrase', function () { tab('s'); })); }
-    if (!c.auto) { box.appendChild(alertCard('warn', 'fa-clock', 'Nightly job is off', 'Nothing is backed up automatically.', 'Schedule', function () { tab('c'); })); }
+    if (s && !s.enabled) { box.appendChild(alertCard('warn', 'fa-server', 'Server backup is off', s.sites + ' website' + (s.sites === 1 ? '' : 's') + ' and their databases are not backed up' + (s.encrypt && !s.key ? '. Encryption is on but no passphrase is set yet.' : '.'), 'Set up server backup', function () { tab('b', 'srv'); })); }
+    else if (s && s.encrypt && !s.key) { box.appendChild(alertCard('bad', 'fa-key', 'No passphrase for encrypted backups', 'Set a passphrase, or the server backup cannot run.', 'Set passphrase', function () { tab('b', 'srv'); })); }
+    if (!c.auto) { box.appendChild(alertCard('warn', 'fa-clock', 'Nightly job is off', 'Nothing is backed up automatically.', 'Schedule', function () { tab('b', 'sched'); })); }
     else if (!bk && g) { box.appendChild(alertCard('info', 'fa-clock', 'No backups yet', 'The first automatic job runs at ' + sched + '. You can run it now to test it.', 'Run now', function () { $('dRunAll').click(); })); }
     if (ST.free != null && ST.free < 10) { box.appendChild(alertCard('warn', 'fa-hard-drive', 'Low disk space', 'Only ' + ST.free + ' GB free for backups.', '', null)); }
     if (g && g.length && !g.some(function (x) { return x.st !== 'running' || x.dbst !== 'running'; })) {
       box.appendChild(alertCard('ok', 'fa-heart-pulse', g.length === 1 ? 'GLPI is running' : 'All GLPI instances are running', g.map(function (x) { return x.name + ' ' + (x.ver || ''); }).join(', ') + '. Web and database containers are up.', '', null));
     }
-    schedTl();
+    schedTl(); ovAttn();
   }
-  function schedTl() {
-    var c = cfg || {}, r = c.remote || {}, g = ST.glpi, s = ST.srv, ol = $('schedTl'); ol.innerHTML = '';
+  function schedTl() { schedTlInto('schedTl'); schedTlInto('schedTl2'); }
+  function schedTlInto(olId) {
+    var c = cfg || {}, r = c.remote || {}, g = ST.glpi, s = ST.srv, ol = $(olId); ol.innerHTML = '';
     [[ST.ctSel > 0, 'Container volumes', 'Copies the containers ticked under Volumes. Nothing is stopped unless Stop is ticked.', ST.ctSel + ' selected'],
      [g ? g.length > 0 : true, 'GLPI backup', 'Database dump and files of every instance in /opt/glpi.', g ? g.length + ' instance' + (g.length === 1 ? '' : 's') : '...'],
      [s ? s.enabled : false, 'Server backup', 'Websites, databases, system and panel settings.', s ? (s.enabled ? 'on' : 'off') : '...'],
@@ -507,15 +713,18 @@
       tr.appendChild(el('td', '', p[10] === '-' ? 'none yet' : p[10] + ' (' + p[11] + ' kept)'));
       var act = el('td'), ab = el('div', 'ds-acts'); act.appendChild(ab);
       if (upd[name] && upd[name].s === 'yes') { ab.appendChild(btn('Update', 'fa-arrow-up', 'warn sm', function () { updateDialog(name, p[2]); })); }
-      ab.appendChild(btn('Backup', 'fa-floppy-disk', 'primary sm', function () { simple('backup', name, 'Backup ' + name); }));
-      ab.appendChild(btn('Backups', 'fa-clock-rotate-left', 'sm', function () { showBackups(name); }));
-      ab.appendChild(btn(running ? 'Restart' : 'Start', 'fa-rotate', 'sm', function () { ctl(name, running ? 'restart' : 'start'); }));
-      if (running) { ab.appendChild(btn('Stop', 'fa-stop', 'danger sm', function () { ctl(name, 'stop'); })); }
-      ab.appendChild(btn('Logs', 'fa-terminal', 'sm', function () { simple('logs', name, 'Logs of ' + name); }));
-      tr.appendChild(act); tb.appendChild(tr);
+      ab.appendChild(btn('Details', 'fa-chevron-right', 'primary sm', function () { openCt(name); }));
+      ab.appendChild(btn('Backup', 'fa-floppy-disk', 'sm', function () { simple('backup', name, 'Backup ' + name); }));
+      if (!running) { ab.appendChild(btn('Start', 'fa-play', 'sm', function () { ctl(name, 'start'); })); }
+      tr.appendChild(act);
+      tr.addEventListener('click', function (e) { if (e.target.closest('button,input,label,a')) { return; } openCt(name); });
+      if (CT.name === name) { tr.className = 'sel'; }
+      CTROWS[name] = {img: p[2], running: running, upd: upd[name] && upd[name].s === 'yes'};
+      tb.appendChild(tr);
     });
     if (!n) { tb.innerHTML = '<tr><td colspan="6" class="g-muted">No containers found.</td></tr>'; }
     summary();
+    if (CT.name && CTROWS[CT.name]) { ctActions(); }
   }
   function updateDialog(name, img) {
     var box = el('div'); box.appendChild(el('p', '', 'Update "' + name + '" to the newest build of ' + img + '. Steps (automatic):'));
@@ -547,7 +756,7 @@
     if (busy) { return; }
     setBusy(true); msg('info', 'Loading backups of ' + name + '...');
     runJob('backups', name, '', true).then(function (r) {
-      var tb = document.querySelector('#dBackupsTable tbody'); tb.innerHTML = ''; $('dBackupsName').textContent = name; var n = 0, total = sLines(r.log, 'BACKUP|').length;
+      var tb = document.querySelector('#dBackupsTable tbody'); tb.innerHTML = ''; var n = 0, total = sLines(r.log, 'BACKUP|').length;
       r.log.split('\n').forEach(function (line) {
         if (line.indexOf('BACKUP|') !== 0) { return; }
         var p = line.split('|'); n++; var tr = document.createElement('tr');
@@ -558,11 +767,13 @@
           openModal('Restore ' + name, box, 'Restore', true, function () { simple('restore', name, 'Restore ' + name, p[1]); });
         }));
         td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Test', 'fa-vial', '', function () { testRestore('testrestore', name, p[1]); }));
+        td.appendChild(document.createTextNode(' '));
         td.appendChild(btn('Delete', 'fa-trash', 'danger', function () { delBackup('delete', name, p[1], total, function () { showBackups(name); }); }));
         tr.appendChild(td); tb.appendChild(tr);
       });
       if (!n) { tb.innerHTML = '<tr><td colspan="5" class="g-muted">No backups yet.</td></tr>'; }
-      $('dBackupsCard').style.display = 'block'; msg('ok', 'Backups loaded.');
+      msg('ok', 'Backups loaded.');
     }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
   }
   $('dCheck').addEventListener('click', checkUpdates);
@@ -687,6 +898,8 @@
           var box = el('div'); box.appendChild(el('p', '', 'Restore ' + name + ' from backup ' + p[1] + '? The current database and files are replaced (a safety backup of the current state is made first). GLPI is briefly unavailable.'));
           openModal('Restore ' + name, box, 'Restore', true, function () { simple('grestore', name, 'GLPI restore', p[1], gLoad); });
         }));
+        td.appendChild(document.createTextNode(' '));
+        td.appendChild(btn('Test', 'fa-vial', '', function () { testRestore('gtestrestore', name, p[1]); }));
         td.appendChild(document.createTextNode(' '));
         td.appendChild(btn('Delete', 'fa-trash', 'danger', function () { delBackup('gdelete', name, p[1], total, function () { gBackups(name); }); }));
         tr.appendChild(td); tb.appendChild(tr);
@@ -822,21 +1035,403 @@
       msg('ok', 'Passphrase shown.');
     }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
   });
-  var TABS = {d: ['tabBtnD', 'tabDocker'], g: ['tabBtnG', 'tabGlpi'], s: ['tabBtnS', 'tabSrv'], c: ['tabBtnC', 'tabSched'], n: ['tabBtnN', 'tabNas']}, curTab = 'd', versionsLoaded = false;
-  function tab(which) {
+  // ---------------- tabs (+ deep links: #tab=containers&ct=name) ----------------
+  var TABS = {o: ['tabBtnO', 'tabOverview', 'overview'], d: ['tabBtnD', 'tabDocker', 'containers'], g: ['tabBtnG', 'tabGlpi', 'glpi'],
+    b: ['tabBtnB', 'tabBackups', 'backups'], a: ['tabBtnA', 'tabAssistant', 'assistant'], s: ['tabBtnS', 'tabSettings', 'settings']};
+  var SUBS = {srv: ['subBtnSrv', 'subSrv'], sched: ['subBtnSched', 'subSched'], nas: ['subBtnNas', 'subNas']};
+  var curTab = 'o', curSub = 'srv', versionsLoaded = false, CT = {name: '', timer: null}, CTROWS = {};
+  function setHash() {
+    var h = 'tab=' + TABS[curTab][2] + (curTab === 'b' ? '&sub=' + curSub : '') + (curTab === 'd' && CT.name ? '&ct=' + encodeURIComponent(CT.name) : '');
+    try { history.replaceState(null, '', '#' + h); } catch (e) {}
+  }
+  function whenIdle(fn) { if (!busy) { fn(); return; } var t = setInterval(function () { if (!busy) { clearInterval(t); fn(); } }, 500); }
+  function sub(which) {
+    curSub = SUBS[which] ? which : 'srv';
+    Object.keys(SUBS).forEach(function (k) { $(SUBS[k][0]).className = k === curSub ? 'on' : ''; $(SUBS[k][1]).style.display = k === curSub ? 'block' : 'none'; });
+    if (curSub === 'srv' && !$('sTable').dataset.loaded) { $('sTable').dataset.loaded = '1'; whenIdle(sLoad); }
+    setHash();
+  }
+  function tab(which, subName) {
+    if (!TABS[which]) { which = 'o'; }
     curTab = which;
     Object.keys(TABS).forEach(function (k) { $(TABS[k][0]).className = 'ds-tab' + (k === which ? ' on' : ''); $(TABS[k][1]).style.display = k === which ? 'block' : 'none'; });
+    if (which === 'o') { loadOverview(); }
     if (which === 'g') {
       if (!versionsLoaded) { versionsLoaded = true; gLoadVersions(); }
-      if (!$('gInstances').dataset.loaded) { $('gInstances').dataset.loaded = '1'; gLoad(); }
+      if (!$('gInstances').dataset.loaded) { $('gInstances').dataset.loaded = '1'; whenIdle(gLoad); }
     }
-    if (which === 's' && !$('sTable').dataset.loaded) { $('sTable').dataset.loaded = '1'; sLoad(); }
+    if (which === 'b') { sub(subName || curSub); }
+    if (which === 'a') { aiLoadSettings(); loadAudit(); }
+    if (which === 's') { aiLoadSettings(); if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
+    if (which !== 'd') { ctStop(); }
+    setHash();
   }
   Object.keys(TABS).forEach(function (k) { $(TABS[k][0]).addEventListener('click', function () { tab(k); }); });
+  Object.keys(SUBS).forEach(function (k) { $(SUBS[k][0]).addEventListener('click', function () { sub(k); }); });
   $('gRefresh').addEventListener('click', gLoad);
-  $('dRefresh').addEventListener('click', function () { if (curTab === 'g') { gLoad(); } else if (curTab === 's') { sLoad(); } else { loadAll(); } });
+  $('dRefresh').addEventListener('click', function () {
+    if (curTab === 'g') { gLoad(); } else if (curTab === 'b' && curSub === 'srv') { sLoad(); } else if (curTab === 'o') { loadOverview(); loadAll(); } else if (curTab === 'a') { loadAudit(); } else { loadAll(); }
+  });
   $('dSaveSel').addEventListener('click', function () { saveSettings(); });
   $('rSave').addEventListener('click', function () { saveSettings(); });
+  $('dAsk').addEventListener('click', function () { tab('a'); $('aiInput').focus(); });
+  $('oSchedEdit').addEventListener('click', function () { tab('b', 'sched'); });
+  $('oClean').addEventListener('click', function () { tab('s'); $('cleanCard').scrollIntoView({behavior: 'smooth'}); });
+  $('opToggle').addEventListener('click', function () { var o = $('opbar').classList.toggle('open'); this.querySelector('span').textContent = o ? 'Hide log' : 'Show log'; });
+  $('opToggle').classList.add('nb');
+
+  // ---------------- overview (server health) ----------------
+  function gbs(n) { return (n / 1073741824).toFixed(n >= 10737418240 ? 0 : 1) + ' GB'; }
+  function hsize(n) { return n >= 1073741824 ? gbs(n) : (n >= 1048576 ? Math.round(n / 1048576) + ' MB' : Math.round(n / 1024) + ' KB'); }
+  function gauge(id, pct) { var b = $(id); pct = Math.max(0, Math.min(100, pct)); b.style.width = Math.max(2, pct) + '%'; b.className = pct >= 90 ? 'hi' : (pct >= 75 ? 'mid' : ''); }
+  function ago(ts) { var s = Math.max(0, Math.floor(Date.now() / 1000) - ts); return s < 3600 ? Math.max(1, Math.round(s / 60)) + ' min ago' : (s < 172800 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' days ago'); }
+  var ovTimer = null, OV = null;
+  function loadOverview() {
+    clearTimeout(ovTimer);
+    post(URLS.overview, {}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Overview failed'); }
+      OV = d;
+      if (d.load) {
+        var lp = d.load[0] / d.cpus * 100, mp = d.mem.total ? d.mem.used / d.mem.total * 100 : 0, dp = d.disk.total ? d.disk.used / d.disk.total * 100 : 0;
+        $('oCpu').textContent = d.load[0]; $('oCpuSub').textContent = d.cpus + ' cores · 5 min ' + d.load[1] + ', 15 min ' + d.load[2]; gauge('oCpuBar', lp);
+        $('oMem').textContent = Math.round(mp) + '%'; $('oMemSub').textContent = gbs(d.mem.used) + ' of ' + gbs(d.mem.total); gauge('oMemBar', mp);
+        $('oDisk').textContent = Math.round(dp) + '%'; $('oDiskSub').textContent = gbs(d.disk.used) + ' of ' + gbs(d.disk.total); gauge('oDiskBar', dp);
+        $('oUp').textContent = 'Up ' + Math.floor(d.uptime / 86400) + ' d ' + Math.floor(d.uptime % 86400 / 3600) + ' h' + (d.sites ? ' · ' + d.sites + ' website' + (d.sites === 1 ? '' : 's') : '');
+      }
+      var bk = d.backups || {}, newest = 0, src = '';
+      [['docker', 'containers'], ['glpi', 'GLPI'], ['server', 'server'], ['wp', 'WordPress Toolkit']].forEach(function (k) { var b = bk[k[0]]; if (b && b.newest > newest) { newest = b.newest; src = k[1]; } });
+      $('oBk').textContent = newest ? ago(newest) : 'none';
+      $('oBkSub').textContent = newest ? 'newest: ' + src + ' backup' : 'no backups found';
+      gauge('oBkBar', newest ? Math.min(100, (Date.now() / 1000 - newest) / 864 / 2) : 100);
+      var sv = $('oSvc'); sv.innerHTML = '';
+      var names = {lsws: 'OpenLiteSpeed', lscpd: 'CyberPanel', mariadb: 'MariaDB', docker: 'Docker', fail2ban: 'Fail2ban', ufw: 'Firewall (ufw)'};
+      Object.keys(names).forEach(function (k) {
+        var st = (d.services || {})[k]; if (!st || (st !== 'active' && ['fail2ban', 'ufw'].indexOf(k) >= 0)) { return; }
+        var up = st === 'active', c = el('span', 'ds-pill' + (up ? '' : ' down')); c.appendChild(el('i')); c.appendChild(document.createTextNode(names[k] + (up ? ' running' : ' ' + st))); sv.appendChild(c);
+      });
+      if (!sv.children.length) { sv.appendChild(el('span', 'g-muted', 'Service status is not available (systemctl).')); }
+      if (d.reboot_required) { var rb = el('span', 'ds-pill down'); rb.appendChild(el('i')); rb.appendChild(document.createTextNode('Reboot needed for system updates')); sv.appendChild(rb); }
+      var rows = $('oBkSizes'); rows.innerHTML = '';
+      var lbl = {'/var/backups/docker': 'Container backups', '/var/backups/glpi': 'GLPI backups', '/var/backups/server': 'Server backups', '/home/wptoolkit-backups': 'WordPress Toolkit backups', '/var/restore': 'Extracted backups (/var/restore)'};
+      Object.keys(lbl).forEach(function (p) { if (d.dirs && p in d.dirs) { var r = el('div', 'ds-row'); r.appendChild(el('span', '', lbl[p])); r.appendChild(el('b', '', hsize(d.dirs[p]))); rows.appendChild(r); } });
+      if (d.disk) { var r2 = el('div', 'ds-row'); r2.appendChild(el('span', '', 'Free on /')); r2.appendChild(el('b', '', gbs(d.disk.total - d.disk.used))); rows.appendChild(r2); }
+      if (!rows.children.length) { rows.appendChild(el('span', 'g-muted', 'Nothing measured yet.')); }
+      ovAttn();
+    }).catch(function (e) { $('oSvc').innerHTML = ''; $('oSvc').appendChild(el('span', 'g-status s-bad', e.message)); });
+    ovTimer = setTimeout(function () { if (curTab === 'o' && !document.hidden) { loadOverview(); } }, 30000);
+  }
+  // overview-only attention cards (added after the backup/container cards made by summary())
+  function ovAttn() {
+    var box = $('dAttn'), d = OV; if (!d) { return; }
+    box.querySelectorAll('.ov-x').forEach(function (x) { x.remove(); });
+    function add(card) { card.classList.add('ov-x'); box.insertBefore(card, box.firstChild); }
+    if (d.disk && d.disk.used / d.disk.total >= 0.85) { add(alertCard('bad', 'fa-hard-drive', 'Disk almost full', Math.round(d.disk.used / d.disk.total * 100) + '% used on /.', 'Clean up', function () { tab('s'); })); }
+    if (d.reboot_required) { add(alertCard('warn', 'fa-power-off', 'Reboot needed', 'System updates wait for a restart of the server.', '', null)); }
+    ['lsws', 'lscpd', 'mariadb', 'docker'].forEach(function (k) { var st = (d.services || {})[k]; if (st && st !== 'active') { add(alertCard('bad', 'fa-circle-exclamation', k + ' is ' + st, 'This service is not running.', 'Ask the assistant', function () { tab('a'); $('aiInput').value = 'Usługa ' + k + ' nie działa (' + st + '). Sprawdź dlaczego.'; })); } });
+    if (!d.alerts_on && !box.querySelector('.ov-al')) { var c = alertCard('info', 'fa-bell', 'E-mail alerts are off', 'Get a mail when a container stops, the disk fills up or a backup fails.', 'Turn on', function () { tab('s'); }); c.classList.add('ov-al'); add(c); }
+  }
+
+  // ---------------- container details + live stats ----------------
+  function tile(label, val, small) { var t = el('div', 'ds-tile'); t.appendChild(el('span', '', label)); t.appendChild(el('b', '', val)); if (small) { t.appendChild(el('small', '', small)); } return t; }
+  function renderStats(line) {
+    var p = line.split('|'), box = $('ctStats'); box.innerHTML = '';
+    if (p[0] !== 'STATS') { box.appendChild(tile('Usage', 'not running')); return; }
+    box.appendChild(tile('CPU', p[1])); box.appendChild(tile('Memory', p[2].split(' / ')[0], 'of ' + (p[2].split(' / ')[1] || '?') + ' · ' + p[3]));
+    box.appendChild(tile('Network in / out', p[4].replace(' / ', ' / '))); box.appendChild(tile('Disk read / write', p[5])); box.appendChild(tile('Processes', p[6]));
+  }
+  function ctActions() {
+    var n = CT.name, r = CTROWS[n] || {}, a = $('ctActs'); a.innerHTML = '';
+    if (r.upd) { a.appendChild(btn('Update image', 'fa-arrow-up', 'warn', function () { updateDialog(n, r.img); })); }
+    a.appendChild(btn('Back up now', 'fa-floppy-disk', 'primary', function () { simple('backup', n, 'Backup ' + n, '', function () { showBackups(n); loadAllQuiet(); }); }));
+    a.appendChild(btn(r.running ? 'Restart' : 'Start', r.running ? 'fa-rotate' : 'fa-play', '', function () { ctl(n, r.running ? 'restart' : 'start'); }));
+    if (r.running) { a.appendChild(btn('Stop', 'fa-stop', 'danger', function () { ctl(n, 'stop'); })); }
+    a.appendChild(btn('Full log (200 lines)', 'fa-terminal', '', function () { simple('logs', n, 'Logs of ' + n, '', function () {}); }));
+    a.appendChild(btn('Ask the assistant', 'fa-wand-magic-sparkles', '', function () { tab('a'); $('aiInput').value = 'Sprawdź kontener Docker "' + n + '": stan, ostatnie logi i czy coś jest nie tak.'; $('aiInput').focus(); }));
+  }
+  function ctStop() { clearTimeout(CT.timer); CT.timer = null; }
+  function ctPoll() {
+    ctStop();
+    if (!CT.name || !$('ctLive').checked || curTab !== 'd') { return; }
+    CT.timer = setTimeout(function () {
+      if (busy || document.hidden) { ctPoll(); return; }
+      var n = CT.name;
+      runJob('stats', n, '', true).then(function (r) { if (CT.name === n) { var l = r.log.split('\n').filter(function (x) { return x.indexOf('STATS|') === 0; })[0]; renderStats(l || ''); } })
+        .catch(function () {}).then(ctPoll);
+    }, 10000);
+  }
+  function openCt(name) {
+    if (busy) { return; }
+    CT.name = name; ctStop();
+    document.querySelectorAll('#dTable tbody tr[data-ct]').forEach(function (tr) { tr.className = tr.dataset.ct === name ? 'sel' : ''; });
+    var r = CTROWS[name] || {};
+    $('ctDetail').style.display = 'block'; $('ctName').textContent = name; $('ctImg').textContent = r.img || '';
+    $('ctLogo').textContent = (name.replace(/^.*?[-_]/, '').replace(/[-_]\d+$/, '') || name).slice(0, 2); $('ctLogo').className = 'ds-logo' + (r.running ? '' : ' off');
+    $('ctStats').innerHTML = ''; $('ctInfo').innerHTML = ''; $('ctNet').innerHTML = ''; $('ctLog').textContent = 'Loading...'; $('ctBadges').innerHTML = '';
+    ctActions(); setHash();
+    setBusy(true); msg('info', 'Reading ' + name + '...');
+    runJob('inspect', name, '', true).then(function (res) {
+      var logs = [], sizes = {}, statsLine = '';
+      res.log.split('\n').forEach(function (l) {
+        var p = l.split('|');
+        if (p[0] === 'INFO') {
+          if (p[1] === 'Status') { $('ctBadges').appendChild(badge(p[2] === 'running' ? 'ok' : 'bad', p[2])); }
+          if (p[1] === 'Health' && p[2] !== 'no health check') { $('ctBadges').appendChild(badge(p[2] === 'healthy' ? 'ok' : (p[2] === 'unhealthy' ? 'bad' : 'warn'), p[2])); }
+          var d = el('div', 'g-kv'); d.appendChild(el('span', '', p[1])); d.appendChild(el('b', '', p.slice(2).join('|'))); $('ctInfo').appendChild(d);
+        }
+        if (p[0] === 'IMG') { var d2 = el('div', 'g-kv'); d2.appendChild(el('span', '', 'Image built / size')); d2.appendChild(el('b', '', p[1].slice(0, 10) + ' · ' + hsize(+p[2]))); $('ctInfo').appendChild(d2); }
+        if (p[0] === 'STATS') { statsLine = l; }
+        if (p[0] === 'MSIZE') { sizes[p[1]] = p[2]; }
+        if (p[0] === 'LOG') { logs.push(l.slice(4)); }
+      });
+      res.log.split('\n').forEach(function (l) {
+        var p = l.split('|'), row;
+        if (p[0] === 'NET') { row = el('div', 'ds-row'); row.appendChild(el('span', '', 'Network ' + p[1])); row.appendChild(el('b', '', p[2])); }
+        if (p[0] === 'PORT') { row = el('div', 'ds-row'); row.appendChild(el('span', '', 'Port ' + p[1])); row.appendChild(el('b', '', p[2])); }
+        if (p[0] === 'MOUNT') { row = el('div', 'ds-row'); row.appendChild(el('span', '', (p[1] === 'volume' ? 'Volume ' : 'Folder ') + p[3] + (p[4] === 'ro' ? ' (read-only)' : ''))); row.appendChild(el('b', '', p[2] + (sizes[p[3]] ? ' · ' + sizes[p[3]] : ''))); }
+        if (row) { $('ctNet').appendChild(row); }
+      });
+      if (!$('ctNet').children.length) { $('ctNet').appendChild(el('span', 'g-muted', 'No networks, ports or volumes.')); }
+      renderStats(statsLine);
+      var lg = $('ctLog'); lg.textContent = logs.join('\n') || '(empty log)'; lg.scrollTop = lg.scrollHeight;
+      msg('ok', 'Details of ' + name + ' loaded.');
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); showBackups(name); ctPoll(); });
+    $('ctDetail').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+  $('ctClose').addEventListener('click', function () { CT.name = ''; ctStop(); $('ctDetail').style.display = 'none'; document.querySelectorAll('#dTable tbody tr.sel').forEach(function (tr) { tr.className = ''; }); setHash(); });
+  $('ctClose').classList.add('nb');
+  $('ctLive').addEventListener('change', ctPoll);
+  function loadAllQuiet() { runJob('list', '', '', true).then(function (r) { renderList(r.log); }).catch(function () {}); }
+
+  // ---------------- test restore ----------------
+  function checkTable(log) {
+    var t = el('table', 'g-table'), tb = el('tbody'), sum = el('div'); t.appendChild(tb);
+    log.split('\n').forEach(function (line) {
+      var p = line.split('|');
+      if (p[0] === 'CHECK') { var tr = el('tr'); tr.appendChild(el('td', 'nm', p[1])); var b = el('td'); b.appendChild(badge(p[2] === 'OK' ? 'ok' : (p[2] === 'WARN' ? 'warn' : 'bad'), p[2])); tr.appendChild(b); tr.appendChild(el('td', '', p.slice(3).join('|'))); tb.appendChild(tr); }
+      if (p[0] === 'RESULT') { sum.appendChild(badge('ok', p[2] + ' OK')); if (+p[3]) { sum.appendChild(badge('warn', p[3] + ' warning(s)')); } if (+p[4]) { sum.appendChild(badge('bad', p[4] + ' failed')); } }
+    });
+    var box = el('div'); box.appendChild(sum); var sc = el('div', 'ds-scroll'); sc.style.marginTop = '10px'; sc.appendChild(t); box.appendChild(sc); return box;
+  }
+  function testRestore(action, name, id) {
+    var box = el('div'); box.appendChild(el('p', '', 'Check that backup ' + id + ' of ' + name + ' can really be restored:'));
+    var ul = el('ul'); ['Checksums of every file', 'Every archive is unpacked in memory (nothing is written)', 'The database dump is imported into a temporary container with no network, then the container is deleted'].forEach(function (x) { ul.appendChild(el('li', '', x)); });
+    box.appendChild(ul); box.appendChild(el('p', 'g-muted', 'The live container is not touched. Takes 1-3 minutes.'));
+    openModal('Test restore', box, 'Start test', false, function () {
+      if (busy) { return false; }
+      setBusy(true); show('Start...'); msg('info', 'Testing backup ' + id + ' of ' + name + '...');
+      runJob(action, name, id).then(function (r) {
+        msg(r.success ? 'ok' : 'bad', r.success ? 'Backup ' + id + ' passed the restore test.' : 'Backup ' + id + ' did NOT pass - see the result.');
+        setBusy(false);
+        openModal((r.success ? 'Passed: ' : 'Problems: ') + name + ' / ' + id, checkTable(r.log), 'Close', false, function () {});
+        $('dModalCancel').style.display = 'none';
+      }).catch(function (e) { msg('bad', e.message); setBusy(false); });
+    });
+  }
+  $('dModalOk').addEventListener('click', function () { $('dModalCancel').style.display = ''; });
+  $('dModalCancel').addEventListener('click', function () { $('dModalCancel').style.display = ''; });
+
+  // ---------------- alerts ----------------
+  $('aMethod').addEventListener('change', smtpUi);
+  $('aSave').addEventListener('click', function () {
+    if ($('aEnabled').checked && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test($('aEmail').value.trim())) { msg('bad', 'Enter a valid e-mail address first.'); return; }
+    saveSettings(function () { if (curTab === 'o') { loadOverview(); } });
+  });
+  $('aTest').addEventListener('click', function () { saveSettings(function () { simple('alerttest', '', 'Test mail', '', function () {}); }); });
+  $('aCheck').addEventListener('click', function () { saveSettings(function () { simple('alertcheck', '', 'Alert check', '', function () {}); }); });
+  $('aPassSave').addEventListener('click', function () {
+    var p = $('aPass').value; if (!p) { msg('bad', 'Enter the SMTP password.'); return; }
+    simple('smtpsave', '', 'Save SMTP password', b64(p), function () { $('aPass').value = ''; });
+  });
+
+  // ---------------- disk cleanup ----------------
+  var cleanLoaded = false;
+  function cleanMeasure(quiet) {
+    if (busy) { return; }
+    setBusy(true); if (!quiet) { msg('info', 'Measuring Docker disk usage...'); }
+    runJob('diskinfo', '', '', true).then(function (r) {
+      var df = {}, vols = [], logs = [], dangling = 0, root = null, restoreSz = '';
+      r.log.split('\n').forEach(function (l) {
+        var p = l.split('|');
+        if (p[0] === 'DF') { df[p[1]] = {total: p[2], active: p[3], size: p[4], recl: (p[5] || '').replace(/\s*\(.*\)/, '')}; }
+        if (p[0] === 'VOL') { vols.push(p[1] + (p[2] ? ' (' + p[2] + ')' : '')); }
+        if (p[0] === 'CLOG' && +p[2] > 52428800) { logs.push(p[1] + ' (' + hsize(+p[2]) + ')'); }
+        if (p[0] === 'DANGLING') { dangling = +p[1]; }
+        if (p[0] === 'ROOT') { root = p; }
+        if (p[0] === 'DIR' && p[1] === '/var/restore') { restoreSz = p[2]; }
+      });
+      var box = $('cList'); box.innerHTML = '';
+      if (root) { var rr = el('div', 'ds-row'); rr.appendChild(el('span', '', 'System disk')); rr.appendChild(el('b', '', root[1] + ' used (' + root[2] + ' of ' + root[3] + ')')); box.appendChild(rr); }
+      function item(title, text, size, key, danger, list) {
+        var it = el('div', 'ds-citem'), d = el('div'); d.appendChild(el('b', '', title)); d.appendChild(el('p', '', text));
+        if (list && list.length) { var ul = el('ul', 'ds-cl'); list.slice(0, 8).forEach(function (x) { ul.appendChild(el('li', '', x)); }); if (list.length > 8) { ul.appendChild(el('li', 'g-muted', '... and ' + (list.length - 8) + ' more')); } d.appendChild(ul); }
+        it.appendChild(d); it.appendChild(el('span', 'sz', size || '-'));
+        it.appendChild(btn('Clean', 'fa-broom', danger ? 'danger sm' : 'sm', function () { cleanDo(key, title, danger, list); })); box.appendChild(it);
+      }
+      var im = df.Images || {}, bc = df['Build Cache'] || {}, lv = df['Local Volumes'] || {};
+      item('Dangling images', dangling + ' untagged leftover image(s) from updates. Always safe to remove.', dangling ? '' : '0 B', 'dangling', false);
+      item('Unused images', (im.total || 0) + ' images, ' + (im.active || 0) + ' in use. Also removes the old images kept for rolling back an update.', im.recl, 'images', false);
+      item('Build cache', 'Left over from docker build.', bc.recl || bc.size, 'buildcache', false);
+      item('Unused volumes', vols.length ? 'Not attached to any container. Check the list: this data is deleted for good.' : 'No unused volumes.', lv.recl, 'volumes', true, vols);
+      item('Big container logs', logs.length ? 'Container log files over 50 MB are emptied.' : 'No container log is over 50 MB.', logs.length + ' file(s)', 'logs', false, logs);
+      item('Extracted backups', 'Files unpacked by "Extract" in /var/restore. The backups themselves stay.', restoreSz || '0', 'restore', false);
+      if (!quiet) { msg('ok', 'Measured.'); }
+    }).catch(function (e) { msg('bad', e.message); }).then(function () { setBusy(false); });
+  }
+  function cleanDo(key, title, danger, list) {
+    var box = el('div'); box.appendChild(el('p', '', 'Clean "' + title + '"?'));
+    var cf = null;
+    if (danger) {
+      if (list && list.length) { var ul = el('ul'); list.forEach(function (x) { ul.appendChild(el('li', '', x)); }); box.appendChild(ul); }
+      box.appendChild(el('p', '', 'This data cannot be recovered (unless it is in a backup). Type DELETE to confirm:'));
+      cf = document.createElement('input'); cf.className = 'g-in'; cf.type = 'text'; box.appendChild(cf);
+    }
+    openModal('Disk cleanup', box, 'Clean', !!danger, function () { if (cf && cf.value !== 'DELETE') { return false; } simple('cleanup', '', 'Cleanup: ' + title, key, function () { cleanMeasure(true); }); });
+  }
+  $('cRefresh').addEventListener('click', function () { cleanMeasure(false); });
+
+  // ---------------- self-update ----------------
+  var updChecked = false, updNew = '';
+  function updCheck(quiet) {
+    if (busy) { return; }
+    setBusy(true); if (!quiet) { msg('info', 'Checking GitHub for a new Docker Suite...'); }
+    runJob('selfupdate', '', 'check', true).then(function (r) {
+      updChecked = true;
+      var su = r.log.split('\n').filter(function (l) { return l.indexOf('SU|') === 0; })[0], info = $('uInfo'); info.innerHTML = '';
+      if (!r.success || !su) { $('uBadge').innerHTML = ''; $('uBadge').appendChild(badge('bad', 'check failed')); info.appendChild(el('div', 'g-status s-bad', (r.log.match(/ERROR: .*/) || ['Could not check GitHub.'])[0])); return; }
+      var p = su.split('|'), cur = p[1], nw = p[2], newer = cur !== nw && vcmp(nw, cur) > 0;
+      $('uBadge').innerHTML = ''; $('uBadge').appendChild(badge(newer ? 'warn' : 'ok', newer ? cur + ' → ' + nw : 'up to date (' + cur + ')'));
+      $('tabNS').style.display = newer ? '' : 'none';
+      $('uApply').style.display = newer ? '' : 'none'; updNew = newer ? nw : '';
+      var g = el('div', 'g-grid'); [['Installed', cur], ['On GitHub', nw + ' (' + p[3] + ')']].forEach(function (kv) { var d = el('div', 'g-kv'); d.appendChild(el('span', '', kv[0])); d.appendChild(el('b', '', kv[1])); g.appendChild(d); }); info.appendChild(g);
+      var cl = r.log.split('\n').filter(function (l) { return l.indexOf('CL|') === 0; }).map(function (l) { return l.slice(3); }).join('\n').trim();
+      if (cl) { var pre = el('pre', 'g-log', cl); pre.style.marginBottom = '12px'; pre.style.maxHeight = '260px'; info.appendChild(pre); }
+      if (!quiet) { msg('ok', newer ? 'Version ' + nw + ' is available.' : 'Docker Suite is up to date.'); }
+    }).catch(function (e) { if (!quiet) { msg('bad', e.message); } }).then(function () { setBusy(false); });
+  }
+  $('uCheck').addEventListener('click', function () { updCheck(false); });
+  $('uApply').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Install Docker Suite ' + updNew + ' from GitHub?'));
+    var ol = el('ol'); ['Download and check the new files', 'Save the current version to /root/dockersuite-<version>-<date>.tar.gz', 'Replace the plugin files and restart the panel (about 10 seconds)'].forEach(function (x) { ol.appendChild(el('li', '', x)); });
+    box.appendChild(ol); box.appendChild(el('p', 'g-muted', 'Settings, backups, containers and running jobs are not affected.'));
+    openModal('Update Docker Suite', box, 'Install ' + updNew, false, function () {
+      simple('selfupdate', '', 'Update to ' + updNew, 'apply', function () {
+        if ($('dResult').className.indexOf('s-ok') >= 0) {
+          msg('ok', 'Updated to ' + updNew + '. The page reloads in 15 seconds...');
+          setTimeout(function () { location.reload(); }, 15000);
+        }
+      });
+    });
+  });
+
+  // ---------------- assistant (merged Server Command Center) ----------------
+  var convo = [], aiBusy = false, MAX_ROUNDS = 12, chatEl = $('aiChat');
+  function scrollChat() { chatEl.scrollTop = chatEl.scrollHeight; }
+  function bubble(kind, text) { var m = el('div', 'ds-msg ' + kind, text); chatEl.appendChild(m); scrollChat(); return m; }
+  function aiSetBusy(b) { aiBusy = b; $('aiSend').disabled = b; $('aiInput').disabled = b; document.querySelectorAll('#aiSugg button').forEach(function (x) { x.disabled = b; }); }
+  function typing(on) {
+    var t = $('aiTyping');
+    if (on && !t) { t = el('div', 'ds-typing'); t.id = 'aiTyping'; t.appendChild(el('span', 'g-spin')); t.appendChild(document.createTextNode('Thinking...')); chatEl.appendChild(t); scrollChat(); }
+    if (!on && t) { t.remove(); }
+  }
+  function aiFail(m) { typing(false); bubble('bot err', m); aiSetBusy(false); }
+  function cmdCard(tu) {
+    var card = el('div', 'ds-cmd'), head = el('div', 'hd'); head.appendChild(el('b', '', tu.input.reason || 'Command'));
+    var bd = badge('gray', 'checking...'); head.appendChild(bd); card.appendChild(head); card.appendChild(el('pre', '', tu.input.command));
+    chatEl.appendChild(card); scrollChat(); return {card: card, badge: bd};
+  }
+  function setB(ui, cls, t) { ui.badge.className = 'g-badge b-' + cls; ui.badge.textContent = t; }
+  function showOut(ui, r) { if (r.output) { ui.card.appendChild(el('pre', 'out', r.output)); } scrollChat(); }
+  function finishRun(ui, r) {
+    ui.card.classList.remove('wait'); setB(ui, r.rc === 0 ? 'ok' : 'warn', (r.rc === 0 ? 'done' : 'exit ' + r.rc) + (r.readonly ? ' · read-only' : ''));
+    showOut(ui, r); return (r.output || '(no output)') + '\n[exit code ' + r.rc + ']';
+  }
+  function handleTool(tu) {
+    var ui = cmdCard(tu), cmd = tu.input.command;
+    return post(URLS.aiexec, {command64: b64u(cmd), approved: '0'}).then(function (r) {
+      if (!r.ok) { setB(ui, 'bad', 'error'); return 'Error: ' + (r.error || 'failed'); }
+      if (r.status === 'blocked') { ui.card.classList.add('bad'); setB(ui, 'bad', 'blocked'); showOut(ui, r); return r.output; }
+      if (r.status === 'ran') { return finishRun(ui, r); }
+      ui.card.classList.add('wait'); setB(ui, 'warn', 'needs your approval');
+      return new Promise(function (resolve) {
+        var bar = el('div', 'g-actions'); bar.style.marginTop = '10px';
+        var ok = btn('Run it', 'fa-play', 'primary sm', function () {
+          bar.remove(); setB(ui, 'info', 'running...');
+          post(URLS.aiexec, {command64: b64u(cmd), approved: '1'}).then(function (r2) {
+            if (!r2.ok) { setB(ui, 'bad', 'error'); resolve('Error: ' + (r2.error || 'failed')); return; }
+            if (r2.status === 'blocked') { setB(ui, 'bad', 'blocked'); showOut(ui, r2); resolve(r2.output); return; }
+            resolve(finishRun(ui, r2));
+          }).catch(function (e) { setB(ui, 'bad', 'error'); resolve('Error: ' + e.message); });
+        });
+        var no = btn('Do not run', 'fa-xmark', 'danger sm', function () {
+          bar.remove(); ui.card.classList.remove('wait'); setB(ui, 'gray', 'not run');
+          post(URLS.aiexec, {command64: b64u(cmd), deny: '1'}).catch(function () {});
+          resolve('The user did not approve this command. Do not run it. Suggest an alternative or ask what to do.');
+        });
+        bar.appendChild(ok); bar.appendChild(no); ui.card.appendChild(bar); scrollChat();
+      });
+    });
+  }
+  function aiRound(n) {
+    if (n > MAX_ROUNDS) { bubble('bot', 'Stopped after ' + MAX_ROUNDS + ' steps. Tell me how to continue.'); aiSetBusy(false); return; }
+    typing(true);
+    post(URLS.aichat, {messages64: b64u(JSON.stringify(convo))}).then(function (d) {
+      typing(false);
+      if (!d.ok) { throw new Error(d.error || 'The assistant failed'); }
+      convo.push({role: 'assistant', content: d.content});
+      var tools = [];
+      d.content.forEach(function (b) { if (b.type === 'text' && b.text.trim()) { bubble('bot', b.text); } else if (b.type === 'tool_use') { tools.push(b); } });
+      if (!tools.length) { aiSetBusy(false); return; }
+      var results = [];
+      return tools.reduce(function (p, tu) { return p.then(function () { return handleTool(tu).then(function (t) { results.push({type: 'tool_result', tool_use_id: tu.id, content: t}); }); }); }, Promise.resolve())
+        .then(function () { convo.push({role: 'user', content: results}); return aiRound(n + 1); });
+    }).catch(function (e) { aiFail(e.message); });
+  }
+  function aiSend(text) {
+    text = (text || '').trim(); if (!text || aiBusy) { return; }
+    $('aiSugg').style.display = 'none'; convo.push({role: 'user', content: text}); bubble('user', text); $('aiInput').value = ''; aiSetBusy(true); aiRound(1);
+  }
+  $('aiSend').addEventListener('click', function () { aiSend($('aiInput').value); });
+  $('aiInput').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { aiSend($('aiInput').value); } });
+  document.querySelectorAll('#aiSugg [data-ask]').forEach(function (b) { b.addEventListener('click', function () { aiSend(b.getAttribute('data-ask')); }); });
+  $('aiNew').addEventListener('click', function () { if (aiBusy) { return; } convo = []; chatEl.innerHTML = ''; $('aiSugg').style.display = ''; });
+  $('aiGoSet').addEventListener('click', function (e) { e.preventDefault(); tab('s'); });
+  function loadAudit() {
+    post(URLS.aiaudit, {}).then(function (d) {
+      var tb = $('auditBody'); tb.innerHTML = '';
+      if (!d.ok) { throw new Error(d.error); }
+      if (!d.items.length) { tb.innerHTML = '<tr><td colspan="3" class="g-muted">Nothing has been run yet.</td></tr>'; return; }
+      var cls = {'ran-readonly': 'ok', 'ran-approved': 'info', 'denied-by-user': 'gray', 'blocked-by-policy': 'bad'}, lbl = {'ran-readonly': 'read-only', 'ran-approved': 'approved', 'denied-by-user': 'declined', 'blocked-by-policy': 'blocked'};
+      d.items.forEach(function (it) {
+        var tr = el('tr'); tr.appendChild(el('td', '', (it.ts || '').replace('T', ' ').slice(0, 19)));
+        var s2 = el('td'); s2.appendChild(badge(cls[it.status] || 'gray', (lbl[it.status] || it.status) + (it.rc != null && it.rc !== 0 ? ' (exit ' + it.rc + ')' : ''))); tr.appendChild(s2);
+        var c = el('td'); c.appendChild(el('code', '', it.command)); tr.appendChild(c); tb.appendChild(tr);
+      });
+    }).catch(function (e) { $('auditBody').innerHTML = ''; var tr = el('tr'), td = el('td', 'g-muted', e.message); td.colSpan = 3; tr.appendChild(td); $('auditBody').appendChild(tr); });
+  }
+  $('auditRefresh').addEventListener('click', loadAudit);
+  function aiState(d) {
+    var s2 = $('setState'); s2.className = 'g-badge ' + (d.has_key ? 'b-ok' : 'b-warn'); s2.textContent = d.has_key ? 'Key saved' : 'No key yet';
+    $('setModel').value = d.model || ''; $('aiNoKey').style.display = d.has_key ? 'none' : 'block';
+  }
+  function aiLoadSettings() { post(URLS.aiset, {action: 'status'}).then(function (d) { if (d.ok) { aiState(d); } }).catch(function () {}); }
+  $('setSave').addEventListener('click', function () {
+    post(URLS.aiset, {action: 'save', api_key64: b64u($('setKey').value), model: $('setModel').value}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error); } $('setKey').value = ''; aiState(d); msg('ok', 'Assistant settings saved.');
+    }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('setDelete').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Remove the saved Anthropic API key? The assistant stops working until you add a key again.'));
+    openModal('Remove API key', box, 'Remove', true, function () { post(URLS.aiset, {action: 'delete_key'}).then(function (d) { if (!d.ok) { throw new Error(d.error); } aiState(d); msg('ok', 'Key removed.'); }).catch(function (e) { msg('bad', e.message); }); });
+  });
+  ['aiNew', 'aiSend', 'setSave', 'setDelete', 'auditRefresh'].forEach(function (id) { $(id).classList.add('nb'); });
+
+  // ---------------- start ----------------
+  (function () {
+    var h = {}; (location.hash || '').replace(/^#/, '').split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) { h[p[0]] = decodeURIComponent(p[1] || ''); } });
+    var key = Object.keys(TABS).filter(function (k) { return TABS[k][2] === h.tab; })[0] || 'o';
+    tab(key, h.sub);
+    if (key === 'd' && h.ct) { var t = setInterval(function () { if (CTROWS[h.ct] && !busy) { clearInterval(t); openCt(h.ct); } }, 400); setTimeout(function () { clearInterval(t); }, 20000); }
+  })();
   loadAll();
 })();
 </script>
