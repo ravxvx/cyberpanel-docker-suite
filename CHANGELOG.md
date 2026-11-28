@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0
+- **Phone app (PWA)** at `/dockerSuite/m/`: install it from Chrome on Android ("Install app") or Safari on iPhone ("Add to Home Screen"). Overview with alerts (website down, service stopped, SSL expiring, disk/memory nearly full, infected files, stopped containers), CPU/memory/disk and services with Restart; Websites with HTTP status, response time, WordPress version, SSL days left, last WP Toolkit backup and a Backup button; Docker containers with Restart/Start; Security with IPs blocked by CrowdSec, ImunifyAV findings, recent logins and the last plugin-protection repair. Refreshes every minute and when the app is reopened. Uses the normal panel login (administrators only).
+- Settings: "Phone app" card with the address and install notes (the panel needs a domain with a real SSL certificate for installing).
+
 ## 0.9.0
 - **Plugin protection after CyberPanel upgrades** (Settings > Plugin protection & old copies). A CyberPanel upgrade can delete custom plugins and reset `settings.py`, `urls.py` and the sidebar. Every 30 minutes `/usr/local/sbin/dockersuite-maint guard` keeps a copy of the protected plugins (WP Toolkit Pro and Docker Suite by default) in `/root/plugin-backup`, puts a deleted plugin folder back, re-adds it to `settings.py`/`urls.py` and the sidebar, restarts the panel and rolls the config back if the panel does not answer. The script lives outside the plugin folder, so an upgrade cannot delete it. Per-plugin "Protect" switch (untick before removing a plugin on purpose).
 - **Old copies: preview, automatic and manual deletion.** Lists manual backups (`*.bak-*`, `wp-config-*.bak`), replaced plugin versions, plugin archives, self-update backups and the copy of the previous CyberPanel left by the upgrader, with size, age and when each is deleted. Automatic cleanup every day at 05:20 (default 10 days, previous CyberPanel 30 days), "Delete expired copies now", and a Delete button for each copy.

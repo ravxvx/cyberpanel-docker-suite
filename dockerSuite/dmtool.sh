@@ -774,7 +774,7 @@ for l in sys.stdin.read().splitlines():
   N="$(find "$T" -mindepth 2 -maxdepth 2 -type d -name dockerSuite | head -1)"
   [ -n "$N" ] && [ "$(meta_ver "$N/meta.xml")" = "$new" ] || { rm -rf "$T"; fail "downloaded files do not match version $new"; }
   say "Checking the new files..."
-  for f in views.py urls.py assistant.py maint.py; do [ -f "$N/$f" ] || continue; python3 -c 'import ast,sys;ast.parse(open(sys.argv[1]).read())' "$N/$f" || { rm -rf "$T"; fail "$f has a syntax error - update cancelled"; }; done
+  for f in views.py urls.py assistant.py maint.py mobile.py; do [ -f "$N/$f" ] || continue; python3 -c 'import ast,sys;ast.parse(open(sys.argv[1]).read())' "$N/$f" || { rm -rf "$T"; fail "$f has a syntax error - update cancelled"; }; done
   for f in dmtool.sh glpitool.sh srvtool.sh post_install; do [ -f "$N/$f" ] && { bash -n "$N/$f" || { rm -rf "$T"; fail "$f has a syntax error - update cancelled"; }; }; done
   [ -f "$N/templates/dockerSuite/dashboard.html" ] || { rm -rf "$T"; fail "dashboard template missing - update cancelled"; }
   BK="/root/dockersuite-$cur-$(date +%Y%m%d-%H%M%S).tar.gz"

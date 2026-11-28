@@ -13,4 +13,7 @@ urlpatterns = [
     path("ai/audit/", assistant.ai_audit, name="dockerSuiteAiAudit"),
     path("glpilatest/", views.glpilatest, name="dockerSuiteGlpiLatest"),
     path("maint/", views.maint, name="dockerSuiteMaint"),
+    path("m/", views.mobile, name="dockerSuiteMobile"),
+    path("m/api/", views.mobile_api, name="dockerSuiteMobileApi"),
+    path("m/<str:name>", views.mobile_static, name="dockerSuiteMobileStatic"),
 ]
