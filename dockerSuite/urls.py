@@ -12,4 +12,5 @@ urlpatterns = [
     path("ai/settings/", assistant.ai_settings, name="dockerSuiteAiSettings"),
     path("ai/audit/", assistant.ai_audit, name="dockerSuiteAiAudit"),
     path("glpilatest/", views.glpilatest, name="dockerSuiteGlpiLatest"),
+    path("maint/", views.maint, name="dockerSuiteMaint"),
 ]

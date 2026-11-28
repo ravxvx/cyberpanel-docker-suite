@@ -4,6 +4,10 @@ CyberPanel plugin: containers overview, GLPI (Docker) backup/update with rollbac
 server backup (websites, system, databases; optional AES-256 encryption) and optional copy to a NAS over SSH
 (OpenVPN / WireGuard). Version 0.7.0 adds a new design, an Overview tab and readable error messages.
 
+## Plugin protection and WP Toolkit updates (0.9.0)
+
+Settings tab: keeps custom CyberPanel plugins working after a CyberPanel upgrade (copy in `/root/plugin-backup`, checked every 30 minutes by `/usr/local/sbin/dockersuite-maint`), lists and deletes old copies (automatically after N days or by hand), and updates WP Toolkit Pro from GitHub with a check and automatic rollback.
+
 ## Update
 
 From version 0.8.0 on: **Settings > Docker Suite updates > Install update** in the plugin.
