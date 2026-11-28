@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0
+- **Plugin protection after CyberPanel upgrades** (Settings > Plugin protection & old copies). A CyberPanel upgrade can delete custom plugins and reset `settings.py`, `urls.py` and the sidebar. Every 30 minutes `/usr/local/sbin/dockersuite-maint guard` keeps a copy of the protected plugins (WP Toolkit Pro and Docker Suite by default) in `/root/plugin-backup`, puts a deleted plugin folder back, re-adds it to `settings.py`/`urls.py` and the sidebar, restarts the panel and rolls the config back if the panel does not answer. The script lives outside the plugin folder, so an upgrade cannot delete it. Per-plugin "Protect" switch (untick before removing a plugin on purpose).
+- **Old copies: preview, automatic and manual deletion.** Lists manual backups (`*.bak-*`, `wp-config-*.bak`), replaced plugin versions, plugin archives, self-update backups and the copy of the previous CyberPanel left by the upgrader, with size, age and when each is deleted. Automatic cleanup every day at 05:20 (default 10 days, previous CyberPanel 30 days), "Delete expired copies now", and a Delete button for each copy.
+- **WP Toolkit Pro updates from GitHub** (Settings > WP Toolkit Pro updates): shows the installed and the newest version with what is new; "Update" downloads `ravxvx/cyberpanel-wordpress-toolkit-pr`, checks Python and shell syntax, saves the current version to `/root/wptoolkit-<version>-<date>.tar.gz`, swaps the folder, runs `post_install`, tests the panel and puts the previous version back if it does not answer.
+- Panel-restarting jobs (plugin check, WP Toolkit update) run as their own systemd unit, so the panel restart cannot cut them off half-way.
+- Replaces the hand-made `cp-plugin-guard` / `cp-cleanup` cron jobs (removed on install).
+- Docker Suite self-update also checks `assistant.py` and `maint.py` before switching.
+
 ## 0.8.2
 - Assistant settings: the model is now a normal drop-down list (filled by "Load models"), with "Type another model name..." for anything else.
 - New "Test" button: saves the provider and checks that the model answers and can run commands (tool use).

@@ -22,8 +22,18 @@ if [ -s "$C" ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))' "$C"
 else
   bash $P/dmtool.sh setconfig - "$(echo '{"retention_days":5,"min_keep":2,"schedule":"02:30","auto":true}' | base64 -w0)" 0123456789ab >/dev/null 2>&1
 fi
+# Plugin protection + cleanup of old copies. Installed OUTSIDE the plugin folder, so a CyberPanel upgrade that
+# deletes the plugin cannot delete the script that brings it back. Replaces the hand-made cp-plugin-guard / cp-cleanup.
+install -m 700 -o root -g root $P/maint.py /usr/local/sbin/dockersuite-maint
+cat > /etc/cron.d/dockersuite-maint <<'M'
+# Docker Suite: keep custom plugins after CyberPanel upgrades (every 30 min) and delete old copies (05:20)
+*/30 * * * * root /usr/local/sbin/dockersuite-maint guard >/dev/null 2>&1
+20 5 * * * root /usr/local/sbin/dockersuite-maint clean >/dev/null 2>&1
+M
+chmod 644 /etc/cron.d/dockersuite-maint
+rm -f /etc/cron.d/cp-plugin-guard /etc/cron.d/cp-cleanup
 cat > /etc/logrotate.d/dockermanager <<'L'
-/var/log/dockermanager/openvpn.log {
+/var/log/dockermanager/openvpn.log /var/log/dockermanager/plugin-guard.log {
   weekly
   rotate 4
   compress

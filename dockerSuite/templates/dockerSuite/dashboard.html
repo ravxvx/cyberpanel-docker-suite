@@ -473,6 +473,35 @@
         <div class="g-actions" style="margin-top:16px"><button type="button" class="g-btn primary" id="aSave"><i class="fas fa-floppy-disk"></i> Save alerts</button><button type="button" class="g-btn" id="aTest"><i class="fas fa-paper-plane"></i> Send test mail</button><button type="button" class="g-btn" id="aCheck"><i class="fas fa-magnifying-glass"></i> Check now</button></div>
       </div>
     </div>
+    <div class="g-card" id="maintCard">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-shield-halved"></i></span> Plugin protection &amp; old copies</span><button type="button" class="g-btn sm" id="mRefresh"><i class="fas fa-arrows-rotate"></i> Refresh</button></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">A CyberPanel upgrade can delete custom plugins. Every 30 minutes Docker Suite keeps a copy of the protected plugins in <code>/root/plugin-backup</code> and, if a plugin disappears, puts it back, re-adds it to the panel and the sidebar, and rolls back if the panel stops answering. Untick a plugin before you remove it on purpose, otherwise it comes back.</div>
+        <div class="g-check"><input type="checkbox" id="mGuard"><label for="mGuard">Protect plugins after CyberPanel upgrades</label></div>
+        <div class="ds-scroll"><table class="g-table"><thead><tr><th>Protect</th><th>Plugin</th><th>Installed</th><th>In the panel</th><th>Protection copy</th></tr></thead><tbody id="mApps"><tr><td colspan="5" class="g-muted">Loading...</td></tr></tbody></table></div>
+        <h4>Old copies</h4>
+        <div class="g-check"><input type="checkbox" id="mClean"><label for="mClean">Delete old copies automatically every day at 05:20</label></div>
+        <div class="g-form">
+          <div><label for="mKeep">Keep backups, replaced plugin versions and archives (days)</label><input type="number" id="mKeep" min="1" max="365"></div>
+          <div><label for="mPanel">Keep the copy of the previous CyberPanel (days)</label><input type="number" id="mPanel" min="1" max="365"></div>
+        </div>
+        <div class="g-actions"><button type="button" class="g-btn primary" id="mSave"><i class="fas fa-floppy-disk"></i> Save</button><button type="button" class="g-btn" id="mGuardNow"><i class="fas fa-stethoscope"></i> Check plugins now</button><button type="button" class="g-btn danger" id="mCleanNow"><i class="fas fa-broom"></i> Delete expired copies now</button></div>
+        <div class="ds-scroll" style="margin-top:12px"><table class="g-table"><thead><tr><th>Copy</th><th>What</th><th>Size</th><th>Age</th><th>Auto-delete</th><th></th></tr></thead><tbody id="mFiles"><tr><td colspan="6" class="g-muted">Loading...</td></tr></tbody></table></div>
+        <div class="g-muted" id="mTotal" style="margin-top:6px"></div>
+        <h4>Protection log</h4>
+        <pre class="g-log" id="mLog" style="max-height:180px">-</pre>
+      </div>
+    </div>
+    <div class="g-card" id="wptCard">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-puzzle-piece"></i></span> WP Toolkit Pro updates</span><span id="wBadge"></span></div>
+      <div class="g-body">
+        <div class="ds-note" style="margin-bottom:12px">Checks <code>ravxvx/cyberpanel-wordpress-toolkit-pr</code> on GitHub. Before switching, the new files are checked (Python and shell syntax, version), the current version is saved to <code>/root/wptoolkit-&lt;version&gt;-&lt;date&gt;.tar.gz</code>, and after the switch the panel is tested; if it does not answer, the previous version is put back. Site backups and settings are not touched.</div>
+        <div id="wInfo" class="g-muted">Press Check.</div>
+        <pre class="g-log" id="wNotes" style="display:none;max-height:220px;white-space:pre-wrap"></pre>
+        <div class="g-actions"><button type="button" class="g-btn" id="wCheck"><i class="fas fa-magnifying-glass"></i> Check for updates</button><button type="button" class="g-btn primary" id="wApply" style="display:none"><i class="fas fa-download"></i> Update WP Toolkit</button></div>
+        <pre class="g-log" id="wLog" style="display:none;max-height:220px"></pre>
+      </div>
+    </div>
     <div class="g-card" id="cleanCard">
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-broom"></i></span> Disk cleanup</span><button type="button" class="g-btn sm" id="cRefresh"><i class="fas fa-arrows-rotate"></i> Measure</button></div>
       <div class="g-body">
@@ -499,7 +528,7 @@
 <script>
 (function () {
   var URLS = {job: "{% url 'dockerSuiteJob' %}", status: "{% url 'dockerSuiteJobStatus' %}", glatest: "{% url 'dockerSuiteGlpiLatest' %}", overview: "{% url 'dockerSuiteOverview' %}",
-    aichat: "{% url 'dockerSuiteAiChat' %}", aiexec: "{% url 'dockerSuiteAiExec' %}", aiset: "{% url 'dockerSuiteAiSettings' %}", aiaudit: "{% url 'dockerSuiteAiAudit' %}"};
+    aichat: "{% url 'dockerSuiteAiChat' %}", aiexec: "{% url 'dockerSuiteAiExec' %}", aiset: "{% url 'dockerSuiteAiSettings' %}", aiaudit: "{% url 'dockerSuiteAiAudit' %}", maint: "{% url 'dockerSuiteMaint' %}"};
   var csrf = document.querySelector('#dmgr [name=csrfmiddlewaretoken]').value;
   var $ = function (id) { return document.getElementById(id); };
   var busy = false, cfg = null, vpnFiles = {}, upd = {}, lastList = '';
@@ -1066,7 +1095,7 @@
     }
     if (which === 'b') { sub(subName || curSub); }
     if (which === 'a') { aiLoadSettings(); loadAudit(); }
-    if (which === 's') { aiLoadSettings(); if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
+    if (which === 's') { aiLoadSettings(); if (!maintLoaded) { maintLoaded = true; mLoad(true); } if (!wptChecked) { wptChecked = true; wCheck(true); } if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
     if (which !== 'd') { ctStop(); }
     setHash();
   }
@@ -1292,6 +1321,117 @@
     openModal('Disk cleanup', box, 'Clean', !!danger, function () { if (cf && cf.value !== 'DELETE') { return false; } simple('cleanup', '', 'Cleanup: ' + title, key, function () { cleanMeasure(true); }); });
   }
   $('cRefresh').addEventListener('click', function () { cleanMeasure(false); });
+
+
+  // ---------------- plugin protection & old copies ----------------
+  var MT = null, maintLoaded = false;
+  function mRender(d) {
+    MT = d; var c = d.conf;
+    $('mGuard').checked = !!c.guard; $('mClean').checked = !!c.clean; $('mKeep').value = c.keep_days; $('mPanel').value = c.panel_days;
+    var tb = $('mApps'); tb.innerHTML = '';
+    d.apps.forEach(function (a) {
+      var tr = el('tr'), td = el('td'), cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = a.protected; cb.dataset.app = a.app; cb.className = 'mApp';
+      td.appendChild(cb); tr.appendChild(td);
+      tr.appendChild(el('td', '', a.app));
+      var ti = el('td'); ti.appendChild(a.installed ? badge('ok', a.version || 'yes') : badge('bad', 'missing')); tr.appendChild(ti);
+      var tp = el('td'); tp.appendChild(!a.installed ? badge('gray', '-') : (a.registered && a.menu !== false ? badge('ok', 'OK') : badge('warn', a.registered ? 'no sidebar link' : 'not registered'))); tr.appendChild(tp);
+      tr.appendChild(el('td', '', a.copy_version ? a.copy_version + ' · ' + ago(a.copy_time) : 'none yet'));
+      tb.appendChild(tr);
+    });
+    var fb = $('mFiles'); fb.innerHTML = ''; var total = 0;
+    if (!d.files.length) { var r0 = el('tr'), t0 = el('td', 'g-muted', 'No old copies.'); t0.colSpan = 6; r0.appendChild(t0); fb.appendChild(r0); }
+    d.files.forEach(function (f) {
+      total += f.size;
+      var tr = el('tr'), tn = el('td'); tn.appendChild(el('code', '', f.path)); tr.appendChild(tn);
+      tr.appendChild(el('td', '', f.label)); tr.appendChild(el('td', '', hsize(f.size)));
+      tr.appendChild(el('td', '', Math.floor(f.age_days) + ' d'));
+      var ta = el('td'); ta.appendChild(!c.clean ? badge('gray', 'off') : (f.delete_in <= 0 ? badge('warn', 'next run') : badge('info', 'in ' + Math.ceil(f.delete_in) + ' d'))); tr.appendChild(ta);
+      var tx = el('td'); tx.appendChild(btn('Delete', 'fa-trash', 'danger sm', function () { mDelete(f); })); tr.appendChild(tx);
+      fb.appendChild(tr);
+    });
+    $('mTotal').textContent = d.files.length ? d.files.length + ' copies, ' + hsize(total) + ' in total.' : '';
+    $('mLog').textContent = d.log.length ? d.log.join('\n') : 'Nothing logged yet - nothing needed fixing.';
+  }
+  function mCall(data, label) {
+    if (label) { msg('info', label + '...'); }
+    return post(URLS.maint, data).then(function (d) { if (!d.ok) { throw new Error(d.error || 'Error'); } mRender(d); return d; });
+  }
+  function mLoad(quiet) { mCall({action: 'status'}, quiet ? '' : 'Loading').then(function () { if (!quiet) { msg('ok', 'Up to date.'); } }).catch(function (e) { msg('bad', e.message); }); }
+  function mDelete(f) {
+    var box = el('div'); box.appendChild(el('p', '', 'Delete this copy for good?'));
+    box.appendChild(el('p', '', f.path + ' (' + f.label + ', ' + hsize(f.size) + ')'));
+    if (f.panel) { box.appendChild(el('p', 'g-muted', 'Without it you cannot go back to the previous CyberPanel version (a Contabo snapshot still can).')); }
+    openModal('Delete old copy', box, 'Delete', true, function () {
+      mCall({action: 'delete', data64: b64(f.path)}, 'Deleting').then(function () { msg('ok', 'Deleted: ' + f.path); }).catch(function (e) { msg('bad', e.message); });
+    });
+  }
+  $('mRefresh').addEventListener('click', function () { mLoad(false); });
+  $('mSave').addEventListener('click', function () {
+    var apps = []; document.querySelectorAll('#mApps .mApp').forEach(function (x) { if (x.checked) { apps.push(x.dataset.app); } });
+    var data = {guard: $('mGuard').checked, clean: $('mClean').checked, keep_days: parseInt($('mKeep').value, 10) || 10, panel_days: parseInt($('mPanel').value, 10) || 30, apps: apps};
+    mCall({action: 'save', data64: b64(JSON.stringify(data))}, 'Saving').then(function () { msg('ok', 'Saved.'); }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('mGuardNow').addEventListener('click', function () {
+    post(URLS.maint, {action: 'guardnow'}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Error'); }
+      msg('info', 'Checking plugins (if something has to be repaired, the panel restarts)...');
+      setTimeout(function () { mLoad(true); msg('ok', 'Plugins checked - see the protection log.'); }, 20000);
+    }).catch(function (e) { msg('bad', e.message); });
+  });
+  $('mCleanNow').addEventListener('click', function () {
+    var due = (MT && MT.files || []).filter(function (f) { return f.age_days >= f.limit; });
+    var box = el('div');
+    if (!due.length) { box.appendChild(el('p', '', 'No copy is older than its limit yet. To remove a single copy earlier, use its Delete button.')); openModal('Delete expired copies', box, 'OK', false, function () {}); return; }
+    box.appendChild(el('p', '', 'Delete ' + due.length + ' expired copies?')); var ul = el('ul'); due.forEach(function (f) { ul.appendChild(el('li', '', f.path + ' (' + hsize(f.size) + ')')); }); box.appendChild(ul);
+    openModal('Delete expired copies', box, 'Delete', true, function () {
+      mCall({action: 'cleannow'}, 'Deleting expired copies').then(function (d) { msg('ok', 'Deleted ' + (d.deleted || []).length + ' copies.'); }).catch(function (e) { msg('bad', e.message); });
+    });
+  });
+
+
+  // ---------------- WP Toolkit Pro updates (from GitHub) ----------------
+  var wptChecked = false, wptTimer = null;
+  function wShowState(u) {
+    if (!u || !u.log) { return; }
+    $('wLog').style.display = 'block'; $('wLog').textContent = u.log.join('\n'); $('wLog').scrollTop = $('wLog').scrollHeight;
+  }
+  function wCheck(quiet) {
+    if (!quiet) { msg('info', 'Checking GitHub for WP Toolkit Pro...'); }
+    post(URLS.maint, {action: 'wptcheck'}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Error'); }
+      var c = d.check, b = $('wBadge'); b.innerHTML = '';
+      b.appendChild(c.newer ? badge('warn', 'update ' + c.latest) : badge('ok', 'up to date'));
+      $('wInfo').textContent = 'Installed: ' + (c.installed || 'not installed') + ' · on GitHub: ' + (c.latest || '?');
+      $('wNotes').style.display = c.notes ? 'block' : 'none'; $('wNotes').textContent = c.notes || '';
+      $('wApply').style.display = c.newer || !c.installed ? '' : 'none';
+      if (d.update && d.update.running) { wPoll(); }
+      if (!quiet) { msg('ok', c.newer ? 'WP Toolkit ' + c.latest + ' is available.' : 'WP Toolkit is up to date.'); }
+    }).catch(function (e) { if (!quiet) { msg('bad', e.message); } else { $('wInfo').textContent = 'GitHub check failed: ' + e.message; } });
+  }
+  function wPoll() {
+    if (wptTimer) { return; }
+    var fails = 0;
+    wptTimer = setInterval(function () {
+      post(URLS.maint, {action: 'wptstate'}).then(function (d) {
+        fails = 0; var u = d.update || {}; wShowState(u);
+        if (u.done && !u.running) {
+          clearInterval(wptTimer); wptTimer = null;
+          msg(u.ok ? 'ok' : 'bad', u.ok ? 'WP Toolkit updated. Refresh the page (Ctrl+F5).' : 'WP Toolkit update failed - see the log (the previous version was kept).');
+          wCheck(true); mLoad(true);
+        }
+      }).catch(function () { if (++fails > 40) { clearInterval(wptTimer); wptTimer = null; msg('bad', 'Lost contact with the panel - reload the page.'); } });
+    }, 3000);
+  }
+  $('wCheck').addEventListener('click', function () { wCheck(false); });
+  $('wApply').addEventListener('click', function () {
+    var box = el('div'); box.appendChild(el('p', '', 'Update WP Toolkit Pro from GitHub now? The panel restarts for a few seconds; your sites keep running.'));
+    openModal('Update WP Toolkit Pro', box, 'Update', false, function () {
+      post(URLS.maint, {action: 'wptupdate'}).then(function (d) {
+        if (!d.ok) { throw new Error(d.error || 'Error'); }
+        msg('info', 'Updating WP Toolkit Pro (about a minute)...'); $('wApply').style.display = 'none'; wPoll();
+      }).catch(function (e) { msg('bad', e.message); });
+    });
+  });
 
   // ---------------- self-update ----------------
   var updChecked = false, updNew = '';

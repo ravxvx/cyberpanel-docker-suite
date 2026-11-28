@@ -340,3 +340,36 @@ def overview(request):
     err = (lines.get("errors") or ["0"])[0]
     data["plugin_errors"] = int(err) if err.isdigit() else 0
     return JsonResponse(data)
+
+
+MAINT_BIN = "/usr/local/sbin/dockersuite-maint"
+MAINT_ACTIONS = ("status", "save", "cleannow", "guardnow", "delete", "wptcheck", "wptstate", "wptupdate")
+
+
+@require_POST
+@guarded
+def maint(request):
+    """Plugin protection (after CyberPanel upgrades) and cleanup of old copies - Settings tab."""
+    if not _is_admin(request):
+        return _deny()
+    action = request.POST.get("action", "status")
+    if action not in MAINT_ACTIONS:
+        return JsonResponse({"ok": False, "error": "Unknown action."})
+    arg = ""
+    if action in ("save", "delete"):
+        arg = request.POST.get("data64", "").strip()
+        if not B64_RE.match(arg):
+            return JsonResponse({"ok": False, "error": "Invalid data."})
+    tool = MAINT_BIN if os.path.exists(MAINT_BIN) else "python3 " + shlex.quote(os.path.join(PLUGIN_DIR, "maint.py"))
+    if action in ("wptupdate", "guardnow"):
+        # Both can restart the panel. Run them as their own systemd unit, outside lscpd's process group:
+        # a restart of lscpd would otherwise kill them half-way (before the health check / rollback).
+        real = "wptupdate" if action == "wptupdate" else "guardforce"
+        _sh("mkdir -p %s; if command -v systemd-run >/dev/null 2>&1; then systemd-run --quiet --collect --unit=dockersuite-%s-$(date +%%s) %s %s; "
+            "else setsid nohup %s %s > /dev/null 2>&1 < /dev/null & fi" % (LOG_DIR, real, tool, real, tool, real))
+        return JsonResponse({"ok": True, "started": True})
+    out = _sh("%s %s %s" % (tool, action, shlex.quote(arg) if arg else "")).strip()
+    try:
+        return JsonResponse(json.loads(out.splitlines()[-1] if out else "{}"))
+    except ValueError:
+        return JsonResponse({"ok": False, "error": "Unexpected answer from the maintenance tool: %s" % out[-300:]})
