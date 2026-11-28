@@ -492,6 +492,21 @@
         <pre class="g-log" id="mLog" style="max-height:180px">-</pre>
       </div>
     </div>
+    <div class="g-card" id="supdCard">
+      <div class="g-title"><span><span class="ds-ico"><i class="fas fa-arrows-rotate"></i></span> System updates</span><span id="suBadge"></span></div>
+      <div class="g-body">
+        <div id="suOff" class="ds-note" style="display:none">System updates come from the <a href="https://github.com/ravxvx/cyberpanel-server-app" target="_blank" rel="noopener">Server App</a> plugin (also the phone app). Install it to see and install Ubuntu, PHP and database updates here.</div>
+        <div id="suOn" style="display:none">
+          <div id="suSum" class="g-muted">-</div>
+          <div class="g-actions"><button type="button" class="g-btn primary" id="suSec"><i class="fas fa-shield-halved"></i> Install security updates</button><button type="button" class="g-btn" id="suAll"><i class="fas fa-download"></i> Install all updates</button><button type="button" class="g-btn" id="suScan"><i class="fas fa-magnifying-glass"></i> Check now</button></div>
+          <pre class="g-log" id="suLog" style="display:none;max-height:220px"></pre>
+          <div class="ds-scroll" style="margin-top:10px"><table class="g-table"><thead><tr><th>Area</th><th>Installed</th><th>Support</th><th>Status</th></tr></thead><tbody id="suTable"></tbody></table></div>
+          <div class="g-check" style="margin-top:10px"><input type="checkbox" id="suAuto"><label for="suAuto">Install security updates automatically every day (unattended-upgrades)</label></div>
+          <h4>Waiting packages</h4>
+          <div class="ds-scroll"><table class="g-table"><thead><tr><th>Package</th><th>Group</th><th>From</th><th>To</th><th></th></tr></thead><tbody id="suPk"></tbody></table></div>
+        </div>
+      </div>
+    </div>
     <div class="g-card" id="phoneCard">
       <div class="g-title"><span><span class="ds-ico"><i class="fas fa-mobile-screen"></i></span> Phone app</span></div>
       <div class="g-body">
@@ -1103,7 +1118,7 @@
     }
     if (which === 'b') { sub(subName || curSub); }
     if (which === 'a') { aiLoadSettings(); loadAudit(); }
-    if (which === 's') { aiLoadSettings(); if (!maintLoaded) { maintLoaded = true; mLoad(true); } if (!wptChecked) { wptChecked = true; wCheck(true); } if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
+    if (which === 's') { aiLoadSettings(); if (!maintLoaded) { maintLoaded = true; mLoad(true); } if (!suLoaded) { suLoaded = true; suLoad(); } if (!wptChecked) { wptChecked = true; wCheck(true); } if (!cleanLoaded) { cleanLoaded = true; whenIdle(function () { cleanMeasure(true); }); } if (!updChecked) { updChecked = true; whenIdle(function () { updCheck(true); }); } }
     if (which !== 'd') { ctStop(); }
     setHash();
   }
@@ -1442,6 +1457,61 @@
   });
 
   try { $('phoneUrl').textContent = location.origin + '/dockerSuite/m/'; } catch (e) {}
+
+
+  // ---------------- system updates (data and actions from the Server App plugin) ----------------
+  var SA_API = '/serverApp/api/', suTimer = null, suLoaded = false;
+  function suSupport(e) { if (!e) { return badge('gray', '?'); } if (e.ended) { return badge('bad', 'ended ' + e.until); } return badge(e.months_left < 6 ? 'warn' : 'ok', 'until ' + e.until); }
+  function suRow(area, inst, sup, st) { var tr = el('tr'); tr.appendChild(el('td', '', area)); tr.appendChild(el('td', '', inst)); var a = el('td'); a.appendChild(sup); tr.appendChild(a); var b = el('td'); if (st) { b.appendChild(st); } tr.appendChild(b); return tr; }
+  function suRender(d) {
+    var sc = d.scan || {}, run = d.run || {}, sm = sc.summary || {};
+    $('suOff').style.display = 'none'; $('suOn').style.display = '';
+    var bd = $('suBadge'); bd.innerHTML = ''; bd.appendChild(!sc.time ? badge('gray', 'not checked') : sm.security ? badge('warn', sm.security + ' security') : sm.total ? badge('info', sm.total + ' waiting') : badge('ok', 'up to date'));
+    $('suSum').textContent = !sc.time ? 'Not checked yet - press Check now.' : (sm.total ? sm.total + ' update(s) waiting, ' + sm.security + ' security fixes.' : 'Everything is up to date.') + ' Checked ' + ago(sc.time) + '.' + (sc.apt_ok === false ? ' Package lists could not be refreshed: ' + sc.apt_error : '');
+    ['suSec', 'suAll', 'suScan'].forEach(function (id) { $(id).disabled = !!run.running; });
+    var lg = $('suLog');
+    if (run.log && run.log.length && (run.running || Date.now() / 1000 - run.started < 3600)) { lg.style.display = 'block'; lg.textContent = run.log.join('\n'); lg.scrollTop = lg.scrollHeight; } else { lg.style.display = 'none'; }
+    var tb = $('suTable'); tb.innerHTML = '';
+    var ub = sc.ubuntu || {}, cp = sc.cyberpanel || {}, db = sc.database || {};
+    if (ub.name) {
+      var st = ub.reboot ? btn('Restart server', 'fa-power-off', 'danger sm', function () {
+        var c = prompt('The server restarts and all websites are offline for 1-2 minutes. Type RESTART to confirm:'); if (c !== 'RESTART') { return; }
+        post(SA_API, {action: 'reboot', confirm: c}).then(function (r) { if (!r.ok) { throw new Error(r.error); } msg('ok', 'The server restarts in 10 seconds.'); }).catch(function (e) { msg('bad', e.message); });
+      }) : badge('ok', 'no restart needed');
+      tb.appendChild(suRow('Ubuntu', ub.name + ' · kernel ' + ub.kernel, suSupport(ub.eol), st));
+      $('suAuto').checked = !!ub.auto_security;
+    }
+    if (cp.current || cp.latest) { tb.appendChild(suRow('CyberPanel', (cp.current || '?') + ' (newest ' + (cp.latest || '?') + ')', badge('gray', '-'), cp.newer ? badge('warn', 'update available - snapshot first') : badge('ok', 'up to date'))); }
+    (sc.php || []).forEach(function (p) { tb.appendChild(suRow('PHP ' + p.series, (p.version || '-') + (p.sites.length ? ' · ' + p.sites.join(', ') : ' · no websites'), suSupport(p.eol), p.sites.length && p.eol && p.eol.ended ? badge('bad', 'move websites to newer PHP') : null)); });
+    if (db.product) { tb.appendChild(suRow('Database', db.product + ' ' + db.version, suSupport(db.eol), null)); }
+    var pk = $('suPk'); pk.innerHTML = '';
+    if (!(sc.packages || []).length) { var r0 = el('tr'), t0 = el('td', 'g-muted', 'Nothing waiting.'); t0.colSpan = 5; r0.appendChild(t0); pk.appendChild(r0); }
+    (sc.packages || []).slice().sort(function (a, b) { return (b.security - a.security) || a.category.localeCompare(b.category) || a.name.localeCompare(b.name); }).forEach(function (p) {
+      var tr = el('tr'); tr.appendChild(el('td', '', p.name)); tr.appendChild(el('td', '', p.category)); tr.appendChild(el('td', '', p.from)); tr.appendChild(el('td', '', p.to));
+      var t = el('td'); if (p.security) { t.appendChild(badge('warn', 'security')); } tr.appendChild(t); pk.appendChild(tr);
+    });
+  }
+  function suLoad() {
+    return post(SA_API, {action: 'updates'}).then(function (d) {
+      if (!d.ok) { throw new Error(d.error || 'Error'); }
+      suRender(d);
+      if (d.run && d.run.running) { if (!suTimer) { suTimer = setInterval(suLoad, 4000); } }
+      else if (suTimer) { clearInterval(suTimer); suTimer = null; msg(d.run.ok ? 'ok' : 'bad', d.run.ok ? 'Updates installed.' : 'Updating failed - see the log.'); }
+    }).catch(function () { $('suOn').style.display = 'none'; $('suOff').style.display = ''; var bd = $('suBadge'); bd.innerHTML = ''; bd.appendChild(badge('gray', 'Server App not installed')); });
+  }
+  function suRun(kind, title, text) {
+    var box = el('div'); box.appendChild(el('p', '', text));
+    openModal(title, box, 'Install', false, function () {
+      post(SA_API, {action: 'upd_run', kind: kind}).then(function (d) { if (!d.ok) { throw new Error(d.error); } msg('info', 'Installing updates...'); setTimeout(suLoad, 1500); if (!suTimer) { suTimer = setInterval(suLoad, 4000); } }).catch(function (e) { msg('bad', e.message); });
+    });
+  }
+  $('suSec').addEventListener('click', function () { suRun('security', 'Install security updates', 'Install the waiting security updates now? Services that get updated restart for a moment.'); });
+  $('suAll').addEventListener('click', function () { suRun('all', 'Install all updates', 'Install ALL waiting updates now? Nothing is removed; the web server, PHP or database may restart for a moment. A Contabo snapshot first is a good idea.'); });
+  $('suScan').addEventListener('click', function () { post(SA_API, {action: 'upd_scan'}).then(function (d) { msg('info', d.message || 'Checking...'); setTimeout(suLoad, 60000); }).catch(function (e) { msg('bad', e.message); }); });
+  $('suAuto').addEventListener('change', function () {
+    var on = $('suAuto').checked;
+    post(SA_API, {action: 'upd_autosec', on: on ? '1' : '0'}).then(function (d) { if (!d.ok) { throw new Error(d.error); } msg('ok', on ? 'Security updates will install automatically.' : 'Automatic security updates are off.'); }).catch(function (e) { $('suAuto').checked = !on; msg('bad', e.message); });
+  });
 
   // ---------------- self-update ----------------
   var updChecked = false, updNew = '';

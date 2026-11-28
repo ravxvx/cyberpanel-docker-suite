@@ -1,6 +1,7 @@
 # Changelog
 
-## 0.10.1
+## 0.11.0
+- **System updates card** (Settings): Ubuntu with support end, kernel and "restart needed" (Restart server button, type RESTART), CyberPanel installed vs newest, every PHP version with support end and the websites using it, MariaDB version and support, all waiting packages with security fixes first; Install security updates / Install all updates with a live log, Check now, and automatic security updates on/off. Data and actions come from the Server App plugin (one update mechanism for the panel and the phone); without Server App the card says how to get it.
 - Works with the new **Server App** plugin: `/dockerSuite/m/` opens Server App when it is installed, and plugin protection also restores Server App's sidebar link after a CyberPanel upgrade.
 
 ## 0.10.0
