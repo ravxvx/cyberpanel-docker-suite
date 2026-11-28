@@ -28,7 +28,8 @@ DEFAULT = {"guard": True, "apps": ["wordpressToolkitPro", "dockerSuite"], "clean
 APP_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]{1,40}$")
 # sidebar marker written by each plugin's repair-menu.sh, and where that script lives
 MENU = {"wordpressToolkitPro": ("WPT-BEGIN", ["bin/repair-menu.sh", "repair-menu.sh"]),
-        "dockerSuite": ("DM-BEGIN", ["repair-menu.sh"])}
+        "dockerSuite": ("DM-BEGIN", ["repair-menu.sh"]),
+        "serverApp": ("SA-BEGIN", ["repair-menu.sh"])}
 # what "clean" may delete: (glob, which limit applies)
 RULES = [
     (B + "/replaced-*", "keep_days"),

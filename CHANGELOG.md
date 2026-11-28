@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.1
+- Works with the new **Server App** plugin: `/dockerSuite/m/` opens Server App when it is installed, and plugin protection also restores Server App's sidebar link after a CyberPanel upgrade.
+
 ## 0.10.0
 - **Phone app (PWA)** at `/dockerSuite/m/`: install it from Chrome on Android ("Install app") or Safari on iPhone ("Add to Home Screen"). Overview with alerts (website down, service stopped, SSL expiring, disk/memory nearly full, infected files, stopped containers), CPU/memory/disk and services with Restart; Websites with HTTP status, response time, WordPress version, SSL days left, last WP Toolkit backup and a Backup button; Docker containers with Restart/Start; Security with IPs blocked by CrowdSec, ImunifyAV findings, recent logins and the last plugin-protection repair. Refreshes every minute and when the app is reopened. Uses the normal panel login (administrators only).
 - Settings: "Phone app" card with the address and install notes (the panel needs a domain with a real SSL certificate for installing).
