@@ -388,6 +388,8 @@ def mobile(request):
     from django.shortcuts import redirect, render
     if not _logged_in_admin(request):
         return redirect("/")
+    if os.path.isfile("/usr/local/CyberCP/serverApp/meta.xml"):
+        return redirect("/serverApp/")   # the separate Server App plugin replaces this phone view
     return render(request, "dockerSuite/mobile.html", {})
 
 
