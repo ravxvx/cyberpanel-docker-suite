@@ -373,3 +373,54 @@ def maint(request):
         return JsonResponse(json.loads(out.splitlines()[-1] if out else "{}"))
     except ValueError:
         return JsonResponse({"ok": False, "error": "Unexpected answer from the maintenance tool: %s" % out[-300:]})
+
+
+# ---------------- phone app (PWA) at /dockerSuite/m/ ----------------
+MOBILE_TOOL = os.path.join(PLUGIN_DIR, "mobile.py")
+MOBILE_STATIC = os.path.join(PLUGIN_DIR, "mobile")
+
+
+def _logged_in_admin(request):
+    return "userID" in request.session and _is_admin(request)
+
+
+def mobile(request):
+    from django.shortcuts import redirect, render
+    if not _logged_in_admin(request):
+        return redirect("/")
+    return render(request, "dockerSuite/mobile.html", {})
+
+
+def mobile_static(request, name):
+    from django.http import FileResponse, Http404
+    files = {"manifest.webmanifest": "application/manifest+json", "sw.js": "application/javascript",
+             "icon-192.png": "image/png", "icon-512.png": "image/png", "icon-maskable.png": "image/png"}
+    if name not in files:
+        raise Http404()
+    resp = FileResponse(open(os.path.join(MOBILE_STATIC, name), "rb"), content_type=files[name])
+    if name == "sw.js":
+        resp["Service-Worker-Allowed"] = "/dockerSuite/m/"
+        resp["Cache-Control"] = "no-cache"
+    return resp
+
+
+@require_POST
+@guarded
+def mobile_api(request):
+    if not _logged_in_admin(request):
+        return JsonResponse({"ok": False, "login": True, "error": "Please log in to the panel again."}, status=403)
+    action = request.POST.get("action", "status")
+    if action == "status":
+        out = _sh("python3 %s status" % shlex.quote(MOBILE_TOOL))
+    elif action == "act":
+        data = request.POST.get("data64", "").strip()
+        if not B64_RE.match(data):
+            return JsonResponse({"ok": False, "error": "Invalid data."})
+        out = _sh("python3 %s act %s" % (shlex.quote(MOBILE_TOOL), shlex.quote(data)))
+    else:
+        return JsonResponse({"ok": False, "error": "Unknown action."})
+    out = (out or "").strip()
+    try:
+        return JsonResponse(json.loads(out.splitlines()[-1] if out else "{}"))
+    except ValueError:
+        return JsonResponse({"ok": False, "error": "Unexpected answer: %s" % out[-300:]})

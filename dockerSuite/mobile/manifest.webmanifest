@@ -1,0 +1,17 @@
+{
+  "name": "Server - Docker Suite",
+  "short_name": "Server",
+  "description": "Your CyberPanel server on the phone: websites, backups, containers and security.",
+  "id": "/dockerSuite/m/",
+  "start_url": "/dockerSuite/m/",
+  "scope": "/dockerSuite/m/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1510",
+  "theme_color": "#0b1510",
+  "icons": [
+    {"src": "/dockerSuite/m/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/dockerSuite/m/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/dockerSuite/m/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
